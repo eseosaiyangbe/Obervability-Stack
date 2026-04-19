@@ -155,6 +155,45 @@ function getAlertSeverity(alert: AlertmanagerAlert) {
   return alert.labels?.severity || "info"
 }
 
+function getOpenSISOperatorSummary(overview: AppOverview | null) {
+  const primary = overview?.health.primaryEndpoint
+  const openSISAlerts = overview?.alerts.length || 0
+
+  if (!overview || !primary) {
+    return {
+      tone: "yellow" as StatTone,
+      title: "Waiting for OpenSIS operator data",
+      message: "The control plane has not built an OpenSIS overview yet. Start with the browser check and the local wrapper command.",
+      nextAction: "Run the documented local start path, then verify the browser URL and Vault health.",
+    }
+  }
+
+  if (primary.status !== "up") {
+    return {
+      tone: "red" as StatTone,
+      title: "User-facing reachability is the first problem to solve",
+      message: "OpenSIS is currently down at the primary browser path. Start with UI reachability, then inspect Vault and database logs if the UI container is up but responses still fail.",
+      nextAction: "Check localhost:8088, then inspect opensis-ui, opensis-db, and vault logs together.",
+    }
+  }
+
+  if (openSISAlerts > 0) {
+    return {
+      tone: "orange" as StatTone,
+      title: "OpenSIS is reachable, but operator attention is still needed",
+      message: "The browser path is up, but OpenSIS-specific alerts are firing. This usually means the platform has drift or dependency pressure even though the site still responds.",
+      nextAction: "Review the alert stream first, then compare recent logs against Vault and database state.",
+    }
+  }
+
+  return {
+    tone: "green" as StatTone,
+    title: "OpenSIS is currently healthy from the operator point of view",
+    message: "The primary browser path is up and there are no OpenSIS-specific active alerts. The next checks are dependency confidence and drift prevention, not emergency recovery.",
+    nextAction: "Use the runbook commands below for routine checks, especially Vault health and compose logs after restarts.",
+  }
+}
+
 function HeroStatCard({
   icon,
   value,
@@ -275,10 +314,27 @@ function BusinessSignalCard({
 function ManagedAppCard({ app }: { app: AppHealth }) {
   const primaryEndpoint = app.primaryEndpoint || app.endpoints[0]
   const upEndpoints = app.endpoints.filter((endpoint) => endpoint.status === "up").length
+  const browserUrl = primaryEndpoint?.browserUrl
+
+  const openPrimaryTarget = () => {
+    if (!browserUrl) return
+    window.open(browserUrl, "_blank", "noopener,noreferrer")
+  }
 
   return (
     <motion.div whileHover={{ y: -2, scale: 1.01 }} transition={{ duration: 0.2 }}>
-      <Card className="h-full border border-gray-200 dark:border-gray-700 shadow-lg bg-white dark:bg-gray-900 overflow-hidden">
+      <Card
+        className={`h-full border border-gray-200 dark:border-gray-700 shadow-lg bg-white dark:bg-gray-900 overflow-hidden ${browserUrl ? "cursor-pointer hover:border-green-300 hover:shadow-xl dark:hover:border-green-700" : ""}`}
+        onClick={browserUrl ? openPrimaryTarget : undefined}
+        onKeyDown={browserUrl ? (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault()
+            openPrimaryTarget()
+          }
+        } : undefined}
+        role={browserUrl ? "link" : undefined}
+        tabIndex={browserUrl ? 0 : undefined}
+      >
         <CardHeader className="p-4 sm:p-5 bg-gradient-to-r from-gray-50 to-emerald-50 dark:from-gray-800 dark:to-emerald-900/20">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
@@ -320,7 +376,13 @@ function ManagedAppCard({ app }: { app: AppHealth }) {
           </div>
 
           {primaryEndpoint?.browserUrl && (
-            <Button asChild variant="outline" size="sm" className="gap-1.5 w-full h-9 hover:bg-green-50 hover:border-green-300 dark:hover:bg-green-900/20">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="gap-1.5 w-full h-9 hover:bg-green-50 hover:border-green-300 dark:hover:bg-green-900/20"
+              onClick={(event) => event.stopPropagation()}
+            >
               <Link href={primaryEndpoint.browserUrl} target="_blank" rel="noreferrer">
                 <ExternalLink className="h-3.5 w-3.5" />
                 Open
@@ -423,6 +485,7 @@ export default function DashboardPage() {
   const networkTotal = (metrics.data?.network?.inbound || 0) + (metrics.data?.network?.outbound || 0)
   const monitoredEndpointCount = health.reduce((total, app) => total + app.endpoints.length, 0)
   const opensisHealth = opensisOverview?.health.primaryEndpoint
+  const opensisSummary = getOpenSISOperatorSummary(opensisOverview)
   const dashboardTitle = dashboardConfig?.title || "DevOps Monitor"
   const isLoading = appHealthLoading || alertsLoading || overviewLoading || metrics.isLoading || swiftpayBusinessLoading
   const walletBreakerLabel = swiftpayMetrics.walletCircuitBreakerState >= 1
@@ -852,6 +915,158 @@ export default function DashboardPage() {
             </Card>
           </motion.div>
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.8 }}
+        >
+          <Card className="border border-gray-200 dark:border-gray-700 shadow-lg bg-white dark:bg-gray-900">
+            <CardHeader className="bg-gradient-to-r from-indigo-50 to-sky-50 dark:from-indigo-900/20 dark:to-sky-900/20 p-4 sm:p-6">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+                    <div className="p-2 bg-gradient-to-br from-indigo-500 to-sky-600 rounded-xl">
+                      <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                    </div>
+                    OpenSIS Operator Guide
+                  </CardTitle>
+                  <CardDescription className="mt-1 text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                    Dependency-aware first checks for UI reachability, Vault secret delivery, and MariaDB-backed app state
+                  </CardDescription>
+                </div>
+                {opensisHealth?.browserUrl && (
+                  <Button asChild variant="outline" size="sm" className="gap-1.5 bg-white/80 dark:bg-gray-900/60">
+                    <Link href={opensisHealth.browserUrl} target="_blank" rel="noreferrer">
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      Open OpenSIS
+                    </Link>
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+              <div className={`rounded-xl border p-4 bg-gradient-to-r ${statToneStyles[opensisSummary.tone].panel}`}>
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="space-y-1.5">
+                    <p className={`text-sm font-semibold ${statToneStyles[opensisSummary.tone].label}`}>{opensisSummary.title}</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">{opensisSummary.message}</p>
+                  </div>
+                  <Badge className={`${healthBadgeStyles[opensisOverview?.health.status || "unknown"]} w-fit`}>
+                    {opensisOverview?.health.status ? opensisOverview.health.status.charAt(0).toUpperCase() + opensisOverview.health.status.slice(1) : "Unknown"}
+                  </Badge>
+                </div>
+                <p className="mt-3 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                  Next action: {opensisSummary.nextAction}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+                <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-900/20">
+                  <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                    <Wifi className="h-4 w-4" />
+                    <p className="text-sm font-semibold">Browser Path</p>
+                  </div>
+                  <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                    Start here when users report an outage. If this fails, treat it as a reachability or UI startup issue first.
+                  </p>
+                  <code className="mt-3 block rounded-lg bg-white/70 p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                    curl -I http://localhost:8088
+                  </code>
+                </div>
+
+                <div className="rounded-xl border border-violet-200 bg-violet-50 p-4 dark:border-violet-900 dark:bg-violet-900/20">
+                  <div className="flex items-center gap-2 text-violet-700 dark:text-violet-300">
+                    <Shield className="h-4 w-4" />
+                    <p className="text-sm font-semibold">Vault Secrets</p>
+                  </div>
+                  <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                    If the site is up but behavior is broken, validate Vault health and rendered secret delivery before changing app code.
+                  </p>
+                  <code className="mt-3 block rounded-lg bg-white/70 p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                    curl -k https://localhost:8200/v1/sys/health
+                  </code>
+                </div>
+
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900 dark:bg-emerald-900/20">
+                  <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
+                    <Database className="h-4 w-4" />
+                    <p className="text-sm font-semibold">MariaDB State</p>
+                  </div>
+                  <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                    If Vault data looks correct but auth still fails, suspect live database drift before you blame the app wrapper.
+                  </p>
+                  <code className="mt-3 block rounded-lg bg-white/70 p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                    docker compose logs --tail=50 opensis-db
+                  </code>
+                </div>
+
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-900/20">
+                  <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
+                    <Server className="h-4 w-4" />
+                    <p className="text-sm font-semibold">Platform Wrapper</p>
+                  </div>
+                  <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                    Apple Silicon operators should prefer the local build path. That avoids the published image mismatch we already documented.
+                  </p>
+                  <code className="mt-3 block rounded-lg bg-white/70 p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                    ./scripts/compose-start.sh --build-local
+                  </code>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800/70">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-gray-500" />
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">First-response commands</p>
+                  </div>
+                  <div className="mt-3 space-y-3">
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Start</p>
+                      <code className="mt-1 block rounded-lg bg-white p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                        ./scripts/compose-start.sh --build-local
+                      </code>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Primary health</p>
+                      <code className="mt-1 block rounded-lg bg-white p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                        {opensisOverview?.app.runbooks.healthCheck || "curl -I http://localhost:8088"}
+                      </code>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Shared logs</p>
+                      <code className="mt-1 block rounded-lg bg-white p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                        docker compose logs --tail=50 opensis-ui opensis-db vault
+                      </code>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800/70">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-gray-500" />
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">How to interpret failures</p>
+                  </div>
+                  <div className="mt-3 space-y-3 text-sm text-gray-700 dark:text-gray-300">
+                    <p>
+                      If the browser path is down, treat the problem as edge or UI startup first.
+                    </p>
+                    <p>
+                      If the browser path is up but requests fail, compare Vault health, rendered secret flow, and recent logs before changing the app.
+                    </p>
+                    <p>
+                      If Vault values and rendered files agree but authentication still fails, suspect MariaDB drift rather than Vault drift.
+                    </p>
+                    <p>
+                      If alerts are firing while the site still responds, the platform may be degraded even though the public page looks healthy.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     </div>
   )
