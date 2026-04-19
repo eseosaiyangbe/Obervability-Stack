@@ -131,6 +131,7 @@ business_rules=(
   "swiftpay:pending_transactions"
   "swiftpay:pending_amount"
   "swiftpay:transaction_queue_depth"
+  "swiftpay:completed_transfers_total"
   "swiftpay:transaction_failure_rate_5m"
   "swiftpay:wallet_failed_transfer_rate_5m"
   "swiftpay:wallet_circuit_breaker_state"

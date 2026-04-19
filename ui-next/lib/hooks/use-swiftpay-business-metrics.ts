@@ -4,6 +4,7 @@ export interface SwiftPayBusinessMetrics {
   pendingTransactions: number;
   pendingAmount: number;
   queueDepth: number;
+  completedTransfersTotal: number;
   transactionFailureRate: number;
   walletFailureRate: number;
   walletCircuitBreakerState: number;
@@ -19,6 +20,7 @@ const emptyMetrics: SwiftPayBusinessMetrics = {
   pendingTransactions: 0,
   pendingAmount: 0,
   queueDepth: 0,
+  completedTransfersTotal: 0,
   transactionFailureRate: 0,
   walletFailureRate: 0,
   walletCircuitBreakerState: 0,

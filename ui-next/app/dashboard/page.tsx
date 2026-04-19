@@ -599,6 +599,13 @@ export default function DashboardPage() {
                   icon={<Zap className="h-4 w-4 sm:h-5 sm:w-5 text-white" />}
                 />
                 <BusinessSignalCard
+                  title="Completed Transfers"
+                  value={swiftpayMetrics.completedTransfersTotal.toFixed(0)}
+                  description="Successful transfer count since Transaction Service last started. This is the easiest healthy activity signal."
+                  tone={swiftpayMetrics.completedTransfersTotal > 0 ? "blue" : "green"}
+                  icon={<CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-white" />}
+                />
+                <BusinessSignalCard
                   title="Wallet Circuit"
                   value={walletBreakerLabel}
                   description="Closed is healthy. Open means Transaction Service is protecting Wallet Service."

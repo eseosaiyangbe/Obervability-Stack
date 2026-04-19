@@ -7,6 +7,7 @@ const queries = {
   pendingTransactions: 'swiftpay:pending_transactions',
   pendingAmount: 'swiftpay:pending_amount',
   queueDepth: 'swiftpay:transaction_queue_depth',
+  completedTransfersTotal: 'swiftpay:completed_transfers_total',
   transactionFailureRate: 'swiftpay:transaction_failure_rate_5m',
   walletFailureRate: 'swiftpay:wallet_failed_transfer_rate_5m',
   walletCircuitBreakerState: 'swiftpay:wallet_circuit_breaker_state',

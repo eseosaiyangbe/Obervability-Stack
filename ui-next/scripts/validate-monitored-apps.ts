@@ -161,7 +161,7 @@ for (const app of monitoredApps) {
       error(`Endpoint ${endpoint.id} in ${app.id} is missing kubernetes.serviceName`);
     }
 
-    if (endpoint.kubernetes.namespace !== app.kubernetes.namespace) {
+    if (endpoint.kubernetes?.namespace !== app.kubernetes.namespace) {
       error(`Endpoint ${endpoint.id} in ${app.id} namespace mismatch`);
     }
 

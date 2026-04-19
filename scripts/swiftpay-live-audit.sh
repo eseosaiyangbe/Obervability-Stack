@@ -169,10 +169,11 @@ if swiftpay_business=$(http_get_json "$SWIFTPAY_BUSINESS_URL"); then
   assert_json "$swiftpay_business" '.metrics.pendingTransactions | type == "number"' "Business metric pendingTransactions is numeric"
   assert_json "$swiftpay_business" '.metrics.pendingAmount | type == "number"' "Business metric pendingAmount is numeric"
   assert_json "$swiftpay_business" '.metrics.queueDepth | type == "number"' "Business metric queueDepth is numeric"
+  assert_json "$swiftpay_business" '.metrics.completedTransfersTotal | type == "number"' "Business metric completedTransfersTotal is numeric"
   assert_json "$swiftpay_business" '.metrics.transactionFailureRate | type == "number"' "Business metric transactionFailureRate is numeric"
   assert_json "$swiftpay_business" '.metrics.walletFailureRate | type == "number"' "Business metric walletFailureRate is numeric"
   assert_json "$swiftpay_business" '.metrics.walletCircuitBreakerState | type == "number"' "Business metric walletCircuitBreakerState is numeric"
-  info "Healthy happy-path transfers can still leave these business metrics at 0 because they represent pending, failure, queue, and circuit-breaker state."
+  info "Healthy happy-path transfers can still leave pending, failure, queue, and circuit-breaker metrics at 0. Completed Transfers is the positive activity signal."
 else
   fail "Control plane SwiftPay business endpoint is unreachable"
   exit 1
@@ -305,6 +306,15 @@ if completed_transfer_query=$(prom_query 'transactions_total{job="swiftpay-trans
   assert_json "$completed_transfer_query" '([.data.result[] | (.value[1] | tonumber)] | max) >= 1' "Completed transfer counter is at least 1"
 else
   fail "Prometheus completed transfer query failed"
+  exit 1
+fi
+
+if completed_transfer_rule=$(prom_query 'swiftpay:completed_transfers_total'); then
+  pass "Prometheus returns the completed-transfer recording rule"
+  assert_json "$completed_transfer_rule" '.data.result | length >= 1' "Completed-transfer recording rule is present"
+  assert_json "$completed_transfer_rule" '([.data.result[] | (.value[1] | tonumber)] | max) >= 1' "Completed-transfer recording rule is at least 1"
+else
+  fail "Prometheus completed-transfer recording rule query failed"
   exit 1
 fi
 

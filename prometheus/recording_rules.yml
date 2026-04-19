@@ -67,6 +67,10 @@ groups:
       - record: swiftpay:transaction_queue_depth
         expr: max(queue_depth{job="swiftpay-transaction-service",queue_name="transactions"} or vector(0))
 
+      # Successful transfer count since transaction-service last started.
+      - record: swiftpay:completed_transfers_total
+        expr: max(transactions_total{job="swiftpay-transaction-service",service="transaction-service",status="completed",type="transfer"} or vector(0))
+
       # Transaction business failure rate from transaction-service.
       - record: swiftpay:transaction_failure_rate_5m
         expr: sum(rate(transactions_total{job="swiftpay-transaction-service",service="transaction-service",status="failed"}[5m]))
