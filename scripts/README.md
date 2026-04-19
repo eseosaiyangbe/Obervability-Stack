@@ -20,6 +20,7 @@ This directory contains all the shell scripts for managing the Monitoring in a B
 ./scripts/devops-monitor.sh ui        # Start UI development server
 ./scripts/devops-monitor.sh help      # Show help information
 ./scripts/devops-monitor.sh smoke     # Run the control-plane smoke check
+./scripts/devops-monitor.sh inventory # Validate monitored app inventory
 ```
 
 **Features:**
@@ -28,6 +29,23 @@ This directory contains all the shell scripts for managing the Monitoring in a B
 - View logs from all services
 - Start UI development server
 - Comprehensive help system
+
+### `inventory-audit.sh`
+**Monitored app inventory validator** for the control plane.
+
+```bash
+# Usage
+./scripts/inventory-audit.sh
+
+# Or through the main wrapper
+./scripts/devops-monitor.sh inventory
+```
+
+**Features:**
+- Validates the monitored app model in `ui-next/lib/monitored-apps.ts`
+- Checks for duplicate app IDs, priorities, endpoint IDs, and network aliases
+- Verifies primary health endpoints, runbook presence, and local repo references
+- Confirms endpoint labels and docker targets stay aligned with the inventory contract
 
 ### `health-check.sh`
 **Control-plane smoke check script** for the monitoring stack.
@@ -197,6 +215,9 @@ This directory contains all the shell scripts for managing the Monitoring in a B
 
 # Run the smoke check
 ./scripts/devops-monitor.sh health
+
+# Validate monitored app inventory
+./scripts/devops-monitor.sh inventory
 
 # View logs
 ./scripts/devops-monitor.sh logs

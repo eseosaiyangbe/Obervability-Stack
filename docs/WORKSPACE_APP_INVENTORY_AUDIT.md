@@ -102,6 +102,20 @@ The inventory model is now a stronger control-plane contract because it:
 - points MemFlip probing at the frontend-proxied health contract
 - points startup guidance at repo-sanctioned wrapper scripts where available
 
+Operator command:
+
+```bash
+./scripts/devops-monitor.sh inventory
+```
+
+That validator now checks the monitored app model for:
+
+- duplicate app IDs, priorities, endpoint IDs, and network aliases
+- valid primary health endpoint references
+- presence of `localStart` and `healthCheck` runbooks for active apps
+- matching docker targets and network aliases
+- real repo references for wrapper-script startup commands
+
 ## What Still Belongs To Phase 3
 
 - decide whether demo auth remains acceptable for now

@@ -133,6 +133,7 @@ The system supports multiple authentication methods:
 - ✅ **Alert Management**: Intelligent alerting with AlertManager
 - ✅ **Log Aggregation**: Centralized logging with Loki
 - ✅ **Service Health**: Automated control-plane smoke checks and status monitoring
+- ✅ **Inventory Validation**: Automated monitored-app metadata validation
 
 ### User Interface
 - ✅ **Modern Web UI**: Next.js-based monitoring interface

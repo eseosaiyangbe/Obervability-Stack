@@ -238,6 +238,7 @@ show_help() {
     echo "  clean     - Clean up Docker containers and volumes"
     echo "  health    - Run control-plane smoke checks"
     echo "  smoke     - Alias for the control-plane smoke checks"
+    echo "  inventory - Validate monitored app inventory metadata"
     echo "  setup     - Setup environment and dependencies"
     echo "  help      - Show this help message"
     echo ""
@@ -339,6 +340,9 @@ main() {
             ;;
         health|smoke)
             "$SCRIPT_DIR/health-check.sh"
+            ;;
+        inventory)
+            "$SCRIPT_DIR/inventory-audit.sh"
             ;;
         setup)
             ./scripts/setup-env.sh

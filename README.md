@@ -383,6 +383,9 @@ We've created convenient scripts to manage your entire monitoring stack:
 # Run comprehensive control-plane smoke check
 ./scripts/devops-monitor.sh health
 
+# Validate monitored app inventory metadata
+./scripts/devops-monitor.sh inventory
+
 # View service logs
 ./scripts/devops-monitor.sh logs
 
@@ -436,6 +439,9 @@ We've created convenient scripts to manage your entire monitoring stack:
    
    # Run the control-plane smoke check
    ./scripts/devops-monitor.sh health
+
+   # Validate monitored app inventory metadata
+   ./scripts/devops-monitor.sh inventory
    ```
 
 5. **Access the services:**
