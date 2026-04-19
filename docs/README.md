@@ -11,6 +11,8 @@ Welcome to the comprehensive documentation for the DevOps Monitoring in a Box pr
 - **[Configuration Guide](CONFIGURATION_GUIDE.md)** - Complete configuration reference with environment variables
 - **[Project Structure](PROJECT_STRUCTURE.md)** - Complete project structure overview
 - **[Workspace App Inventory Audit](WORKSPACE_APP_INVENTORY_AUDIT.md)** - Verification of monitored app metadata against the actual workspace
+- **[App Onboarding Template](APP_ONBOARDING_TEMPLATE.md)** - Reusable onboarding contract for new or newly normalized workloads
+- **[Operator App Matrix](OPERATOR_APP_MATRIX.md)** - Operator-facing summary of the current managed workloads
 - **[Main README](../README.md)** - Project overview and quick start guide
 
 ### 🔧 Core Components
