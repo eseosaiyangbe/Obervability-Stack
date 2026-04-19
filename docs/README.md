@@ -15,6 +15,7 @@ Welcome to the comprehensive documentation for the DevOps Monitoring in a Box pr
 - **[Operator App Matrix](OPERATOR_APP_MATRIX.md)** - Operator-facing summary of the current managed workloads
 - **[Operator Health Workflow](OPERATOR_HEALTH_WORKFLOW.md)** - Canonical first-response flow for the platform
 - **[Incident Matrix](INCIDENT_MATRIX.md)** - First checks and ownership hints for common incident shapes
+- **[Incident Drill Catalog](INCIDENT_DRILLS.md)** - Controlled break/fix drills for the managed workloads
 - **[SwiftPay Operator Runbook](SWIFTPAY_OPERATOR_RUNBOOK.md)** - Platform-facing runbook for the flagship microservices workload
 - **[MemFlip Operator Runbook](MEMFLIP_OPERATOR_RUNBOOK.md)** - Platform-facing runbook for the reference onboarding workload
 - **[OpenSIS Operator Runbook](OPENSIS_OPERATOR_RUNBOOK.md)** - Platform-facing runbook for the legacy-platform workload

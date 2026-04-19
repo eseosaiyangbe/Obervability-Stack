@@ -6,6 +6,8 @@ This is the first Phase 5 incident matrix for the workspace.
 
 It maps common symptoms to the most likely first checks and the app or platform area that should own the next step.
 
+For controlled break/fix practice, use `INCIDENT_DRILLS.md` after the baseline health checks pass.
+
 ## Matrix
 
 | Symptom | First Check | Likely Domain | Next Command |

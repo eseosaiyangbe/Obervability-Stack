@@ -103,6 +103,12 @@ Current platform runbooks:
 - `OpenSIS`: `OPENSIS_OPERATOR_RUNBOOK.md`
 - `FoodPulse`: `FOODPULSE_OPERATOR_RUNBOOK.md`
 
+### 7. Incident Drill Catalog
+
+Use `INCIDENT_DRILLS.md` when you are ready to intentionally break and recover a workload.
+
+Do not start a drill until the pre-drill baseline is healthy.
+
 ## Which App Tells Which Story
 
 - `SwiftPay`: microservice health, queue depth, money flow, circuit breaker state
