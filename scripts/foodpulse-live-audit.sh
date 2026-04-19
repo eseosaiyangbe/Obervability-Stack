@@ -19,10 +19,6 @@ CONTROL_PLANE_HEALTH_URL="http://localhost:4000/api/apps/health"
 PROMETHEUS_QUERY_URL="http://localhost:9090/api/v1/query"
 FOODPULSE_URL="http://localhost:8090"
 FOODPULSE_STATS_URL="http://localhost:8090/api/getstats"
-FOODPULSE_PROMETHEUS_URL="http://localhost:9095/-/healthy"
-FOODPULSE_GRAFANA_URL="http://localhost:3010/api/health"
-FOODPULSE_ALERTMANAGER_URL="http://localhost:9096/-/healthy"
-FOODPULSE_HAPROXY_STATS_URL="http://localhost:8410/stats"
 
 TOTAL_CHECKS=0
 PASSED_CHECKS=0
@@ -131,9 +127,9 @@ else
   exit 1
 fi
 
-if stats_headers=$(http_head "$FOODPULSE_STATS_URL"); then
+if foodpulse_stats=$(http_get_json "$FOODPULSE_STATS_URL"); then
   pass "FoodPulse stats endpoint responds through the UI proxy"
-  assert_json "$(printf '%s' "$stats_headers" | jq -Rs '{headers: .}')" '.headers | contains("200 OK")' "FoodPulse stats endpoint returns HTTP 200"
+  assert_json "$foodpulse_stats" '.hostname != null and .pageviews != null' "FoodPulse stats endpoint returns app telemetry"
 else
   fail "FoodPulse stats endpoint is unreachable"
   exit 1
@@ -148,42 +144,7 @@ else
 fi
 
 echo
-header "Internal Lab Surface Checks"
-
-if foodpulse_prometheus_headers=$(http_head "$FOODPULSE_PROMETHEUS_URL"); then
-  pass "FoodPulse Prometheus health endpoint responds"
-  assert_json "$(printf '%s' "$foodpulse_prometheus_headers" | jq -Rs '{headers: .}')" '.headers | contains("200 OK")' "FoodPulse Prometheus returns HTTP 200"
-else
-  fail "FoodPulse Prometheus health endpoint is unreachable"
-  exit 1
-fi
-
-if foodpulse_grafana=$(http_get_json "$FOODPULSE_GRAFANA_URL"); then
-  pass "FoodPulse Grafana health endpoint responds"
-  assert_json "$foodpulse_grafana" '.database == "ok"' "FoodPulse Grafana reports a healthy database"
-else
-  fail "FoodPulse Grafana health endpoint is unreachable"
-  exit 1
-fi
-
-if foodpulse_alertmanager_headers=$(http_head "$FOODPULSE_ALERTMANAGER_URL"); then
-  pass "FoodPulse Alertmanager health endpoint responds"
-  assert_json "$(printf '%s' "$foodpulse_alertmanager_headers" | jq -Rs '{headers: .}')" '.headers | contains("200 OK")' "FoodPulse Alertmanager returns HTTP 200"
-else
-  fail "FoodPulse Alertmanager health endpoint is unreachable"
-  exit 1
-fi
-
-if haproxy_headers=$(http_head "$FOODPULSE_HAPROXY_STATS_URL"); then
-  pass "FoodPulse HAProxy stats endpoint responds"
-  assert_json "$(printf '%s' "$haproxy_headers" | jq -Rs '{headers: .}')" '.headers | contains("200 OK")' "FoodPulse HAProxy stats endpoint returns HTTP 200"
-else
-  fail "FoodPulse HAProxy stats endpoint is unreachable"
-  exit 1
-fi
-
-echo
-header "Prometheus Target Checks"
+header "Central Observability Checks"
 
 if foodpulse_probe=$(prom_query 'probe_success{job="blackbox-http",app="foodpulse"}'); then
   pass "Prometheus returns FoodPulse blackbox target health"

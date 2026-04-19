@@ -263,7 +263,7 @@ export const monitoredApps: MonitoredApp[] = [
       latencyQuery: 'probe_duration_seconds{job="blackbox-http",app="foodpulse"}',
     },
     runbooks: {
-      localStart: 'cd FoodPulse && cp .env.example .env && docker compose up -d',
+      localStart: 'cd FoodPulse && cp .env.example .env && ./scripts/start.sh',
       healthCheck: 'curl -I http://localhost:8090',
     },
     tags: ['frontend'],

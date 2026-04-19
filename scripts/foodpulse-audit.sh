@@ -80,19 +80,29 @@ header "Compose And Inventory Alignment"
 
 assert_contains "$FOODPULSE_COMPOSE" "foodpulse-ui" "FoodPulse compose exposes the observability alias"
 assert_contains "$FOODPULSE_COMPOSE" '127.0.0.1:${FOODPULSE_UI_HOST_PORT:-8090}:80' "FoodPulse UI host port defaults to 8090"
-assert_contains "$FOODPULSE_COMPOSE" '127.0.0.1:${FOODPULSE_PROMETHEUS_HOST_PORT:-9095}:9090' "FoodPulse Prometheus host port defaults to 9095"
-assert_contains "$FOODPULSE_COMPOSE" '127.0.0.1:${FOODPULSE_GRAFANA_HOST_PORT:-3010}:3000' "FoodPulse Grafana host port defaults to 3010"
-assert_contains "$FOODPULSE_COMPOSE" '127.0.0.1:${FOODPULSE_ALERTMANAGER_HOST_PORT:-9096}:9093' "FoodPulse Alertmanager host port defaults to 9096"
-assert_contains "$FOODPULSE_COMPOSE" '127.0.0.1:${FOODPULSE_HAPROXY_STATS_HOST_PORT:-8410}:8404' "FoodPulse HAProxy stats host port defaults to 8410"
-assert_contains "$FOODPULSE_COMPOSE" "container_name: foodpulse-prometheus" "FoodPulse Prometheus container is workspace-safe"
-assert_contains "$FOODPULSE_COMPOSE" "container_name: foodpulse-grafana" "FoodPulse Grafana container is workspace-safe"
-assert_contains "$FOODPULSE_COMPOSE" "container_name: foodpulse-alertmanager" "FoodPulse Alertmanager container is workspace-safe"
-assert_contains "$FOODPULSE_COMPOSE" "container_name: foodpulse-blackbox-exporter" "FoodPulse blackbox exporter container is workspace-safe"
 assert_contains "$MONITORED_APPS_FILE" "http://localhost:8090" "Control plane inventory uses the FoodPulse browser URL"
-assert_contains "$MONITORED_APPS_FILE" "cp .env.example .env && docker compose up -d" "Control plane inventory points at the normalized FoodPulse startup path"
+assert_contains "$MONITORED_APPS_FILE" "cp .env.example .env && ./scripts/start.sh" "Control plane inventory points at the FoodPulse startup path"
 assert_contains "$MONITORED_APPS_FILE" "curl -I http://localhost:8090" "Control plane inventory uses the FoodPulse browser health check"
 assert_contains "$FOODPULSE_README" "http://localhost:8090" "FoodPulse README documents the normalized browser URL"
-assert_contains "$FOODPULSE_README" "http://localhost:9095" "FoodPulse README documents the normalized Prometheus URL"
+assert_contains "$FOODPULSE_README" 'central `Obervability-Stack`' "FoodPulse README documents central observability ownership"
+
+if rg -Fq -- "foodpulse-prometheus" "$FOODPULSE_COMPOSE"; then
+  fail "FoodPulse compose should not include a local Prometheus service"
+else
+  pass "FoodPulse compose does not include a local Prometheus service"
+fi
+
+if rg -Fq -- "foodpulse-grafana" "$FOODPULSE_COMPOSE"; then
+  fail "FoodPulse compose should not include a local Grafana service"
+else
+  pass "FoodPulse compose does not include a local Grafana service"
+fi
+
+if rg -Fq -- "foodpulse-alertmanager" "$FOODPULSE_COMPOSE"; then
+  fail "FoodPulse compose should not include a local Alertmanager service"
+else
+  pass "FoodPulse compose does not include a local Alertmanager service"
+fi
 
 echo
 header "Prometheus Scrape Contract"
@@ -106,7 +116,6 @@ header "Operator Contract"
 assert_contains "$FOODPULSE_CLUSTER_STATUS" 'FOODPULSE_UI_HOST_PORT:-8090' "FoodPulse cluster status uses the normalized browser port"
 assert_contains "$FOODPULSE_CLUSTER_STATUS" "foodpulse-pg-haproxy" "FoodPulse cluster status defaults to normalized Postgres HAProxy container names"
 assert_contains "$FOODPULSE_ENV" "FOODPULSE_UI_HOST_PORT=8090" "FoodPulse env contract documents the browser port"
-assert_contains "$FOODPULSE_ENV" "FOODPULSE_PROMETHEUS_HOST_PORT=9095" "FoodPulse env contract documents the Prometheus port"
 
 echo
 header "Audit Summary"
