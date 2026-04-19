@@ -217,6 +217,16 @@ show_status() {
     echo "  ui        - Start UI development server"
     echo "  build-ui  - Build UI for production"
     echo "  status    - Show project status"
+    echo "  health    - Run control-plane smoke checks"
+    echo "  inventory - Validate monitored app inventory"
+    echo "  swiftpay  - Audit SwiftPay onboarding"
+    echo "  swiftpay-live - Run the live SwiftPay audit"
+    echo "  memflip   - Audit MemFlip onboarding"
+    echo "  memflip-live - Run the live MemFlip audit"
+    echo "  opensis   - Audit OpenSIS onboarding"
+    echo "  opensis-live - Run the live OpenSIS audit"
+    echo "  foodpulse - Audit FoodPulse onboarding"
+    echo "  foodpulse-live - Run the live FoodPulse audit"
     echo "  help      - Show this help message"
 }
 
@@ -243,6 +253,10 @@ show_help() {
     echo "  swiftpay-live - Run the live SwiftPay integration audit"
     echo "  memflip   - Audit MemFlip onboarding contract"
     echo "  memflip-live - Run the live MemFlip integration audit"
+    echo "  opensis   - Audit OpenSIS onboarding contract"
+    echo "  opensis-live - Run the live OpenSIS integration audit"
+    echo "  foodpulse - Audit FoodPulse onboarding contract"
+    echo "  foodpulse-live - Run the live FoodPulse integration audit"
     echo "  setup     - Setup environment and dependencies"
     echo "  help      - Show this help message"
     echo ""
@@ -359,6 +373,18 @@ main() {
             ;;
         memflip-live)
             "$SCRIPT_DIR/memflip-live-audit.sh"
+            ;;
+        opensis)
+            "$SCRIPT_DIR/opensis-audit.sh"
+            ;;
+        opensis-live)
+            "$SCRIPT_DIR/opensis-live-audit.sh"
+            ;;
+        foodpulse)
+            "$SCRIPT_DIR/foodpulse-audit.sh"
+            ;;
+        foodpulse-live)
+            "$SCRIPT_DIR/foodpulse-live-audit.sh"
             ;;
         setup)
             ./scripts/setup-env.sh

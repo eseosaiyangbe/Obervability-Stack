@@ -25,6 +25,10 @@ This directory contains all the shell scripts for managing the Monitoring in a B
 ./scripts/devops-monitor.sh swiftpay-live # Run the live SwiftPay integration audit
 ./scripts/devops-monitor.sh memflip  # Audit MemFlip onboarding contract
 ./scripts/devops-monitor.sh memflip-live # Run the live MemFlip integration audit
+./scripts/devops-monitor.sh opensis # Audit OpenSIS onboarding contract
+./scripts/devops-monitor.sh opensis-live # Run the live OpenSIS integration audit
+./scripts/devops-monitor.sh foodpulse # Audit FoodPulse onboarding contract
+./scripts/devops-monitor.sh foodpulse-live # Run the live FoodPulse integration audit
 ```
 
 **Features:**
@@ -117,6 +121,70 @@ This directory contains all the shell scripts for managing the Monitoring in a B
 - Creates a synthetic user, starts a game, submits a valid match, and completes the game through the frontend proxy
 - Confirms the leaderboard and user-stats endpoints respond
 - Confirms the backend metrics endpoint records the game flow
+
+### `opensis-audit.sh`
+**OpenSIS onboarding validator** for the legacy-platform workload.
+
+```bash
+# Usage
+./scripts/opensis-audit.sh
+
+# Or through the main wrapper
+./scripts/devops-monitor.sh opensis
+```
+
+**Features:**
+- Validates OpenSIS observability alias, localhost ports, and control-plane inventory metadata
+- Confirms the build-local startup path is documented and wired for Apple Silicon operators
+- Checks the control-plane blackbox target and the local Vault-plus-app bootstrap contract
+
+### `opensis-live-audit.sh`
+**OpenSIS live integration validator** for end-to-end operator confidence.
+
+```bash
+# Usage
+./scripts/opensis-live-audit.sh
+
+# Or through the main wrapper
+./scripts/devops-monitor.sh opensis-live
+```
+
+**Features:**
+- Verifies the live OpenSIS browser path, Vault health surface, and control-plane health view
+- Confirms the root page serves recognizable OpenSIS content
+- Confirms Prometheus sees the OpenSIS blackbox probe as healthy
+
+### `foodpulse-audit.sh`
+**FoodPulse onboarding validator** for the resilience lab workload.
+
+```bash
+# Usage
+./scripts/foodpulse-audit.sh
+
+# Or through the main wrapper
+./scripts/devops-monitor.sh foodpulse
+```
+
+**Features:**
+- Validates FoodPulse observability alias, normalized host ports, and workspace-safe container names
+- Confirms the control-plane inventory uses the normalized browser URL and startup path
+- Checks the control-plane blackbox target and the lab operator helper contract
+
+### `foodpulse-live-audit.sh`
+**FoodPulse live integration validator** for end-to-end operator confidence.
+
+```bash
+# Usage
+./scripts/foodpulse-live-audit.sh
+
+# Or through the main wrapper
+./scripts/devops-monitor.sh foodpulse-live
+```
+
+**Features:**
+- Verifies the live FoodPulse browser path, stats route, and control-plane health view
+- Confirms the lab-local Prometheus, Grafana, Alertmanager, and HAProxy stats surfaces are reachable on normalized ports
+- Confirms the `cluster-status.sh` operator workflow reports a healthy lab
 
 ### `health-check.sh`
 **Control-plane smoke check script** for the monitoring stack.
@@ -301,6 +369,18 @@ This directory contains all the shell scripts for managing the Monitoring in a B
 
 # Run the live MemFlip integration audit
 ./scripts/devops-monitor.sh memflip-live
+
+# Audit OpenSIS onboarding contract
+./scripts/devops-monitor.sh opensis
+
+# Run the live OpenSIS integration audit
+./scripts/devops-monitor.sh opensis-live
+
+# Audit FoodPulse onboarding contract
+./scripts/devops-monitor.sh foodpulse
+
+# Run the live FoodPulse integration audit
+./scripts/devops-monitor.sh foodpulse-live
 
 # View logs
 ./scripts/devops-monitor.sh logs

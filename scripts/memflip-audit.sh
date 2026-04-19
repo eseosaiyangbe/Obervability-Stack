@@ -57,7 +57,7 @@ assert_contains() {
   local pattern="$2"
   local label="$3"
 
-  if rg -Fq "$pattern" "$file"; then
+  if rg -Fq -- "$pattern" "$file"; then
     pass "$label"
   else
     fail "$label"

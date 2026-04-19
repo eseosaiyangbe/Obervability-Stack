@@ -138,6 +138,10 @@ The system supports multiple authentication methods:
 - ✅ **SwiftPay Live Audit**: Automated end-to-end SwiftPay transaction validation against the live control plane
 - ✅ **MemFlip Audit**: Automated lightweight workload onboarding validation
 - ✅ **MemFlip Live Audit**: Automated end-to-end MemFlip game-flow validation against the live control plane
+- ✅ **OpenSIS Audit**: Automated legacy-platform onboarding validation
+- ✅ **OpenSIS Live Audit**: Automated OpenSIS browser-and-Vault validation against the live control plane
+- ✅ **FoodPulse Audit**: Automated resilience-lab onboarding validation
+- ✅ **FoodPulse Live Audit**: Automated FoodPulse browser-and-lab-surface validation against the live control plane
 
 ### User Interface
 - ✅ **Modern Web UI**: Next.js-based monitoring interface

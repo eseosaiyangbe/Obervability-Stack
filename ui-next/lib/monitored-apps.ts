@@ -255,7 +255,7 @@ export const monitoredApps: MonitoredApp[] = [
     },
     observability: {
       endpoints: [
-        endpoint('foodpulse-ui', 'FoodPulse UI', 'frontend', 'http://foodpulse-ui/', 'http://localhost', 'foodpulse', 'frontend'),
+        endpoint('foodpulse-ui', 'FoodPulse UI', 'frontend', 'http://foodpulse-ui/', 'http://localhost:8090', 'foodpulse', 'frontend'),
       ],
       primaryHealthEndpointId: 'foodpulse-ui',
       logQuery: '{compose_project=~".*foodpulse.*"}',
@@ -263,8 +263,8 @@ export const monitoredApps: MonitoredApp[] = [
       latencyQuery: 'probe_duration_seconds{job="blackbox-http",app="foodpulse"}',
     },
     runbooks: {
-      localStart: 'cd FoodPulse && docker compose up -d',
-      healthCheck: 'curl -I http://localhost',
+      localStart: 'cd FoodPulse && cp .env.example .env && docker compose up -d',
+      healthCheck: 'curl -I http://localhost:8090',
     },
     tags: ['frontend'],
   },

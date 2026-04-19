@@ -398,6 +398,18 @@ We've created convenient scripts to manage your entire monitoring stack:
 # Run the live MemFlip integration audit
 ./scripts/devops-monitor.sh memflip-live
 
+# Audit OpenSIS onboarding contract
+./scripts/devops-monitor.sh opensis
+
+# Run the live OpenSIS integration audit
+./scripts/devops-monitor.sh opensis-live
+
+# Audit FoodPulse onboarding contract
+./scripts/devops-monitor.sh foodpulse
+
+# Run the live FoodPulse integration audit
+./scripts/devops-monitor.sh foodpulse-live
+
 # View service logs
 ./scripts/devops-monitor.sh logs
 
@@ -466,6 +478,18 @@ We've created convenient scripts to manage your entire monitoring stack:
 
    # Run the live MemFlip integration audit
    ./scripts/devops-monitor.sh memflip-live
+
+   # Audit OpenSIS onboarding contract
+   ./scripts/devops-monitor.sh opensis
+
+   # Run the live OpenSIS integration audit
+   ./scripts/devops-monitor.sh opensis-live
+
+   # Audit FoodPulse onboarding contract
+   ./scripts/devops-monitor.sh foodpulse
+
+   # Run the live FoodPulse integration audit
+   ./scripts/devops-monitor.sh foodpulse-live
    ```
 
 5. **Access the services:**
