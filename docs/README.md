@@ -95,6 +95,12 @@ Welcome to the comprehensive documentation for the DevOps Monitoring in a Box pr
    ./devops-monitor.sh start
    ```
 
+   Or directly with Docker Compose:
+
+   ```bash
+   docker compose up -d
+   ```
+
 3. **Access the applications**
    - **Web UI**: http://localhost:4000
    - **Grafana**: http://localhost:3000

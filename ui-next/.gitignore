@@ -198,7 +198,6 @@ ehthumbs.db
 Thumbs.db
 
 # Docker
-.dockerignore
 Dockerfile.dev
 
 # Local development

@@ -115,7 +115,7 @@ docker push your-username/devops-monitoring-box:latest
 git clone https://github.com/NotHarshhaa/devops-monitoring-in-a-box.git
 cd devops-monitoring-in-a-box
 
-# Start all services (Prometheus, Grafana, Loki, etc.)
+# Start all services (Prometheus, Grafana, Loki, UI, etc.)
 ./devops-monitor.sh start
 
 # Or manually with Docker Compose

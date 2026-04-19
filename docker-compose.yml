@@ -1,5 +1,3 @@
-version: '3.8'
-
 # Logging configuration for all services
 x-logging: &default-logging
   driver: "json-file"
@@ -303,7 +301,6 @@ services:
 
   # DevOps Monitor UI - Modern Next.js web dashboard
   devops-monitor-ui:
-    profiles: ["ui"]
     build:
       context: ./ui-next
       dockerfile: Dockerfile
