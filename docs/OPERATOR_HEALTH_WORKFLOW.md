@@ -101,6 +101,7 @@ Current platform runbooks:
 - `SwiftPay`: `SWIFTPAY_OPERATOR_RUNBOOK.md`
 - `MemFlip`: `MEMFLIP_OPERATOR_RUNBOOK.md`
 - `OpenSIS`: `OPENSIS_OPERATOR_RUNBOOK.md`
+- `FoodPulse`: `FOODPULSE_OPERATOR_RUNBOOK.md`
 
 ## Which App Tells Which Story
 

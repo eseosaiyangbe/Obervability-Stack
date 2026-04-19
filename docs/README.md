@@ -18,6 +18,7 @@ Welcome to the comprehensive documentation for the DevOps Monitoring in a Box pr
 - **[SwiftPay Operator Runbook](SWIFTPAY_OPERATOR_RUNBOOK.md)** - Platform-facing runbook for the flagship microservices workload
 - **[MemFlip Operator Runbook](MEMFLIP_OPERATOR_RUNBOOK.md)** - Platform-facing runbook for the reference onboarding workload
 - **[OpenSIS Operator Runbook](OPENSIS_OPERATOR_RUNBOOK.md)** - Platform-facing runbook for the legacy-platform workload
+- **[FoodPulse Operator Runbook](FOODPULSE_OPERATOR_RUNBOOK.md)** - Platform-facing runbook for the resilience and failover workload
 - **[Main README](../README.md)** - Project overview and quick start guide
 
 ### 🔧 Core Components
