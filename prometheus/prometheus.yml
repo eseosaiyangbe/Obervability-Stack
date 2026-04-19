@@ -1,0 +1,294 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'devops-monitoring'
+    replica: 'prometheus-1'
+  scrape_timeout: 10s
+
+rule_files:
+  - "alert_rules.yml"
+  - "recording_rules.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+      timeout: 10s
+      api_version: v2
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 15s
+    metrics_path: /metrics
+    honor_labels: true
+
+  # Node Exporter - System metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 15s
+    metrics_path: /metrics
+    honor_labels: true
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        regex: '([^:]+):.*'
+        replacement: '${1}'
+
+  # cAdvisor - Container metrics.
+  # Enable later with: docker compose --profile container-metrics up -d cadvisor
+  # This host currently needs higher inotify limits before cAdvisor can run reliably.
+  # - job_name: 'cadvisor'
+  #   static_configs:
+  #     - targets: ['cadvisor:8080']
+  #   scrape_interval: 15s
+  #   metrics_path: /metrics
+  #   honor_labels: true
+  #   relabel_configs:
+  #     - source_labels: [__address__]
+  #       target_label: instance
+  #       regex: '([^:]+):.*'
+  #       replacement: '${1}'
+
+  # Loki - Log aggregation metrics
+  - job_name: 'loki'
+    static_configs:
+      - targets: ['loki:3100']
+    scrape_interval: 15s
+    metrics_path: /metrics
+    honor_labels: true
+
+  # Alertmanager - Alert management metrics
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
+    scrape_interval: 15s
+    metrics_path: /metrics
+    honor_labels: true
+
+  # Grafana - Dashboard metrics
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+    scrape_interval: 15s
+    metrics_path: /metrics
+    honor_labels: true
+
+  # Promtail - Log shipping metrics
+  - job_name: 'promtail'
+    static_configs:
+      - targets: ['promtail:9080']
+    scrape_interval: 15s
+    metrics_path: /metrics
+    honor_labels: true
+
+  # Blackbox Exporter - HTTP uptime monitoring for local learning apps.
+  # App containers join the shared observability-net Docker network with stable aliases.
+  - job_name: 'blackbox-http'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - labels:
+          app: foodpulse
+          component: frontend
+        targets:
+          - http://foodpulse-ui/
+      - labels:
+          app: memflip
+          component: frontend
+        targets:
+          - http://memflip-frontend/
+      - labels:
+          app: memflip
+          component: backend
+        targets:
+          - http://memflip-backend:3001/health
+      - labels:
+          app: opensis
+          component: frontend
+        targets:
+          - http://opensis-ui/
+      - labels:
+          app: swiftpay
+          component: frontend
+        targets:
+          - http://swiftpay-frontend/
+      - labels:
+          app: swiftpay
+          component: api-gateway
+        targets:
+          - http://swiftpay-api-gateway:3000/health
+      - labels:
+          app: swiftpay
+          component: auth-service
+        targets:
+          - http://swiftpay-auth-service:3004/health
+      - labels:
+          app: swiftpay
+          component: wallet-service
+        targets:
+          - http://swiftpay-wallet-service:3001/health
+      - labels:
+          app: swiftpay
+          component: transaction-service
+        targets:
+          - http://swiftpay-transaction-service:3002/health
+      - labels:
+          app: swiftpay
+          component: notification-service
+        targets:
+          - http://swiftpay-notification-service:3003/health
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  # SwiftPay application metrics.
+  # These are business and service metrics from the wallet/payment app, not just uptime probes.
+  # The Docker Compose services join observability-net with stable aliases.
+  - job_name: 'swiftpay-api-gateway'
+    static_configs:
+      - targets: ['swiftpay-api-gateway:3000']
+        labels:
+          app: swiftpay
+          component: api-gateway
+    scrape_interval: 15s
+    metrics_path: /metrics
+    honor_labels: true
+
+  - job_name: 'swiftpay-auth-service'
+    static_configs:
+      - targets: ['swiftpay-auth-service:3004']
+        labels:
+          app: swiftpay
+          component: auth-service
+    scrape_interval: 15s
+    metrics_path: /metrics
+    honor_labels: true
+
+  - job_name: 'swiftpay-wallet-service'
+    static_configs:
+      - targets: ['swiftpay-wallet-service:3001']
+        labels:
+          app: swiftpay
+          component: wallet-service
+    scrape_interval: 15s
+    metrics_path: /metrics
+    honor_labels: true
+
+  - job_name: 'swiftpay-transaction-service'
+    static_configs:
+      - targets: ['swiftpay-transaction-service:3002']
+        labels:
+          app: swiftpay
+          component: transaction-service
+    scrape_interval: 15s
+    metrics_path: /metrics
+    honor_labels: true
+
+  - job_name: 'swiftpay-notification-service'
+    static_configs:
+      - targets: ['swiftpay-notification-service:3003']
+        labels:
+          app: swiftpay
+          component: notification-service
+    scrape_interval: 15s
+    metrics_path: /metrics
+    honor_labels: true
+
+  # Service Discovery - Docker containers (optional - requires additional setup)
+  # - job_name: 'docker'
+  #   docker_sd_configs:
+  #     - host: unix:///var/run/docker.sock
+  #       refresh_interval: 15s
+  #       filters:
+  #         - name: label
+  #           values: ["prometheus.io/scrape=true"]
+  #   relabel_configs:
+  #     - source_labels: [__meta_docker_container_name]
+  #       target_label: container_name
+  #     - source_labels: [__meta_docker_container_label_prometheus_io_scrape]
+  #       target_label: __tmp_prometheus_scrape
+  #       regex: true
+  #     - source_labels: [__meta_docker_container_label_prometheus_io_path]
+  #       target_label: __metrics_path__
+  #       regex: (.+)
+  #     - source_labels: [__address__, __meta_docker_container_label_prometheus_io_port]
+  #       target_label: __address__
+  #       regex: ([^:]+)(?::\d+)?;(\d+)
+  #       replacement: $1:$2
+  #     - action: keep
+  #       source_labels: [__tmp_prometheus_scrape]
+  #       regex: true
+
+  # Kubernetes Service Discovery (if running in k8s - requires additional setup)
+  # - job_name: 'kubernetes-pods'
+  #   kubernetes_sd_configs:
+  #     - role: pod
+  #   relabel_configs:
+  #     - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+  #       action: keep
+  #       regex: true
+  #     - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+  #       action: replace
+  #       target_label: __metrics_path__
+  #       regex: (.+)
+  #     - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+  #       action: replace
+  #       regex: ([^:]+)(?::\d+)?;(\d+)
+  #       replacement: $1:$2
+  #       target_label: __address__
+  #     - action: labelmap
+  #       regex: __meta_kubernetes_pod_label_(.+)
+  #     - source_labels: [__meta_kubernetes_namespace]
+  #       action: replace
+  #       target_label: kubernetes_namespace
+  #     - source_labels: [__meta_kubernetes_pod_name]
+  #       action: replace
+  #       target_label: kubernetes_pod_name
+
+  # Application metrics (example - requires actual applications)
+  # - job_name: 'applications'
+  #   static_configs:
+  #     - targets: ['app1:8080', 'app2:8080']
+  #   scrape_interval: 30s
+  #   metrics_path: /metrics
+  #   honor_labels: true
+  #   relabel_configs:
+  #     - source_labels: [__address__]
+  #       target_label: instance
+  #       regex: '([^:]+):.*'
+  #       replacement: '${1}'
+
+  # Database metrics (example - requires postgres-exporter)
+  # - job_name: 'postgres'
+  #   static_configs:
+  #     - targets: ['postgres-exporter:9187']
+  #   scrape_interval: 30s
+  #   metrics_path: /metrics
+  #   honor_labels: true
+
+  # Redis metrics (example - requires redis-exporter)
+  # - job_name: 'redis'
+  #   static_configs:
+  #     - targets: ['redis-exporter:9121']
+  #   scrape_interval: 30s
+  #   metrics_path: /metrics
+  #   honor_labels: true
+
+  # Nginx metrics (example - requires nginx-prometheus-exporter)
+  # - job_name: 'nginx'
+  #   static_configs:
+  #     - targets: ['nginx-exporter:9113']
+  #   scrape_interval: 30s
+  #   metrics_path: /metrics
+  #   honor_labels: true

@@ -1,0 +1,125 @@
+import { NextAuthOptions } from "next-auth"
+import CredentialsProvider from "next-auth/providers/credentials"
+import { checkAuthConfig } from "./auth-config-check"
+
+// Run configuration check
+if (typeof window === "undefined") {
+  checkAuthConfig()
+}
+
+// Define UserRole enum locally to avoid Prisma dependency
+enum UserRole {
+  ADMIN = "ADMIN",
+  VIEWER = "VIEWER", 
+  EDITOR = "EDITOR"
+}
+
+// Validate and set NEXTAUTH_URL
+const getNextAuthUrl = () => {
+  // Check if NEXTAUTH_URL is explicitly set
+  if (process.env.NEXTAUTH_URL) {
+    return process.env.NEXTAUTH_URL
+  }
+  
+  // In development, try to detect from common ports
+  if (process.env.NODE_ENV === "development") {
+    // Check if running on Vercel
+    if (process.env.VERCEL_URL) {
+      return `https://${process.env.VERCEL_URL}`
+    }
+    // Default development URL (UI runs on port 4000)
+    return "http://localhost:4000"
+  }
+  
+  // Production fallback - should be set explicitly
+  return process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:4000"
+}
+
+// Warn if NEXTAUTH_URL is not set in production
+if (process.env.NODE_ENV === "production" && !process.env.NEXTAUTH_URL) {
+  console.warn(
+    "[NextAuth] Warning: NEXTAUTH_URL is not set. " +
+    "This may cause authentication issues in production. " +
+    "Please set NEXTAUTH_URL to your production URL."
+  )
+}
+
+export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET || "devops-monitoring-demo-secret-key-2024",
+  debug: process.env.NODE_ENV === "development",
+  providers: [
+    // Credentials provider for email/password login
+    CredentialsProvider({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          return null
+        }
+
+        // For demo purposes, we'll use hardcoded credentials
+        // In production, you should query the database
+        const demoUsers = [
+          {
+            id: "1",
+            email: "demo@example.com",
+            password: "demo123",
+            name: "Demo Admin",
+            role: UserRole.ADMIN,
+          },
+          {
+            id: "2", 
+            email: "editor@example.com",
+            password: "editor123",
+            name: "Demo Editor",
+            role: UserRole.EDITOR,
+          },
+          {
+            id: "3",
+            email: "viewer@example.com", 
+            password: "viewer123",
+            name: "Demo Viewer",
+            role: UserRole.VIEWER,
+          }
+        ]
+
+        const user = demoUsers.find(u => u.email === credentials.email && u.password === credentials.password)
+        
+        if (!user) {
+          return null
+        }
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        }
+      }
+    }),
+  ],
+  session: {
+    strategy: "jwt",
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = (user as any).role
+      }
+      return token
+    },
+    async session({ session, token }) {
+      if (token && session.user && token.sub) {
+        (session.user as any).id = token.sub as string
+        (session.user as any).role = token.role as UserRole
+      }
+      return session
+    }
+  },
+  pages: {
+    signIn: "/auth/signin",
+  },
+}

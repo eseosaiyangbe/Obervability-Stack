@@ -1,0 +1,388 @@
+version: '3.8'
+
+# Logging configuration for all services
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+    labels: "project=devops-monitoring"
+
+x-logging-debug: &debug-logging
+  driver: "json-file"
+  options:
+    max-size: "20m"
+    max-file: "5"
+    labels: "project=devops-monitoring"
+
+services:
+  # Prometheus - Metrics collection and storage
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      - ./prometheus/recording_rules.yml:/etc/prometheus/recording_rules.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+      - '--storage.tsdb.wal-compression'
+      - '--storage.tsdb.head-chunks-write-queue-size=2500'
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging: *default-logging
+    networks:
+      - monitoring
+      - observability-net
+
+  # Grafana - Visualization and dashboards
+  grafana:
+    image: grafana/grafana:10.0.0
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=
+      - GF_SECURITY_COOKIE_SECURE=true
+      - GF_SECURITY_COOKIE_SAMESITE=strict
+      - GF_SECURITY_CONTENT_TYPE_PROTECTION=true
+      - GF_SECURITY_X_CONTENT_TYPE_OPTIONS=nosniff
+      - GF_SECURITY_X_XSS_PROTECTION=true
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+      - GF_DIAGNOSTICS_ENABLED=false
+      - GF_SMTP_ENABLED=false
+      - GF_LOG_LEVEL=info
+      - GF_LOG_MODE=file
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/ >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging: *default-logging
+    networks:
+      - monitoring
+    depends_on:
+      prometheus:
+        condition: service_healthy
+
+  # Loki - Log aggregation
+  loki:
+    image: grafana/loki:2.8.0
+    container_name: loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/config.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging: *default-logging
+    networks:
+      - monitoring
+
+  # Promtail - Log collection agent
+  promtail:
+    image: grafana/promtail:2.8.0
+    container_name: promtail
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - ./loki/promtail-config.yml:/etc/promtail/config.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/config.yml
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    healthcheck:
+      disable: true
+    logging: *default-logging
+    networks:
+      - monitoring
+    depends_on:
+      loki:
+        condition: service_healthy
+
+  # Alertmanager - Alert routing and silencing
+  alertmanager:
+    image: prom/alertmanager:v0.25.0
+    container_name: alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager/config.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+      - '--cluster.peer=alertmanager:9094'
+      - '--cluster.listen-address=0.0.0.0:9094'
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9093/-/healthy || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging: *default-logging
+    networks:
+      - monitoring
+
+  # Node Exporter - System metrics
+  node-exporter:
+    image: prom/node-exporter:v1.6.0
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+      - '--collector.netdev.device-exclude=^(veth.*|docker.*|br-.*|lo)$$'
+      - '--no-collector.ipvs'
+      - '--no-collector.netdev'
+      - '--no-collector.bonding'
+      - '--no-collector.infiniband'
+      - '--no-collector.wifi'
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.05'
+          memory: 64M
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9100/metrics || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging: *default-logging
+    networks:
+      - monitoring
+
+  # cAdvisor - Container metrics
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    container_name: cadvisor
+    profiles: ["container-metrics"]
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    privileged: true
+    devices:
+      - /dev/kmsg
+    command:
+      - "--docker_only=true"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/healthz || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging: *default-logging
+    networks:
+      - monitoring
+
+  # Blackbox Exporter - HTTP uptime probing for monitored apps
+  blackbox-exporter:
+    image: prom/blackbox-exporter:v0.25.0
+    container_name: blackbox-exporter
+    ports:
+      - "9115:9115"
+    volumes:
+      - ./blackbox/blackbox.yml:/etc/blackbox_exporter/config.yml:ro
+    command:
+      - "--config.file=/etc/blackbox_exporter/config.yml"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9115/-/healthy || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging: *default-logging
+    networks:
+      - monitoring
+      - observability-net
+
+  # DevOps Monitor UI - Modern Next.js web dashboard
+  devops-monitor-ui:
+    profiles: ["ui"]
+    build:
+      context: ./ui-next
+      dockerfile: Dockerfile
+    container_name: devops-monitor-ui
+    ports:
+      - "4000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - SITE_NAME=${SITE_NAME:-DevOps Monitoring Dashboard}
+      - SITE_URL=${SITE_URL:-http://localhost:4000}
+      - SITE_DESCRIPTION=${SITE_DESCRIPTION:-Comprehensive DevOps monitoring solution}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:4000/api}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-change-this-secret}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:4000}
+      - PROMETHEUS_URL=${PROMETHEUS_URL:-http://prometheus:9090}
+      - GRAFANA_URL=${GRAFANA_URL:-http://grafana:3000}
+      - LOKI_URL=${LOKI_URL:-http://loki:3100}
+      - ALERTMANAGER_URL=${ALERTMANAGER_URL:-http://alertmanager:9093}
+      - NODE_EXPORTER_URL=${NODE_EXPORTER_URL:-http://node-exporter:9100}
+      - NODE_EXPORTER_ENABLED=${NODE_EXPORTER_ENABLED:-true}
+      - CADVISOR_ENABLED=${CADVISOR_ENABLED:-false}
+      - NEXT_PUBLIC_PROMETHEUS_BROWSER_URL=${NEXT_PUBLIC_PROMETHEUS_BROWSER_URL:-http://localhost:9090}
+      - NEXT_PUBLIC_GRAFANA_BROWSER_URL=${NEXT_PUBLIC_GRAFANA_BROWSER_URL:-http://localhost:3000}
+      - NEXT_PUBLIC_LOKI_BROWSER_URL=${NEXT_PUBLIC_LOKI_BROWSER_URL:-http://localhost:3100}
+      - NEXT_PUBLIC_ALERTMANAGER_BROWSER_URL=${NEXT_PUBLIC_ALERTMANAGER_BROWSER_URL:-http://localhost:9093}
+      - NEXT_PUBLIC_NODE_EXPORTER_BROWSER_URL=${NEXT_PUBLIC_NODE_EXPORTER_BROWSER_URL:-http://localhost:9100}
+      - NOTIFICATION_STORE_PATH=${NOTIFICATION_STORE_PATH:-/app/data/notification-events.json}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-}
+      - SLACK_CHANNEL=${SLACK_CHANNEL:-#alerts}
+      - SLACK_USERNAME=${SLACK_USERNAME:-DevOps Monitor}
+      - SLACK_ICON_EMOJI=${SLACK_ICON_EMOJI:-:bell:}
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_SECURE=${SMTP_SECURE:-false}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      - EMAIL_FROM=${EMAIL_FROM:-alerts@devops-monitoring.local}
+      - EMAIL_TO=${EMAIL_TO:-admin@devops-monitoring.local}
+    volumes:
+      - devops_monitor_ui_data:/app/data
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/ >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging: *debug-logging
+    networks:
+      - monitoring
+    depends_on:
+      prometheus:
+        condition: service_healthy
+      grafana:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+
+
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  loki_data:
+  alertmanager_data:
+  devops_monitor_ui_data:
+
+networks:
+  monitoring:
+    driver: bridge
+  observability-net:
+    name: observability-net
+    external: true
