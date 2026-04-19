@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Loader2, Github, Chrome, AlertCircle, Eye, EyeOff, Home, Copy, Check } from "lucide-react"
 import Link from "next/link"
 
+const authMode = process.env.NEXT_PUBLIC_AUTH_MODE === "demo" ? "demo" : "database"
 const demoLoginEnabled =
   process.env.NEXT_PUBLIC_ENABLE_DEMO_LOGIN === "true" ||
   (process.env.NEXT_PUBLIC_ENABLE_DEMO_LOGIN === undefined && process.env.NODE_ENV !== "production")
@@ -160,6 +161,15 @@ function SignInForm() {
                 <p className="text-blue-100 text-lg mb-8">
                   Sign in to access your DevOps Monitoring Dashboard and manage your infrastructure.
                 </p>
+
+                <div className="flex flex-wrap gap-2 mb-6">
+                  <span className="px-3 py-1 rounded-full bg-white/15 border border-white/20 text-xs font-medium tracking-wide uppercase">
+                    Auth Mode: {authMode}
+                  </span>
+                  <span className="px-3 py-1 rounded-full bg-white/15 border border-white/20 text-xs font-medium tracking-wide uppercase">
+                    Demo Login: {demoLoginEnabled ? "Enabled" : "Disabled"}
+                  </span>
+                </div>
                 
                 {demoLoginEnabled && (
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
@@ -222,6 +232,15 @@ function SignInForm() {
                         </motion.div>
                       )}
                     </div>
+                  </div>
+                )}
+
+                {!demoLoginEnabled && (
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                    <h3 className="font-semibold mb-2 text-white">Operator Mode</h3>
+                    <p className="text-sm text-blue-100">
+                      Demo credentials are disabled in this environment. Sign in with a seeded or registered database-backed account.
+                    </p>
                   </div>
                 )}
               </motion.div>

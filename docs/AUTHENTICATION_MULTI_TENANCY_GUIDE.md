@@ -2,6 +2,24 @@
 
 This guide documents the complete implementation of Phase 6 - Authentication & Multi-Tenancy for the DevOps Monitoring Dashboard.
 
+## Current Runtime Note
+
+This document mixes implemented pieces with longer-horizon architecture notes.
+
+For the current runtime source of truth, use:
+
+- [`AUTH_ACCESS_MODEL.md`](/Users/raymond/Documents/DevOps-Easy-Learning/Obervability-Stack/docs/AUTH_ACCESS_MODEL.md)
+- [`ui-next/lib/auth.ts`](/Users/raymond/Documents/DevOps-Easy-Learning/Obervability-Stack/ui-next/lib/auth.ts)
+- [`ui-next/prisma/schema.prisma`](/Users/raymond/Documents/DevOps-Easy-Learning/Obervability-Stack/ui-next/prisma/schema.prisma)
+
+Current runtime summary:
+
+- database-backed credentials are the primary auth path
+- demo login is controlled explicitly through auth mode and demo-login flags
+- OAuth providers are only active when credentials are configured
+- registration only works in database mode
+- some broader multi-tenancy ideas in this guide remain aspirational rather than fully wired at runtime
+
 ## 🎯 **Overview**
 
 The authentication and multi-tenancy system provides:
@@ -100,7 +118,6 @@ model Configuration {
 ```typescript
 // lib/auth.ts
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
   providers: [
     // Credentials provider for email/password login
     CredentialsProvider({
@@ -115,15 +132,7 @@ export const authOptions: NextAuthOptions = {
     }),
     
     // OAuth providers
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-    }),
-    
-    GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID || "",
-      clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
-    }),
+    // Only enabled when credentials are present
   ],
   session: { strategy: "jwt" },
   callbacks: {
@@ -246,15 +255,16 @@ export function useMultiTenantConfig() {
 
 #### **Sign In Page** (`/auth/signin`)
 - **Credentials Login**: Email/password authentication
-- **OAuth Providers**: Google and GitHub integration
-- **Demo Credentials**: Pre-configured demo accounts
+- **OAuth Providers**: Only shown as configured providers when credentials are present
+- **Demo Credentials**: Visible only when demo login is enabled
+- **Runtime Mode Visibility**: Sign-in page shows auth mode and whether demo login is enabled
 - **Responsive Design**: Mobile-friendly interface
 - **Error Handling**: User-friendly error messages
 
 #### **Sign Up Page** (`/auth/signup`)
 - **Registration Form**: Name, email, password fields
 - **Password Validation**: Minimum length and confirmation
-- **OAuth Registration**: Automatic account creation
+- **Mode Awareness**: Registration is blocked in demo mode
 - **Success Flow**: Auto sign-in after registration
 
 ### **2. User Management Components**
@@ -337,7 +347,7 @@ export function useMultiTenantConfig() {
 
 ## 🚀 **Demo Users**
 
-The system includes pre-configured demo users for testing:
+The system can include pre-configured demo users for testing when demo login is enabled:
 
 ### **Admin User**
 - **Email**: `demo@example.com`
@@ -385,8 +395,12 @@ The system includes pre-configured demo users for testing:
 DATABASE_URL="file:./dev.db"
 
 # NextAuth.js
-NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_URL="http://localhost:4000"
 NEXTAUTH_SECRET="your-secret-key-here"
+AUTH_MODE="database"
+ENABLE_DEMO_LOGIN="true"
+NEXT_PUBLIC_AUTH_MODE="database"
+NEXT_PUBLIC_ENABLE_DEMO_LOGIN="true"
 
 # OAuth Providers (optional)
 GOOGLE_CLIENT_ID=""
@@ -417,7 +431,7 @@ npm run dev
 
 ### **1. Authentication Flow**
 1. **Landing Page**: Redirects to sign-in if not authenticated
-2. **Sign In**: Multiple authentication options
+2. **Sign In**: Credentials auth with runtime-aware demo and OAuth behavior
 3. **Dashboard**: Role-based dashboard access
 4. **User Menu**: Profile and settings access
 5. **Sign Out**: Secure logout with session cleanup
@@ -515,16 +529,16 @@ npm run dev
 
 ## 🎉 **Conclusion**
 
-The Authentication & Multi-Tenancy system provides a robust, secure, and scalable foundation for the DevOps Monitoring Dashboard. With role-based access control, user-specific configurations, and comprehensive security features, the system is ready for production use and can scale to support multiple users and teams.
+The current authentication runtime is now much closer to an operator-grade control plane than a pure demo app, but it is still evolving. The most important distinction is that authentication mode is now explicit instead of accidental.
 
 The implementation includes:
-- ✅ **Complete Authentication System** with NextAuth.js
+- ✅ **Database-first Authentication System** with NextAuth.js
 - ✅ **Role-Based Access Control** with Admin, Editor, and Viewer roles
 - ✅ **Multi-User Support** with isolated configurations
 - ✅ **User Management** with admin panel
 - ✅ **Security Features** with proper authentication and authorization
 - ✅ **Responsive UI** with mobile-friendly design
 - ✅ **Database Integration** with Prisma and SQLite
-- ✅ **Demo Users** for testing and demonstration
+- ✅ **Controlled Demo Access** for testing and demonstration
 
-The system is now ready for production deployment and can be extended with additional features as needed! 🚀
+The remaining work in this area is mostly about reconciling aspirational multi-tenancy concepts with the current runtime and deciding how far to harden the operator model next. 🚀
