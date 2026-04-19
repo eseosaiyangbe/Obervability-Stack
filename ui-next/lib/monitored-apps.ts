@@ -193,7 +193,7 @@ export const monitoredApps: MonitoredApp[] = [
     status: 'active',
     priority: 3,
     environment: 'local',
-    category: 'web-application',
+    category: 'demo-app',
     docker: {
       composeProject: 'memflip',
       networkAliases: ['memflip-frontend', 'memflip-backend'],
@@ -207,7 +207,7 @@ export const monitoredApps: MonitoredApp[] = [
       namespace: 'memflip',
       recommendedServiceLabels: {
         'app.kubernetes.io/name': 'memflip',
-        'app.kubernetes.io/part-of': 'web-application',
+        'app.kubernetes.io/part-of': 'demo-app',
         'observability.dev/app': 'memflip',
       },
     },
@@ -235,7 +235,7 @@ export const monitoredApps: MonitoredApp[] = [
     status: 'active',
     priority: 4,
     environment: 'local',
-    category: 'web-application',
+    category: 'resilience-lab',
     docker: {
       composeProject: 'foodpulse',
       networkAliases: ['foodpulse-ui'],
@@ -249,7 +249,7 @@ export const monitoredApps: MonitoredApp[] = [
       namespace: 'foodpulse',
       recommendedServiceLabels: {
         'app.kubernetes.io/name': 'foodpulse',
-        'app.kubernetes.io/part-of': 'web-application',
+        'app.kubernetes.io/part-of': 'resilience-lab',
         'observability.dev/app': 'foodpulse',
       },
     },
