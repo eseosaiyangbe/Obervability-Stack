@@ -92,6 +92,14 @@ After the live audit, use the dashboard operator panels for:
 
 Those panels help answer what to check first, not just whether the app is up.
 
+### 6. App Operator Runbook
+
+Use the app-specific operator runbook after the first dashboard and live-audit pass.
+
+Current platform runbooks:
+
+- `SwiftPay`: `SWIFTPAY_OPERATOR_RUNBOOK.md`
+
 ## Which App Tells Which Story
 
 - `SwiftPay`: microservice health, queue depth, money flow, circuit breaker state
