@@ -386,6 +386,9 @@ We've created convenient scripts to manage your entire monitoring stack:
 # Validate monitored app inventory metadata
 ./scripts/devops-monitor.sh inventory
 
+# Audit SwiftPay onboarding contract
+./scripts/devops-monitor.sh swiftpay
+
 # View service logs
 ./scripts/devops-monitor.sh logs
 
@@ -442,6 +445,9 @@ We've created convenient scripts to manage your entire monitoring stack:
 
    # Validate monitored app inventory metadata
    ./scripts/devops-monitor.sh inventory
+
+   # Audit SwiftPay onboarding contract
+   ./scripts/devops-monitor.sh swiftpay
    ```
 
 5. **Access the services:**

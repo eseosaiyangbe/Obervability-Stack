@@ -134,6 +134,7 @@ The system supports multiple authentication methods:
 - ✅ **Log Aggregation**: Centralized logging with Loki
 - ✅ **Service Health**: Automated control-plane smoke checks and status monitoring
 - ✅ **Inventory Validation**: Automated monitored-app metadata validation
+- ✅ **SwiftPay Audit**: Automated flagship workload onboarding validation
 
 ### User Interface
 - ✅ **Modern Web UI**: Next.js-based monitoring interface

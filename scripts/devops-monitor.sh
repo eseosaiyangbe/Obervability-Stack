@@ -239,6 +239,7 @@ show_help() {
     echo "  health    - Run control-plane smoke checks"
     echo "  smoke     - Alias for the control-plane smoke checks"
     echo "  inventory - Validate monitored app inventory metadata"
+    echo "  swiftpay  - Audit SwiftPay onboarding contract"
     echo "  setup     - Setup environment and dependencies"
     echo "  help      - Show this help message"
     echo ""
@@ -343,6 +344,9 @@ main() {
             ;;
         inventory)
             "$SCRIPT_DIR/inventory-audit.sh"
+            ;;
+        swiftpay)
+            "$SCRIPT_DIR/swiftpay-audit.sh"
             ;;
         setup)
             ./scripts/setup-env.sh
