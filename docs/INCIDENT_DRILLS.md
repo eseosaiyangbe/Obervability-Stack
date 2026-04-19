@@ -57,6 +57,7 @@ If the baseline is already failing, stop and fix the existing problem first. A d
 | Date | Drill | Result | Notes |
 |---|---|---|---|
 | 2026-04-19 | MemFlip backend down | Passed | Direct live audit caught the failure; control-plane health lagged briefly before and after recovery because blackbox probe data refreshes on its own interval |
+| 2026-04-19 | SwiftPay transaction worker down | Passed | Stopping `transaction-service` made the gateway return HTTP 500 on transfer creation; after restart, direct service health recovered before control-plane and Prometheus state refreshed |
 
 ## Standard Drill Format
 
