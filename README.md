@@ -392,6 +392,12 @@ We've created convenient scripts to manage your entire monitoring stack:
 # Run the live SwiftPay integration audit
 ./scripts/devops-monitor.sh swiftpay-live
 
+# Audit MemFlip onboarding contract
+./scripts/devops-monitor.sh memflip
+
+# Run the live MemFlip integration audit
+./scripts/devops-monitor.sh memflip-live
+
 # View service logs
 ./scripts/devops-monitor.sh logs
 
@@ -454,6 +460,12 @@ We've created convenient scripts to manage your entire monitoring stack:
 
    # Run the live SwiftPay integration audit
    ./scripts/devops-monitor.sh swiftpay-live
+
+   # Audit MemFlip onboarding contract
+   ./scripts/devops-monitor.sh memflip
+
+   # Run the live MemFlip integration audit
+   ./scripts/devops-monitor.sh memflip-live
    ```
 
 5. **Access the services:**

@@ -23,6 +23,8 @@ This directory contains all the shell scripts for managing the Monitoring in a B
 ./scripts/devops-monitor.sh inventory # Validate monitored app inventory
 ./scripts/devops-monitor.sh swiftpay  # Audit SwiftPay onboarding contract
 ./scripts/devops-monitor.sh swiftpay-live # Run the live SwiftPay integration audit
+./scripts/devops-monitor.sh memflip  # Audit MemFlip onboarding contract
+./scripts/devops-monitor.sh memflip-live # Run the live MemFlip integration audit
 ```
 
 **Features:**
@@ -82,6 +84,39 @@ This directory contains all the shell scripts for managing the Monitoring in a B
 - Creates synthetic users and a real transfer through the public gateway
 - Confirms the transfer completes, wallet balance changes, and Prometheus transfer counters react
 - Documents that the SwiftPay business endpoint can remain all-zero on a healthy successful path because it tracks pending, failure, queue, and circuit-breaker state
+
+### `memflip-audit.sh`
+**MemFlip onboarding validator** for the lightweight demo workload.
+
+```bash
+# Usage
+./scripts/memflip-audit.sh
+
+# Or through the main wrapper
+./scripts/devops-monitor.sh memflip
+```
+
+**Features:**
+- Validates MemFlip observability aliases, local ports, and inventory metadata
+- Checks the control-plane blackbox targets for MemFlip frontend and backend health
+- Confirms the backend exposes `/health`, `/api/health`, and `/metrics`
+
+### `memflip-live-audit.sh`
+**MemFlip live integration validator** for end-to-end operator confidence.
+
+```bash
+# Usage
+./scripts/memflip-live-audit.sh
+
+# Or through the main wrapper
+./scripts/devops-monitor.sh memflip-live
+```
+
+**Features:**
+- Verifies the live MemFlip frontend, backend, and control-plane health surfaces
+- Creates a synthetic user, starts a game, submits a valid match, and completes the game through the frontend proxy
+- Confirms the leaderboard and user-stats endpoints respond
+- Confirms the backend metrics endpoint records the game flow
 
 ### `health-check.sh`
 **Control-plane smoke check script** for the monitoring stack.
@@ -260,6 +295,12 @@ This directory contains all the shell scripts for managing the Monitoring in a B
 
 # Run the live SwiftPay integration audit
 ./scripts/devops-monitor.sh swiftpay-live
+
+# Audit MemFlip onboarding contract
+./scripts/devops-monitor.sh memflip
+
+# Run the live MemFlip integration audit
+./scripts/devops-monitor.sh memflip-live
 
 # View logs
 ./scripts/devops-monitor.sh logs

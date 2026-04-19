@@ -241,6 +241,8 @@ show_help() {
     echo "  inventory - Validate monitored app inventory metadata"
     echo "  swiftpay  - Audit SwiftPay onboarding contract"
     echo "  swiftpay-live - Run the live SwiftPay integration audit"
+    echo "  memflip   - Audit MemFlip onboarding contract"
+    echo "  memflip-live - Run the live MemFlip integration audit"
     echo "  setup     - Setup environment and dependencies"
     echo "  help      - Show this help message"
     echo ""
@@ -351,6 +353,12 @@ main() {
             ;;
         swiftpay-live)
             "$SCRIPT_DIR/swiftpay-live-audit.sh"
+            ;;
+        memflip)
+            "$SCRIPT_DIR/memflip-audit.sh"
+            ;;
+        memflip-live)
+            "$SCRIPT_DIR/memflip-live-audit.sh"
             ;;
         setup)
             ./scripts/setup-env.sh
