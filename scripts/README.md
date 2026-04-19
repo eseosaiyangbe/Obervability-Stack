@@ -20,6 +20,7 @@ This directory contains all the shell scripts for managing the Monitoring in a B
 ./scripts/devops-monitor.sh ui        # Start UI development server
 ./scripts/devops-monitor.sh help      # Show help information
 ./scripts/devops-monitor.sh smoke     # Run the control-plane smoke check
+./scripts/devops-monitor.sh operator  # Run the operator-first workflow
 ./scripts/devops-monitor.sh inventory # Validate monitored app inventory
 ./scripts/devops-monitor.sh swiftpay  # Audit SwiftPay onboarding contract
 ./scripts/devops-monitor.sh swiftpay-live # Run the live SwiftPay integration audit
@@ -37,6 +38,23 @@ This directory contains all the shell scripts for managing the Monitoring in a B
 - View logs from all services
 - Start UI development server
 - Comprehensive help system
+
+### `operator-first-check.sh`
+**Operator-first workflow** for the shared platform.
+
+```bash
+# Usage
+./scripts/operator-first-check.sh
+
+# Or through the main wrapper
+./scripts/devops-monitor.sh operator
+```
+
+**Features:**
+- Runs the control-plane smoke check first
+- Validates the monitored app inventory contract
+- Prints a current workspace app-health snapshot from `/api/apps/health`
+- Points the operator to the next app-specific live audit
 
 ### `inventory-audit.sh`
 **Monitored app inventory validator** for the control plane.

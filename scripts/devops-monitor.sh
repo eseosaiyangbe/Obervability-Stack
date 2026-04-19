@@ -218,6 +218,7 @@ show_status() {
     echo "  build-ui  - Build UI for production"
     echo "  status    - Show project status"
     echo "  health    - Run control-plane smoke checks"
+    echo "  operator  - Run the operator-first workflow"
     echo "  inventory - Validate monitored app inventory"
     echo "  swiftpay  - Audit SwiftPay onboarding"
     echo "  swiftpay-live - Run the live SwiftPay audit"
@@ -248,6 +249,7 @@ show_help() {
     echo "  clean     - Clean up Docker containers and volumes"
     echo "  health    - Run control-plane smoke checks"
     echo "  smoke     - Alias for the control-plane smoke checks"
+    echo "  operator  - Run the operator-first workflow"
     echo "  inventory - Validate monitored app inventory metadata"
     echo "  swiftpay  - Audit SwiftPay onboarding contract"
     echo "  swiftpay-live - Run the live SwiftPay integration audit"
@@ -358,6 +360,9 @@ main() {
             ;;
         health|smoke)
             "$SCRIPT_DIR/health-check.sh"
+            ;;
+        operator)
+            "$SCRIPT_DIR/operator-first-check.sh"
             ;;
         inventory)
             "$SCRIPT_DIR/inventory-audit.sh"

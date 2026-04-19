@@ -155,6 +155,74 @@ function getAlertSeverity(alert: AlertmanagerAlert) {
   return alert.labels?.severity || "info"
 }
 
+function getSwiftPayOperatorSummary(
+  overview: AppOverview | null,
+  business: {
+    pendingTransactions: number
+    pendingAmount: number
+    queueDepth: number
+    transactionFailureRate: number
+    walletFailureRate: number
+    walletCircuitBreakerState: number
+    completedTransfersTotal: number
+  }
+) {
+  const primary = overview?.health.primaryEndpoint
+  const swiftpayAlerts = overview?.alerts.length || 0
+
+  if (!overview || !primary) {
+    return {
+      tone: "yellow" as StatTone,
+      title: "Waiting for SwiftPay operator data",
+      message: "The control plane has not built a SwiftPay overview yet. Start with gateway health, then verify the business metrics endpoint.",
+      nextAction: "Check localhost:3007/health, then run the SwiftPay live audit.",
+    }
+  }
+
+  if (primary.status !== "up") {
+    return {
+      tone: "red" as StatTone,
+      title: "SwiftPay user path is degraded",
+      message: "The primary SwiftPay surface is down. Check the frontend and API gateway before chasing downstream service metrics.",
+      nextAction: "Verify localhost:8081 and localhost:3007/health, then inspect gateway routing.",
+    }
+  }
+
+  if (business.walletCircuitBreakerState >= 1) {
+    return {
+      tone: "red" as StatTone,
+      title: "Wallet circuit breaker is open",
+      message: "Transaction Service is protecting Wallet Service. Treat this as downstream pressure or wallet-path failure until the circuit closes.",
+      nextAction: "Run swiftpay-live, then inspect wallet-service and transaction-service logs together.",
+    }
+  }
+
+  if (business.pendingTransactions > 0 || business.pendingAmount > 0 || business.queueDepth > 0) {
+    return {
+      tone: "orange" as StatTone,
+      title: "SwiftPay has work stuck in the money path",
+      message: "Pending work or queue depth means accepted transfers are not clearing normally. The app may still be reachable while business flow is degraded.",
+      nextAction: "Start with queue depth, then compare transaction-service worker logs with wallet-service health.",
+    }
+  }
+
+  if (business.transactionFailureRate > 0 || business.walletFailureRate > 0 || swiftpayAlerts > 0) {
+    return {
+      tone: "yellow" as StatTone,
+      title: "SwiftPay is reachable, but failures need attention",
+      message: "The user path is up, but failure rates or alerts indicate the money flow may be unreliable.",
+      nextAction: "Run the live audit and compare failed transfer counters against recent transaction-service logs.",
+    }
+  }
+
+  return {
+    tone: business.completedTransfersTotal > 0 ? "green" as StatTone : "blue" as StatTone,
+    title: "SwiftPay money flow is currently healthy",
+    message: "The primary path is up and pending, queue, failure, and circuit-breaker signals are clear. Completed Transfers is the positive activity signal.",
+    nextAction: "Use swiftpay-live whenever you need to prove gateway, auth, wallet, transaction, and metrics are all working end to end.",
+  }
+}
+
 function getOpenSISOperatorSummary(overview: AppOverview | null) {
   const primary = overview?.health.primaryEndpoint
   const openSISAlerts = overview?.alerts.length || 0
@@ -517,6 +585,9 @@ export default function DashboardPage() {
   const [memflipOverview, setMemflipOverview] = useState<AppOverview | null>(null)
   const [memflipOverviewLoading, setMemflipOverviewLoading] = useState(false)
   const [memflipOverviewError, setMemflipOverviewError] = useState<string | null>(null)
+  const [swiftpayOverview, setSwiftpayOverview] = useState<AppOverview | null>(null)
+  const [swiftpayOverviewLoading, setSwiftpayOverviewLoading] = useState(false)
+  const [swiftpayOverviewError, setSwiftpayOverviewError] = useState<string | null>(null)
 
   const fetchOpenSISOverview = useCallback(async () => {
     setOverviewLoading(true)
@@ -578,17 +649,39 @@ export default function DashboardPage() {
     }
   }, [])
 
+  const fetchSwiftPayOverview = useCallback(async () => {
+    setSwiftpayOverviewLoading(true)
+    setSwiftpayOverviewError(null)
+
+    try {
+      const response = await fetch("/api/apps/swiftpay/overview")
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}))
+        throw new Error(body.error || `Request failed with ${response.status}`)
+      }
+
+      setSwiftpayOverview(await response.json())
+    } catch (error) {
+      setSwiftpayOverviewError(error instanceof Error ? error.message : "Failed to fetch SwiftPay overview")
+    } finally {
+      setSwiftpayOverviewLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     fetchOpenSISOverview()
     fetchFoodPulseOverview()
     fetchMemFlipOverview()
+    fetchSwiftPayOverview()
     const interval = window.setInterval(() => {
       fetchOpenSISOverview()
       fetchFoodPulseOverview()
       fetchMemFlipOverview()
+      fetchSwiftPayOverview()
     }, 30000)
     return () => window.clearInterval(interval)
-  }, [fetchFoodPulseOverview, fetchMemFlipOverview, fetchOpenSISOverview])
+  }, [fetchFoodPulseOverview, fetchMemFlipOverview, fetchOpenSISOverview, fetchSwiftPayOverview])
 
   const refreshAll = useCallback(() => {
     refreshApps()
@@ -598,7 +691,8 @@ export default function DashboardPage() {
     fetchOpenSISOverview()
     fetchFoodPulseOverview()
     fetchMemFlipOverview()
-  }, [fetchFoodPulseOverview, fetchMemFlipOverview, fetchOpenSISOverview, metrics, refreshAlerts, refreshApps, refreshSwiftPayBusiness])
+    fetchSwiftPayOverview()
+  }, [fetchFoodPulseOverview, fetchMemFlipOverview, fetchOpenSISOverview, fetchSwiftPayOverview, metrics, refreshAlerts, refreshApps, refreshSwiftPayBusiness])
 
   const uptimeChart = useMemo(() => {
     return (opensisOverview?.uptimeSeries || []).map((point) => ({
@@ -622,8 +716,10 @@ export default function DashboardPage() {
   const foodpulseSummary = getFoodPulseOperatorSummary(foodpulseOverview)
   const memflipHealth = memflipOverview?.health.primaryEndpoint
   const memflipSummary = getMemFlipOperatorSummary(memflipOverview)
+  const swiftpayHealth = swiftpayOverview?.health.primaryEndpoint
+  const swiftpaySummary = getSwiftPayOperatorSummary(swiftpayOverview, swiftpayMetrics)
   const dashboardTitle = dashboardConfig?.title || "DevOps Monitor"
-  const isLoading = appHealthLoading || alertsLoading || overviewLoading || foodpulseOverviewLoading || memflipOverviewLoading || metrics.isLoading || swiftpayBusinessLoading
+  const isLoading = appHealthLoading || alertsLoading || overviewLoading || foodpulseOverviewLoading || memflipOverviewLoading || swiftpayOverviewLoading || metrics.isLoading || swiftpayBusinessLoading
   const walletBreakerLabel = swiftpayMetrics.walletCircuitBreakerState >= 1
     ? "Open"
     : swiftpayMetrics.walletCircuitBreakerState > 0
@@ -726,12 +822,12 @@ export default function DashboardPage() {
           </Badge>
         </motion.div>
 
-        {(appHealthError || alertsError || overviewError || foodpulseOverviewError || memflipOverviewError || metrics.error || swiftpayBusinessError) && (
+        {(appHealthError || alertsError || overviewError || foodpulseOverviewError || memflipOverviewError || swiftpayOverviewError || metrics.error || swiftpayBusinessError) && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-900/20">
               <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5" />
               <p className="text-sm text-red-700 dark:text-red-400">
-                {appHealthError || alertsError || overviewError || foodpulseOverviewError || memflipOverviewError || swiftpayBusinessError || "Metrics API failed"}
+                {appHealthError || alertsError || overviewError || foodpulseOverviewError || memflipOverviewError || swiftpayOverviewError || swiftpayBusinessError || "Metrics API failed"}
               </p>
             </div>
           </motion.div>
@@ -825,6 +921,158 @@ export default function DashboardPage() {
                   tone={swiftpayMetrics.walletFailureRate > 0 ? "orange" : "green"}
                   icon={<Gauge className="h-4 w-4 sm:h-5 sm:w-5 text-white" />}
                 />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.28 }}
+        >
+          <Card className="border border-gray-200 dark:border-gray-700 shadow-lg bg-white dark:bg-gray-900">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 sm:p-6">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+                    <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl">
+                      <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                    </div>
+                    SwiftPay Operator Guide
+                  </CardTitle>
+                  <CardDescription className="mt-1 text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                    Gateway reachability, async transaction flow, queue pressure, wallet protection, and business-metric interpretation
+                  </CardDescription>
+                </div>
+                {swiftpayHealth?.browserUrl && (
+                  <Button asChild variant="outline" size="sm" className="gap-1.5 bg-white/80 dark:bg-gray-900/60">
+                    <Link href={swiftpayHealth.browserUrl} target="_blank" rel="noreferrer">
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      Open SwiftPay
+                    </Link>
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+              <div className={`rounded-xl border p-4 bg-gradient-to-r ${statToneStyles[swiftpaySummary.tone].panel}`}>
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="space-y-1.5">
+                    <p className={`text-sm font-semibold ${statToneStyles[swiftpaySummary.tone].label}`}>{swiftpaySummary.title}</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">{swiftpaySummary.message}</p>
+                  </div>
+                  <Badge className={`${healthBadgeStyles[swiftpayOverview?.health.status || "unknown"]} w-fit`}>
+                    {swiftpayOverview?.health.status ? swiftpayOverview.health.status.charAt(0).toUpperCase() + swiftpayOverview.health.status.slice(1) : "Unknown"}
+                  </Badge>
+                </div>
+                <p className="mt-3 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                  Next action: {swiftpaySummary.nextAction}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+                <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-900/20">
+                  <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                    <Wifi className="h-4 w-4" />
+                    <p className="text-sm font-semibold">Gateway Path</p>
+                  </div>
+                  <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                    Start here when SwiftPay looks down. The gateway is the public service boundary for auth, wallets, and transactions.
+                  </p>
+                  <code className="mt-3 block rounded-lg bg-white/70 p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                    curl -fsS http://localhost:3007/health
+                  </code>
+                </div>
+
+                <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-900 dark:bg-indigo-900/20">
+                  <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300">
+                    <Zap className="h-4 w-4" />
+                    <p className="text-sm font-semibold">Async Worker Path</p>
+                  </div>
+                  <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                    Queue depth and pending transactions point at transaction worker pressure, RabbitMQ backlog, or downstream wallet delays.
+                  </p>
+                  <code className="mt-3 block rounded-lg bg-white/70 p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                    ./scripts/devops-monitor.sh swiftpay-live
+                  </code>
+                </div>
+
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900 dark:bg-emerald-900/20">
+                  <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
+                    <CheckCircle className="h-4 w-4" />
+                    <p className="text-sm font-semibold">Positive Signal</p>
+                  </div>
+                  <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                    Completed Transfers proves the happy path has worked since Transaction Service started. Healthy zeros elsewhere are normal.
+                  </p>
+                  <code className="mt-3 block rounded-lg bg-white/70 p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                    curl -fsS http://localhost:4000/api/apps/swiftpay/business
+                  </code>
+                </div>
+
+                <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 dark:border-rose-900 dark:bg-rose-900/20">
+                  <div className="flex items-center gap-2 text-rose-700 dark:text-rose-300">
+                    <Shield className="h-4 w-4" />
+                    <p className="text-sm font-semibold">Wallet Protection</p>
+                  </div>
+                  <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                    An open wallet circuit means Transaction Service is deliberately protecting Wallet Service. Check both services together.
+                  </p>
+                  <code className="mt-3 block rounded-lg bg-white/70 p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                    docker compose logs transaction-service wallet-service
+                  </code>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800/70">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-gray-500" />
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">First-response commands</p>
+                  </div>
+                  <div className="mt-3 space-y-3">
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Start</p>
+                      <code className="mt-1 block rounded-lg bg-white p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                        {swiftpayOverview?.app.runbooks.localStart || "cd SwiftPay && docker compose up -d"}
+                      </code>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Primary health</p>
+                      <code className="mt-1 block rounded-lg bg-white p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                        {swiftpayOverview?.app.runbooks.healthCheck || "curl -fsS http://localhost:3007/health && curl -I http://localhost:8081"}
+                      </code>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Live proof</p>
+                      <code className="mt-1 block rounded-lg bg-white p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                        ./scripts/devops-monitor.sh swiftpay-live
+                      </code>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800/70">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-gray-500" />
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">How to interpret failures</p>
+                  </div>
+                  <div className="mt-3 space-y-3 text-sm text-gray-700 dark:text-gray-300">
+                    <p>
+                      If the gateway is down, fix the public API boundary before investigating internal business metrics.
+                    </p>
+                    <p>
+                      If pending transactions, pending amount, or queue depth rise, focus on transaction-service, RabbitMQ, and wallet-service pressure.
+                    </p>
+                    <p>
+                      If Completed Transfers is flat during expected traffic, the happy path may be broken even when failure counters are still quiet.
+                    </p>
+                    <p>
+                      If the wallet circuit is open, the system is protecting itself; treat that as a downstream incident, not just a dashboard warning.
+                    </p>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

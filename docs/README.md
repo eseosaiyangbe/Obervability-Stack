@@ -13,6 +13,8 @@ Welcome to the comprehensive documentation for the DevOps Monitoring in a Box pr
 - **[Workspace App Inventory Audit](WORKSPACE_APP_INVENTORY_AUDIT.md)** - Verification of monitored app metadata against the actual workspace
 - **[App Onboarding Template](APP_ONBOARDING_TEMPLATE.md)** - Reusable onboarding contract for new or newly normalized workloads
 - **[Operator App Matrix](OPERATOR_APP_MATRIX.md)** - Operator-facing summary of the current managed workloads
+- **[Operator Health Workflow](OPERATOR_HEALTH_WORKFLOW.md)** - Canonical first-response flow for the platform
+- **[Incident Matrix](INCIDENT_MATRIX.md)** - First checks and ownership hints for common incident shapes
 - **[Main README](../README.md)** - Project overview and quick start guide
 
 ### 🔧 Core Components
