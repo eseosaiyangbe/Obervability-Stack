@@ -103,7 +103,7 @@ scrape_configs:
           app: memflip
           component: frontend
         targets:
-          - http://memflip-frontend/
+          - http://memflip-frontend/api/health
       - labels:
           app: memflip
           component: backend

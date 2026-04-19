@@ -10,6 +10,7 @@ Welcome to the comprehensive documentation for the DevOps Monitoring in a Box pr
 - **[Setup Guide](SETUP.md)** - Complete setup instructions for the monitoring stack
 - **[Configuration Guide](CONFIGURATION_GUIDE.md)** - Complete configuration reference with environment variables
 - **[Project Structure](PROJECT_STRUCTURE.md)** - Complete project structure overview
+- **[Workspace App Inventory Audit](WORKSPACE_APP_INVENTORY_AUDIT.md)** - Verification of monitored app metadata against the actual workspace
 - **[Main README](../README.md)** - Project overview and quick start guide
 
 ### 🔧 Core Components

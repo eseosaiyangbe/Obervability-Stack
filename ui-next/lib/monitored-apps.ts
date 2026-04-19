@@ -113,7 +113,7 @@ export const monitoredApps: MonitoredApp[] = [
       latencyQuery: 'probe_duration_seconds{job="blackbox-http",app="opensis"}',
     },
     runbooks: {
-      localStart: 'cd OpenSIS && ./scripts/precheck.sh && docker compose up -d',
+      localStart: 'cd OpenSIS && ./scripts/compose-start.sh',
       healthCheck: 'curl -I http://localhost:8088',
     },
     tags: ['first-managed-app', 'php', 'mariadb'],
@@ -213,16 +213,17 @@ export const monitoredApps: MonitoredApp[] = [
     },
     observability: {
       endpoints: [
-        endpoint('memflip-frontend', 'MemFlip Frontend', 'frontend', 'http://memflip-frontend/', undefined, 'memflip', 'frontend'),
+        endpoint('memflip-frontend', 'MemFlip Frontend', 'frontend', 'http://memflip-frontend/api/health', 'http://localhost:8080', 'memflip', 'frontend', '/api/health'),
         endpoint('memflip-backend', 'MemFlip Backend', 'api', 'http://memflip-backend:3001/health', undefined, 'memflip', 'backend', '/health'),
       ],
-      primaryHealthEndpointId: 'memflip-backend',
+      primaryHealthEndpointId: 'memflip-frontend',
       logQuery: '{compose_project=~".*memflip.*"}',
       uptimeQuery: 'probe_success{job="blackbox-http",app="memflip"}',
       latencyQuery: 'probe_duration_seconds{job="blackbox-http",app="memflip"}',
     },
     runbooks: {
       localStart: 'cd MemFlip && docker compose up -d',
+      healthCheck: 'curl -fsS http://localhost:8080/api/health',
     },
     tags: ['frontend', 'backend'],
   },
@@ -254,7 +255,7 @@ export const monitoredApps: MonitoredApp[] = [
     },
     observability: {
       endpoints: [
-        endpoint('foodpulse-ui', 'FoodPulse UI', 'frontend', 'http://foodpulse-ui/', undefined, 'foodpulse', 'frontend'),
+        endpoint('foodpulse-ui', 'FoodPulse UI', 'frontend', 'http://foodpulse-ui/', 'http://localhost', 'foodpulse', 'frontend'),
       ],
       primaryHealthEndpointId: 'foodpulse-ui',
       logQuery: '{compose_project=~".*foodpulse.*"}',
@@ -263,6 +264,7 @@ export const monitoredApps: MonitoredApp[] = [
     },
     runbooks: {
       localStart: 'cd FoodPulse && docker compose up -d',
+      healthCheck: 'curl -I http://localhost',
     },
     tags: ['frontend'],
   },
