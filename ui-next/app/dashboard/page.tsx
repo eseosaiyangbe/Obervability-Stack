@@ -194,6 +194,45 @@ function getOpenSISOperatorSummary(overview: AppOverview | null) {
   }
 }
 
+function getFoodPulseOperatorSummary(overview: AppOverview | null) {
+  const primary = overview?.health.primaryEndpoint
+  const foodPulseAlerts = overview?.alerts.length || 0
+
+  if (!overview || !primary) {
+    return {
+      tone: "yellow" as StatTone,
+      title: "Waiting for FoodPulse lab data",
+      message: "The control plane has not built a FoodPulse overview yet. Start with the browser path, then confirm the cluster-status helper reports a healthy lab.",
+      nextAction: "Check localhost:8090, then run ./scripts/cluster-status.sh inside FoodPulse.",
+    }
+  }
+
+  if (primary.status !== "up") {
+    return {
+      tone: "red" as StatTone,
+      title: "FoodPulse reachability is degraded",
+      message: "The main browser path is down. Treat this as an app or edge issue first, then verify the underlying Redis and Postgres lab layers if the UI is up but requests still fail.",
+      nextAction: "Check localhost:8090, then inspect foodpulse-ui, foodpulse-api, and both HAProxy layers.",
+    }
+  }
+
+  if (foodPulseAlerts > 0) {
+    return {
+      tone: "orange" as StatTone,
+      title: "FoodPulse is reachable, but the lab still needs attention",
+      message: "The browser path is up, but FoodPulse-specific alerts are firing. In this lab, that usually means dependency pressure or failover drift rather than a complete app outage.",
+      nextAction: "Run cluster-status first, then decide whether the Redis or Postgres drill path best matches the symptom.",
+    }
+  }
+
+  return {
+    tone: "green" as StatTone,
+    title: "FoodPulse is healthy and the failover lab looks stable",
+    message: "The main browser path is up and there are no FoodPulse-specific active alerts. This is the right time for controlled drill work, not reactive recovery.",
+    nextAction: "Use cluster-status as the baseline, then run Redis or Postgres drills intentionally when you want to exercise the lab.",
+  }
+}
+
 function HeroStatCard({
   icon,
   value,
@@ -433,6 +472,9 @@ export default function DashboardPage() {
   const [opensisOverview, setOpensisOverview] = useState<AppOverview | null>(null)
   const [overviewLoading, setOverviewLoading] = useState(false)
   const [overviewError, setOverviewError] = useState<string | null>(null)
+  const [foodpulseOverview, setFoodpulseOverview] = useState<AppOverview | null>(null)
+  const [foodpulseOverviewLoading, setFoodpulseOverviewLoading] = useState(false)
+  const [foodpulseOverviewError, setFoodpulseOverviewError] = useState<string | null>(null)
 
   const fetchOpenSISOverview = useCallback(async () => {
     setOverviewLoading(true)
@@ -454,11 +496,35 @@ export default function DashboardPage() {
     }
   }, [])
 
+  const fetchFoodPulseOverview = useCallback(async () => {
+    setFoodpulseOverviewLoading(true)
+    setFoodpulseOverviewError(null)
+
+    try {
+      const response = await fetch("/api/apps/foodpulse/overview")
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}))
+        throw new Error(body.error || `Request failed with ${response.status}`)
+      }
+
+      setFoodpulseOverview(await response.json())
+    } catch (error) {
+      setFoodpulseOverviewError(error instanceof Error ? error.message : "Failed to fetch FoodPulse overview")
+    } finally {
+      setFoodpulseOverviewLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     fetchOpenSISOverview()
-    const interval = window.setInterval(fetchOpenSISOverview, 30000)
+    fetchFoodPulseOverview()
+    const interval = window.setInterval(() => {
+      fetchOpenSISOverview()
+      fetchFoodPulseOverview()
+    }, 30000)
     return () => window.clearInterval(interval)
-  }, [fetchOpenSISOverview])
+  }, [fetchFoodPulseOverview, fetchOpenSISOverview])
 
   const refreshAll = useCallback(() => {
     refreshApps()
@@ -466,7 +532,8 @@ export default function DashboardPage() {
     metrics.refetch()
     refreshSwiftPayBusiness()
     fetchOpenSISOverview()
-  }, [fetchOpenSISOverview, metrics, refreshAlerts, refreshApps, refreshSwiftPayBusiness])
+    fetchFoodPulseOverview()
+  }, [fetchFoodPulseOverview, fetchOpenSISOverview, metrics, refreshAlerts, refreshApps, refreshSwiftPayBusiness])
 
   const uptimeChart = useMemo(() => {
     return (opensisOverview?.uptimeSeries || []).map((point) => ({
@@ -486,8 +553,10 @@ export default function DashboardPage() {
   const monitoredEndpointCount = health.reduce((total, app) => total + app.endpoints.length, 0)
   const opensisHealth = opensisOverview?.health.primaryEndpoint
   const opensisSummary = getOpenSISOperatorSummary(opensisOverview)
+  const foodpulseHealth = foodpulseOverview?.health.primaryEndpoint
+  const foodpulseSummary = getFoodPulseOperatorSummary(foodpulseOverview)
   const dashboardTitle = dashboardConfig?.title || "DevOps Monitor"
-  const isLoading = appHealthLoading || alertsLoading || overviewLoading || metrics.isLoading || swiftpayBusinessLoading
+  const isLoading = appHealthLoading || alertsLoading || overviewLoading || foodpulseOverviewLoading || metrics.isLoading || swiftpayBusinessLoading
   const walletBreakerLabel = swiftpayMetrics.walletCircuitBreakerState >= 1
     ? "Open"
     : swiftpayMetrics.walletCircuitBreakerState > 0
@@ -515,7 +584,7 @@ export default function DashboardPage() {
                         {dashboardTitle}
                       </CardTitle>
                       <CardDescription className="mt-1 sm:mt-2 text-blue-100 text-sm sm:text-base">
-                        Real-time OpenSIS health, metrics, logs, and alerts
+                        Real-time workload health, metrics, logs, alerts, and operator guidance
                       </CardDescription>
                     </div>
                   </div>
@@ -590,12 +659,12 @@ export default function DashboardPage() {
           </Badge>
         </motion.div>
 
-        {(appHealthError || alertsError || overviewError || metrics.error || swiftpayBusinessError) && (
+        {(appHealthError || alertsError || overviewError || foodpulseOverviewError || metrics.error || swiftpayBusinessError) && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-900/20">
               <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5" />
               <p className="text-sm text-red-700 dark:text-red-400">
-                {appHealthError || alertsError || overviewError || swiftpayBusinessError || "Metrics API failed"}
+                {appHealthError || alertsError || overviewError || foodpulseOverviewError || swiftpayBusinessError || "Metrics API failed"}
               </p>
             </div>
           </motion.div>
@@ -1060,6 +1129,158 @@ export default function DashboardPage() {
                     </p>
                     <p>
                       If alerts are firing while the site still responds, the platform may be degraded even though the public page looks healthy.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.85 }}
+        >
+          <Card className="border border-gray-200 dark:border-gray-700 shadow-lg bg-white dark:bg-gray-900">
+            <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 p-4 sm:p-6">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+                    <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl">
+                      <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                    </div>
+                    FoodPulse Failover Guide
+                  </CardTitle>
+                  <CardDescription className="mt-1 text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                    App reachability plus the Redis, Postgres, and HAProxy checks that make the resilience lab meaningful
+                  </CardDescription>
+                </div>
+                {foodpulseHealth?.browserUrl && (
+                  <Button asChild variant="outline" size="sm" className="gap-1.5 bg-white/80 dark:bg-gray-900/60">
+                    <Link href={foodpulseHealth.browserUrl} target="_blank" rel="noreferrer">
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      Open FoodPulse
+                    </Link>
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+              <div className={`rounded-xl border p-4 bg-gradient-to-r ${statToneStyles[foodpulseSummary.tone].panel}`}>
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="space-y-1.5">
+                    <p className={`text-sm font-semibold ${statToneStyles[foodpulseSummary.tone].label}`}>{foodpulseSummary.title}</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">{foodpulseSummary.message}</p>
+                  </div>
+                  <Badge className={`${healthBadgeStyles[foodpulseOverview?.health.status || "unknown"]} w-fit`}>
+                    {foodpulseOverview?.health.status ? foodpulseOverview.health.status.charAt(0).toUpperCase() + foodpulseOverview.health.status.slice(1) : "Unknown"}
+                  </Badge>
+                </div>
+                <p className="mt-3 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                  Next action: {foodpulseSummary.nextAction}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900 dark:bg-emerald-900/20">
+                  <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
+                    <Wifi className="h-4 w-4" />
+                    <p className="text-sm font-semibold">Browser Path</p>
+                  </div>
+                  <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                    Start with the user-facing path. If this is broken, do not jump into failover drills until the app surface itself is understood.
+                  </p>
+                  <code className="mt-3 block rounded-lg bg-white/70 p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                    curl -I http://localhost:8090
+                  </code>
+                </div>
+
+                <div className="rounded-xl border border-sky-200 bg-sky-50 p-4 dark:border-sky-900 dark:bg-sky-900/20">
+                  <div className="flex items-center gap-2 text-sky-700 dark:text-sky-300">
+                    <Server className="h-4 w-4" />
+                    <p className="text-sm font-semibold">Cluster Status</p>
+                  </div>
+                  <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                    This is the baseline operator command. Use it before and after drills so you know whether the lab is actually healthy.
+                  </p>
+                  <code className="mt-3 block rounded-lg bg-white/70 p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                    ./scripts/cluster-status.sh
+                  </code>
+                </div>
+
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-900/20">
+                  <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
+                    <Zap className="h-4 w-4" />
+                    <p className="text-sm font-semibold">Redis Drill</p>
+                  </div>
+                  <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                    Use this when you want to observe Sentinel-driven failover and verify HAProxy points at the new master.
+                  </p>
+                  <code className="mt-3 block rounded-lg bg-white/70 p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                    ./scripts/redis-failover-drill.sh
+                  </code>
+                </div>
+
+                <div className="rounded-xl border border-violet-200 bg-violet-50 p-4 dark:border-violet-900 dark:bg-violet-900/20">
+                  <div className="flex items-center gap-2 text-violet-700 dark:text-violet-300">
+                    <Database className="h-4 w-4" />
+                    <p className="text-sm font-semibold">Postgres Drill</p>
+                  </div>
+                  <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                    This is a manual promotion lab. It is useful for learning, but it intentionally leaves the topology dirty afterward.
+                  </p>
+                  <code className="mt-3 block rounded-lg bg-white/70 p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                    ./scripts/pg-failover-drill.sh
+                  </code>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800/70">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-gray-500" />
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">First-response commands</p>
+                  </div>
+                  <div className="mt-3 space-y-3">
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Start</p>
+                      <code className="mt-1 block rounded-lg bg-white p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                        {foodpulseOverview?.app.runbooks.localStart || "cd FoodPulse && cp .env.example .env && ./scripts/start.sh"}
+                      </code>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Baseline health</p>
+                      <code className="mt-1 block rounded-lg bg-white p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                        {foodpulseOverview?.app.runbooks.healthCheck || "curl -I http://localhost:8090"}
+                      </code>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Lab baseline</p>
+                      <code className="mt-1 block rounded-lg bg-white p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                        ./scripts/cluster-status.sh
+                      </code>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800/70">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-gray-500" />
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">How to interpret failures</p>
+                  </div>
+                  <div className="mt-3 space-y-3 text-sm text-gray-700 dark:text-gray-300">
+                    <p>
+                      If the browser path is down, treat it as an app or proxy issue first, not as an automatic failover problem.
+                    </p>
+                    <p>
+                      If the browser path is healthy but cluster-status is degraded, the lab dependencies need attention even if the UI still looks fine.
+                    </p>
+                    <p>
+                      Redis failover drills are the cleaner resilience exercise because Sentinel and HAProxy should converge on a new master automatically.
+                    </p>
+                    <p>
+                      Postgres promotion drills are educational but intentionally disruptive; use them when you want to study failure handling, not when you need a clean steady state afterward.
                     </p>
                   </div>
                 </div>
