@@ -52,6 +52,12 @@ If the baseline is already failing, stop and fix the existing problem first. A d
 | FoodPulse app healthy but topology degraded | FoodPulse | Restart | UI can work while HA checks fail |
 | Control plane probe/config drift | Platform | Read-only / Restart | app healthy locally but control plane disagrees |
 
+## Executed Drill Log
+
+| Date | Drill | Result | Notes |
+|---|---|---|---|
+| 2026-04-19 | MemFlip backend down | Passed | Direct live audit caught the failure; control-plane health lagged briefly before and after recovery because blackbox probe data refreshes on its own interval |
+
 ## Standard Drill Format
 
 Every drill should follow this order:
