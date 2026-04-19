@@ -16,6 +16,7 @@ Welcome to the comprehensive documentation for the DevOps Monitoring in a Box pr
 - **[Operator Health Workflow](OPERATOR_HEALTH_WORKFLOW.md)** - Canonical first-response flow for the platform
 - **[Incident Matrix](INCIDENT_MATRIX.md)** - First checks and ownership hints for common incident shapes
 - **[SwiftPay Operator Runbook](SWIFTPAY_OPERATOR_RUNBOOK.md)** - Platform-facing runbook for the flagship microservices workload
+- **[MemFlip Operator Runbook](MEMFLIP_OPERATOR_RUNBOOK.md)** - Platform-facing runbook for the reference onboarding workload
 - **[Main README](../README.md)** - Project overview and quick start guide
 
 ### 🔧 Core Components

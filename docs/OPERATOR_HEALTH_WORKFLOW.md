@@ -99,6 +99,7 @@ Use the app-specific operator runbook after the first dashboard and live-audit p
 Current platform runbooks:
 
 - `SwiftPay`: `SWIFTPAY_OPERATOR_RUNBOOK.md`
+- `MemFlip`: `MEMFLIP_OPERATOR_RUNBOOK.md`
 
 ## Which App Tells Which Story
 
