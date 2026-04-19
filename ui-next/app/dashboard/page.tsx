@@ -233,6 +233,45 @@ function getFoodPulseOperatorSummary(overview: AppOverview | null) {
   }
 }
 
+function getMemFlipOperatorSummary(overview: AppOverview | null) {
+  const primary = overview?.health.primaryEndpoint
+  const memflipAlerts = overview?.alerts.length || 0
+
+  if (!overview || !primary) {
+    return {
+      tone: "yellow" as StatTone,
+      title: "Waiting for MemFlip onboarding data",
+      message: "The control plane has not built a MemFlip overview yet. Start with the frontend proxy health path, then validate the synthetic game flow.",
+      nextAction: "Check localhost:8080/api/health, then run the MemFlip live audit.",
+    }
+  }
+
+  if (primary.status !== "up") {
+    return {
+      tone: "red" as StatTone,
+      title: "MemFlip onboarding path is degraded",
+      message: "The frontend-proxied health path is down. Treat this as a browser-first integration issue before diving into backend metrics or game flow details.",
+      nextAction: "Check localhost:8080/api/health, then compare frontend proxy behavior with backend health on localhost:3101/health.",
+    }
+  }
+
+  if (memflipAlerts > 0) {
+    return {
+      tone: "orange" as StatTone,
+      title: "MemFlip is reachable, but the onboarding surface still needs attention",
+      message: "The preferred browser-facing health path is up, but MemFlip-specific alerts are firing. That usually points to drift between the simple app path and the supporting backend surfaces.",
+      nextAction: "Run the live audit to confirm game flow, leaderboard, and backend metrics all still agree.",
+    }
+  }
+
+  return {
+    tone: "green" as StatTone,
+    title: "MemFlip is the clean reference onboarding path",
+    message: "The frontend proxy path is healthy and there are no MemFlip-specific active alerts. This is the simplest example of how an app should join the platform.",
+    nextAction: "Use the live audit as the reference check when onboarding future browser-first apps.",
+  }
+}
+
 function HeroStatCard({
   icon,
   value,
@@ -475,6 +514,9 @@ export default function DashboardPage() {
   const [foodpulseOverview, setFoodpulseOverview] = useState<AppOverview | null>(null)
   const [foodpulseOverviewLoading, setFoodpulseOverviewLoading] = useState(false)
   const [foodpulseOverviewError, setFoodpulseOverviewError] = useState<string | null>(null)
+  const [memflipOverview, setMemflipOverview] = useState<AppOverview | null>(null)
+  const [memflipOverviewLoading, setMemflipOverviewLoading] = useState(false)
+  const [memflipOverviewError, setMemflipOverviewError] = useState<string | null>(null)
 
   const fetchOpenSISOverview = useCallback(async () => {
     setOverviewLoading(true)
@@ -516,15 +558,37 @@ export default function DashboardPage() {
     }
   }, [])
 
+  const fetchMemFlipOverview = useCallback(async () => {
+    setMemflipOverviewLoading(true)
+    setMemflipOverviewError(null)
+
+    try {
+      const response = await fetch("/api/apps/memflip/overview")
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}))
+        throw new Error(body.error || `Request failed with ${response.status}`)
+      }
+
+      setMemflipOverview(await response.json())
+    } catch (error) {
+      setMemflipOverviewError(error instanceof Error ? error.message : "Failed to fetch MemFlip overview")
+    } finally {
+      setMemflipOverviewLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     fetchOpenSISOverview()
     fetchFoodPulseOverview()
+    fetchMemFlipOverview()
     const interval = window.setInterval(() => {
       fetchOpenSISOverview()
       fetchFoodPulseOverview()
+      fetchMemFlipOverview()
     }, 30000)
     return () => window.clearInterval(interval)
-  }, [fetchFoodPulseOverview, fetchOpenSISOverview])
+  }, [fetchFoodPulseOverview, fetchMemFlipOverview, fetchOpenSISOverview])
 
   const refreshAll = useCallback(() => {
     refreshApps()
@@ -533,7 +597,8 @@ export default function DashboardPage() {
     refreshSwiftPayBusiness()
     fetchOpenSISOverview()
     fetchFoodPulseOverview()
-  }, [fetchFoodPulseOverview, fetchOpenSISOverview, metrics, refreshAlerts, refreshApps, refreshSwiftPayBusiness])
+    fetchMemFlipOverview()
+  }, [fetchFoodPulseOverview, fetchMemFlipOverview, fetchOpenSISOverview, metrics, refreshAlerts, refreshApps, refreshSwiftPayBusiness])
 
   const uptimeChart = useMemo(() => {
     return (opensisOverview?.uptimeSeries || []).map((point) => ({
@@ -555,8 +620,10 @@ export default function DashboardPage() {
   const opensisSummary = getOpenSISOperatorSummary(opensisOverview)
   const foodpulseHealth = foodpulseOverview?.health.primaryEndpoint
   const foodpulseSummary = getFoodPulseOperatorSummary(foodpulseOverview)
+  const memflipHealth = memflipOverview?.health.primaryEndpoint
+  const memflipSummary = getMemFlipOperatorSummary(memflipOverview)
   const dashboardTitle = dashboardConfig?.title || "DevOps Monitor"
-  const isLoading = appHealthLoading || alertsLoading || overviewLoading || foodpulseOverviewLoading || metrics.isLoading || swiftpayBusinessLoading
+  const isLoading = appHealthLoading || alertsLoading || overviewLoading || foodpulseOverviewLoading || memflipOverviewLoading || metrics.isLoading || swiftpayBusinessLoading
   const walletBreakerLabel = swiftpayMetrics.walletCircuitBreakerState >= 1
     ? "Open"
     : swiftpayMetrics.walletCircuitBreakerState > 0
@@ -659,12 +726,12 @@ export default function DashboardPage() {
           </Badge>
         </motion.div>
 
-        {(appHealthError || alertsError || overviewError || foodpulseOverviewError || metrics.error || swiftpayBusinessError) && (
+        {(appHealthError || alertsError || overviewError || foodpulseOverviewError || memflipOverviewError || metrics.error || swiftpayBusinessError) && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-900/20">
               <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5" />
               <p className="text-sm text-red-700 dark:text-red-400">
-                {appHealthError || alertsError || overviewError || foodpulseOverviewError || swiftpayBusinessError || "Metrics API failed"}
+                {appHealthError || alertsError || overviewError || foodpulseOverviewError || memflipOverviewError || swiftpayBusinessError || "Metrics API failed"}
               </p>
             </div>
           </motion.div>
@@ -1281,6 +1348,158 @@ export default function DashboardPage() {
                     </p>
                     <p>
                       Postgres promotion drills are educational but intentionally disruptive; use them when you want to study failure handling, not when you need a clean steady state afterward.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.9 }}
+        >
+          <Card className="border border-gray-200 dark:border-gray-700 shadow-lg bg-white dark:bg-gray-900">
+            <CardHeader className="bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 p-4 sm:p-6">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+                    <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl">
+                      <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                    </div>
+                    MemFlip Onboarding Guide
+                  </CardTitle>
+                  <CardDescription className="mt-1 text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                    The simplest browser-first reference path: frontend proxy health, backend API health, synthetic game flow, and metrics confirmation
+                  </CardDescription>
+                </div>
+                {memflipHealth?.browserUrl && (
+                  <Button asChild variant="outline" size="sm" className="gap-1.5 bg-white/80 dark:bg-gray-900/60">
+                    <Link href={memflipHealth.browserUrl} target="_blank" rel="noreferrer">
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      Open MemFlip
+                    </Link>
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+              <div className={`rounded-xl border p-4 bg-gradient-to-r ${statToneStyles[memflipSummary.tone].panel}`}>
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="space-y-1.5">
+                    <p className={`text-sm font-semibold ${statToneStyles[memflipSummary.tone].label}`}>{memflipSummary.title}</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">{memflipSummary.message}</p>
+                  </div>
+                  <Badge className={`${healthBadgeStyles[memflipOverview?.health.status || "unknown"]} w-fit`}>
+                    {memflipOverview?.health.status ? memflipOverview.health.status.charAt(0).toUpperCase() + memflipOverview.health.status.slice(1) : "Unknown"}
+                  </Badge>
+                </div>
+                <p className="mt-3 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                  Next action: {memflipSummary.nextAction}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+                <div className="rounded-xl border border-cyan-200 bg-cyan-50 p-4 dark:border-cyan-900 dark:bg-cyan-900/20">
+                  <div className="flex items-center gap-2 text-cyan-700 dark:text-cyan-300">
+                    <Wifi className="h-4 w-4" />
+                    <p className="text-sm font-semibold">Frontend Proxy Health</p>
+                  </div>
+                  <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                    This is the preferred operator check because it follows the same browser-facing contract users hit.
+                  </p>
+                  <code className="mt-3 block rounded-lg bg-white/70 p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                    curl -fsS http://localhost:8080/api/health
+                  </code>
+                </div>
+
+                <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-900/20">
+                  <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                    <Server className="h-4 w-4" />
+                    <p className="text-sm font-semibold">Backend Health</p>
+                  </div>
+                  <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                    Use the backend check when the proxy path looks wrong and you need to separate frontend routing from API availability.
+                  </p>
+                  <code className="mt-3 block rounded-lg bg-white/70 p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                    curl -fsS http://localhost:3101/health
+                  </code>
+                </div>
+
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900 dark:bg-emerald-900/20">
+                  <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
+                    <Activity className="h-4 w-4" />
+                    <p className="text-sm font-semibold">Synthetic Game Flow</p>
+                  </div>
+                  <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                    This is the best end-to-end onboarding proof because it exercises user creation, game start, match, complete, and leaderboard flow.
+                  </p>
+                  <code className="mt-3 block rounded-lg bg-white/70 p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                    ./scripts/devops-monitor.sh memflip-live
+                  </code>
+                </div>
+
+                <div className="rounded-xl border border-violet-200 bg-violet-50 p-4 dark:border-violet-900 dark:bg-violet-900/20">
+                  <div className="flex items-center gap-2 text-violet-700 dark:text-violet-300">
+                    <Gauge className="h-4 w-4" />
+                    <p className="text-sm font-semibold">Backend Metrics</p>
+                  </div>
+                  <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                    Confirm the simple game flow reaches the backend metrics surface before treating the onboarding as complete.
+                  </p>
+                  <code className="mt-3 block rounded-lg bg-white/70 p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                    curl -fsS http://localhost:3101/metrics
+                  </code>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800/70">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-gray-500" />
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">First-response commands</p>
+                  </div>
+                  <div className="mt-3 space-y-3">
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Start</p>
+                      <code className="mt-1 block rounded-lg bg-white p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                        {memflipOverview?.app.runbooks.localStart || "cd MemFlip && cp .env.example .env && docker compose up -d"}
+                      </code>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Preferred health</p>
+                      <code className="mt-1 block rounded-lg bg-white p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                        {memflipOverview?.app.runbooks.healthCheck || "curl -fsS http://localhost:8080/api/health"}
+                      </code>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Live proof</p>
+                      <code className="mt-1 block rounded-lg bg-white p-2 text-xs text-gray-900 dark:bg-gray-950/60 dark:text-gray-100">
+                        ./scripts/devops-monitor.sh memflip-live
+                      </code>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800/70">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-gray-500" />
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">How to interpret failures</p>
+                  </div>
+                  <div className="mt-3 space-y-3 text-sm text-gray-700 dark:text-gray-300">
+                    <p>
+                      If the frontend proxy health path is down, start there first because that is the platform-facing contract we want future apps to copy.
+                    </p>
+                    <p>
+                      If the proxy path is unhealthy but the backend health path is up, the issue is likely in frontend routing or proxy wiring rather than the core API.
+                    </p>
+                    <p>
+                      If health looks good but the live audit fails, treat the game-flow endpoints and leaderboard path as the next layer to debug.
+                    </p>
+                    <p>
+                      If the live audit passes but metrics are missing, the app is functional but the onboarding is still incomplete from an operator perspective.
                     </p>
                   </div>
                 </div>
