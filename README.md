@@ -389,6 +389,9 @@ We've created convenient scripts to manage your entire monitoring stack:
 # Audit SwiftPay onboarding contract
 ./scripts/devops-monitor.sh swiftpay
 
+# Run the live SwiftPay integration audit
+./scripts/devops-monitor.sh swiftpay-live
+
 # View service logs
 ./scripts/devops-monitor.sh logs
 
@@ -448,6 +451,9 @@ We've created convenient scripts to manage your entire monitoring stack:
 
    # Audit SwiftPay onboarding contract
    ./scripts/devops-monitor.sh swiftpay
+
+   # Run the live SwiftPay integration audit
+   ./scripts/devops-monitor.sh swiftpay-live
    ```
 
 5. **Access the services:**

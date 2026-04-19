@@ -22,6 +22,7 @@ This directory contains all the shell scripts for managing the Monitoring in a B
 ./scripts/devops-monitor.sh smoke     # Run the control-plane smoke check
 ./scripts/devops-monitor.sh inventory # Validate monitored app inventory
 ./scripts/devops-monitor.sh swiftpay  # Audit SwiftPay onboarding contract
+./scripts/devops-monitor.sh swiftpay-live # Run the live SwiftPay integration audit
 ```
 
 **Features:**
@@ -63,6 +64,24 @@ This directory contains all the shell scripts for managing the Monitoring in a B
 - Validates SwiftPay observability aliases against the real `SwiftPay/docker-compose.yml`
 - Checks control-plane inventory and Prometheus scrape targets for SwiftPay
 - Confirms business recording rules, dashboard API queries, and the SwiftPay observability runbook stay aligned
+
+### `swiftpay-live-audit.sh`
+**SwiftPay live integration validator** for end-to-end operator confidence.
+
+```bash
+# Usage
+./scripts/swiftpay-live-audit.sh
+
+# Or through the main wrapper
+./scripts/devops-monitor.sh swiftpay-live
+```
+
+**Features:**
+- Verifies the live SwiftPay gateway, frontend, Prometheus, and control-plane surfaces are reachable
+- Confirms the control plane sees SwiftPay as healthy through `/api/apps/health`
+- Creates synthetic users and a real transfer through the public gateway
+- Confirms the transfer completes, wallet balance changes, and Prometheus transfer counters react
+- Documents that the SwiftPay business endpoint can remain all-zero on a healthy successful path because it tracks pending, failure, queue, and circuit-breaker state
 
 ### `health-check.sh`
 **Control-plane smoke check script** for the monitoring stack.
@@ -238,6 +257,9 @@ This directory contains all the shell scripts for managing the Monitoring in a B
 
 # Audit SwiftPay onboarding contract
 ./scripts/devops-monitor.sh swiftpay
+
+# Run the live SwiftPay integration audit
+./scripts/devops-monitor.sh swiftpay-live
 
 # View logs
 ./scripts/devops-monitor.sh logs

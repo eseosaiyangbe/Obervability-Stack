@@ -135,6 +135,7 @@ The system supports multiple authentication methods:
 - ✅ **Service Health**: Automated control-plane smoke checks and status monitoring
 - ✅ **Inventory Validation**: Automated monitored-app metadata validation
 - ✅ **SwiftPay Audit**: Automated flagship workload onboarding validation
+- ✅ **SwiftPay Live Audit**: Automated end-to-end SwiftPay transaction validation against the live control plane
 
 ### User Interface
 - ✅ **Modern Web UI**: Next.js-based monitoring interface
