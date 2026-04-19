@@ -17,6 +17,7 @@ Welcome to the comprehensive documentation for the DevOps Monitoring in a Box pr
 - **[Incident Matrix](INCIDENT_MATRIX.md)** - First checks and ownership hints for common incident shapes
 - **[SwiftPay Operator Runbook](SWIFTPAY_OPERATOR_RUNBOOK.md)** - Platform-facing runbook for the flagship microservices workload
 - **[MemFlip Operator Runbook](MEMFLIP_OPERATOR_RUNBOOK.md)** - Platform-facing runbook for the reference onboarding workload
+- **[OpenSIS Operator Runbook](OPENSIS_OPERATOR_RUNBOOK.md)** - Platform-facing runbook for the legacy-platform workload
 - **[Main README](../README.md)** - Project overview and quick start guide
 
 ### 🔧 Core Components
