@@ -304,6 +304,14 @@ services:
     build:
       context: ./ui-next
       dockerfile: Dockerfile
+      args:
+        DATABASE_URL: ${DATABASE_URL:-file:./dev.db}
+        NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:4000}
+        NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-change-this-secret}
+        AUTH_MODE: ${AUTH_MODE:-database}
+        ENABLE_DEMO_LOGIN: ${ENABLE_DEMO_LOGIN:-true}
+        NEXT_PUBLIC_AUTH_MODE: ${NEXT_PUBLIC_AUTH_MODE:-database}
+        NEXT_PUBLIC_ENABLE_DEMO_LOGIN: ${NEXT_PUBLIC_ENABLE_DEMO_LOGIN:-true}
     container_name: devops-monitor-ui
     ports:
       - "4000:3000"
@@ -314,8 +322,13 @@ services:
       - SITE_URL=${SITE_URL:-http://localhost:4000}
       - SITE_DESCRIPTION=${SITE_DESCRIPTION:-Comprehensive DevOps monitoring solution}
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:4000/api}
+      - DATABASE_URL=${DATABASE_URL:-file:./dev.db}
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-change-this-secret}
       - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:4000}
+      - AUTH_MODE=${AUTH_MODE:-database}
+      - ENABLE_DEMO_LOGIN=${ENABLE_DEMO_LOGIN:-true}
+      - NEXT_PUBLIC_AUTH_MODE=${NEXT_PUBLIC_AUTH_MODE:-database}
+      - NEXT_PUBLIC_ENABLE_DEMO_LOGIN=${NEXT_PUBLIC_ENABLE_DEMO_LOGIN:-true}
       - PROMETHEUS_URL=${PROMETHEUS_URL:-http://prometheus:9090}
       - GRAFANA_URL=${GRAFANA_URL:-http://grafana:3000}
       - LOKI_URL=${LOKI_URL:-http://loki:3100}
