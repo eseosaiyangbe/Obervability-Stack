@@ -1,5 +1,7 @@
 # DevOps Monitoring in a Box - Documentation
 
+> Note: use the root `README.md` in this repo as the source of truth for current local startup commands and port mappings. This docs index is a navigation hub and may lag behind runtime changes if it is not refreshed alongside compose updates.
+
 Welcome to the comprehensive documentation for the DevOps Monitoring in a Box project. This documentation covers all aspects of the monitoring system, from setup and configuration to advanced features and integrations.
 
 ## 📚 Documentation Index
@@ -62,7 +64,7 @@ Welcome to the comprehensive documentation for the DevOps Monitoring in a Box pr
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Next.js UI    │    │   Prometheus    │    │     Grafana     │
-│   (Port 3000)   │◄──►│   (Port 9090)   │◄──►│   (Port 3001)   │
+│   (Port 4000)   │◄──►│   (Port 9090)   │◄──►│   (Port 3000)   │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                       │                       │
          │                       ▼                       │
@@ -88,12 +90,12 @@ Welcome to the comprehensive documentation for the DevOps Monitoring in a Box pr
 
 2. **Start the monitoring stack**
    ```bash
-   ./start.sh
+   ./devops-monitor.sh start
    ```
 
 3. **Access the applications**
-   - **Web UI**: http://localhost:3000
-   - **Grafana**: http://localhost:3001
+   - **Web UI**: http://localhost:4000
+   - **Grafana**: http://localhost:3000
    - **Prometheus**: http://localhost:9090
    - **Loki**: http://localhost:3100
 
@@ -181,4 +183,4 @@ This project is licensed under the MIT License - see the [LICENSE](../LICENSE) f
 
 **Built with ❤️ by Harshhaa**
 
-*Last updated: September 2025*
+*Last updated: April 2026*
