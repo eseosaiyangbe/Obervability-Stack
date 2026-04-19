@@ -60,6 +60,7 @@ If the baseline is already failing, stop and fix the existing problem first. A d
 | 2026-04-19 | SwiftPay transaction worker down | Passed | Stopping `transaction-service` made the gateway return HTTP 500 on transfer creation; after restart, direct service health recovered before control-plane and Prometheus state refreshed |
 | 2026-04-19 | OpenSIS Vault unavailable | Passed | OpenSIS UI stayed reachable while `opensis-live` caught Vault HTTP failures; recovery required starting Vault and rerunning `vault-bootstrap` because Vault restarted sealed |
 | 2026-04-19 | FoodPulse Redis failover | Passed | Sentinel promoted a replica after the Redis master stopped; a follow-up cluster check confirmed one master with the old master rejoined as a replica, and `foodpulse-live` returned to `16/16` |
+| 2026-04-19 | Control plane probe drift | Passed | Stopping `blackbox-exporter` made Prometheus blackbox targets report `0` while direct app probes stayed healthy; restarting blackbox restored all targets to `1` and operator checks to `26/26` |
 
 ## Standard Drill Format
 
