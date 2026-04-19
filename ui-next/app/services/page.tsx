@@ -241,6 +241,13 @@ function ManagedAppCard({ app, health }: { app: MonitoredApp; health?: AppHealth
     (endpoint) => endpoint.id === app.observability.primaryHealthEndpointId
   );
   const livePrimaryEndpoint = health?.primaryEndpoint;
+  const browserUrl = primaryEndpoint?.browserUrl;
+  const openLabel = browserUrl ? `Open ${app.name}` : undefined;
+
+  const openPrimaryTarget = () => {
+    if (!browserUrl) return;
+    window.open(browserUrl, "_blank", "noopener,noreferrer");
+  };
 
   const statusStyles = {
     healthy: 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400',
@@ -256,7 +263,21 @@ function ManagedAppCard({ app, health }: { app: MonitoredApp; health?: AppHealth
       whileHover={{ y: -2, scale: 1.01 }}
       transition={{ duration: 0.2 }}
     >
-      <Card className="h-full border border-gray-200 dark:border-gray-700 shadow-lg bg-white dark:bg-gray-900">
+      <Card
+        className={`h-full border border-gray-200 dark:border-gray-700 shadow-lg bg-white dark:bg-gray-900 ${
+          browserUrl ? 'cursor-pointer hover:border-green-300 hover:shadow-xl dark:hover:border-green-700' : ''
+        }`}
+        onClick={browserUrl ? openPrimaryTarget : undefined}
+        onKeyDown={browserUrl ? (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openPrimaryTarget();
+          }
+        } : undefined}
+        role={browserUrl ? 'link' : undefined}
+        tabIndex={browserUrl ? 0 : undefined}
+        aria-label={openLabel}
+      >
         <CardHeader className="p-4 sm:p-5 bg-gradient-to-r from-gray-50 to-emerald-50 dark:from-gray-800 dark:to-emerald-900/20">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
@@ -315,6 +336,22 @@ function ManagedAppCard({ app, health }: { app: MonitoredApp; health?: AppHealth
               </Badge>
             ))}
           </div>
+
+          {browserUrl && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 w-full h-9 hover:bg-green-50 hover:border-green-300 dark:hover:bg-green-900/20"
+              onClick={(event) => {
+                event.stopPropagation();
+                openPrimaryTarget();
+              }}
+              aria-label={openLabel}
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              {openLabel}
+            </Button>
+          )}
         </CardContent>
       </Card>
     </motion.div>
