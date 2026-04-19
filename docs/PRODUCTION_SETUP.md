@@ -4,8 +4,9 @@ This document explains how to configure the DevOps Monitoring UI for production 
 
 ## 🚀 Quick Demo vs Production
 
-- **Demo Mode**: Works out-of-the-box with default credentials (demo@example.com / demo123)
-- **Production Mode**: Requires proper environment configuration for security
+- **Demo Mode**: Explicitly set `AUTH_MODE=demo` if you want a preview-style control plane with demo users only
+- **Database Mode**: Use `AUTH_MODE=database` for the real control-plane path
+- **Production Mode**: Use database mode, set real secrets, and disable demo login unless you intentionally need it
 
 ## 🔧 Environment Variables
 
@@ -20,6 +21,10 @@ NEXTAUTH_SECRET=your-secure-random-secret-key-here
 
 # Database
 DATABASE_URL=postgresql://username:password@host:port/database
+AUTH_MODE=database
+ENABLE_DEMO_LOGIN=false
+NEXT_PUBLIC_AUTH_MODE=database
+NEXT_PUBLIC_ENABLE_DEMO_LOGIN=false
 ```
 
 ### Optional Variables
@@ -73,11 +78,11 @@ Set the environment variables according to your platform's documentation.
 
 ## 🎯 Demo Credentials (Preview Only)
 
-For testing the preview version:
+For testing a demo-enabled environment:
 - **Email**: demo@example.com
 - **Password**: demo123
 
-**⚠️ These credentials are for demo purposes only and should not be used in production.**
+**⚠️ These credentials are for demo purposes only and should not be enabled in production operator environments.**
 
 ## 📞 Support
 

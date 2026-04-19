@@ -35,6 +35,7 @@ Welcome to the comprehensive documentation for the DevOps Monitoring in a Box pr
 
 #### Next.js Web Application
 - **[UI Application Guide](UI_README.md)** - Frontend application setup and features
+- **[Auth Access Model](AUTH_ACCESS_MODEL.md)** - Active authentication mode, demo fallback behavior, and operator guidance
 - **[Authentication & Multi-Tenancy](AUTHENTICATION_MULTI_TENANCY_GUIDE.md)** - User management and role-based access control
 
 #### Configuration Management

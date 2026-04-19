@@ -14,6 +14,10 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Loader2, Github, Chrome, AlertCircle, Eye, EyeOff, Home, Copy, Check } from "lucide-react"
 import Link from "next/link"
 
+const demoLoginEnabled =
+  process.env.NEXT_PUBLIC_ENABLE_DEMO_LOGIN === "true" ||
+  (process.env.NEXT_PUBLIC_ENABLE_DEMO_LOGIN === undefined && process.env.NODE_ENV !== "production")
+
 function SignInForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -157,68 +161,69 @@ function SignInForm() {
                   Sign in to access your DevOps Monitoring Dashboard and manage your infrastructure.
                 </p>
                 
-                {/* Demo credentials preview */}
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <h3 className="font-semibold mb-3 text-white">Demo Credentials</h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-blue-100 text-sm">Email:</span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-sm text-blue-100">demo@example.com</span>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => copyToClipboard('demo@example.com', 'email')}
-                          className="h-8 w-8 p-0 hover:bg-white/20 text-white hover:text-white transition-colors"
-                          title="Copy email"
-                        >
-                          {copiedEmail ? (
-                            <Check className="h-4 w-4 text-green-300" />
-                          ) : (
-                            <Copy className="h-4 w-4" />
-                          )}
-                        </Button>
+                {demoLoginEnabled && (
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                    <h3 className="font-semibold mb-3 text-white">Demo Credentials</h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-blue-100 text-sm">Email:</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-sm text-blue-100">demo@example.com</span>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => copyToClipboard('demo@example.com', 'email')}
+                            className="h-8 w-8 p-0 hover:bg-white/20 text-white hover:text-white transition-colors"
+                            title="Copy email"
+                          >
+                            {copiedEmail ? (
+                              <Check className="h-4 w-4 text-green-300" />
+                            ) : (
+                              <Copy className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-blue-100 text-sm">Password:</span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-sm text-blue-100">demo123</span>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => copyToClipboard('demo123', 'password')}
-                          className="h-8 w-8 p-0 hover:bg-white/20 text-white hover:text-white transition-colors"
-                          title="Copy password"
-                        >
-                          {copiedPassword ? (
-                            <Check className="h-4 w-4 text-green-300" />
-                          ) : (
-                            <Copy className="h-4 w-4" />
-                          )}
-                        </Button>
+                      <div className="flex items-center justify-between">
+                        <span className="text-blue-100 text-sm">Password:</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-sm text-blue-100">demo123</span>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => copyToClipboard('demo123', 'password')}
+                            className="h-8 w-8 p-0 hover:bg-white/20 text-white hover:text-white transition-colors"
+                            title="Copy password"
+                          >
+                            {copiedPassword ? (
+                              <Check className="h-4 w-4 text-green-300" />
+                            ) : (
+                              <Copy className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
                       </div>
+                      {copiedEmail && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-green-300 text-xs text-center"
+                        >
+                          Email copied to clipboard!
+                        </motion.div>
+                      )}
+                      {copiedPassword && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-green-300 text-xs text-center"
+                        >
+                          Password copied to clipboard!
+                        </motion.div>
+                      )}
                     </div>
-                    {copiedEmail && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-green-300 text-xs text-center"
-                      >
-                        Email copied to clipboard!
-                      </motion.div>
-                    )}
-                    {copiedPassword && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-green-300 text-xs text-center"
-                      >
-                        Password copied to clipboard!
-                      </motion.div>
-                    )}
                   </div>
-                </div>
+                )}
               </motion.div>
             </div>
             

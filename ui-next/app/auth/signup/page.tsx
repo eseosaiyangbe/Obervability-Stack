@@ -14,6 +14,8 @@ import { Progress } from "@/components/ui/progress"
 import { Loader2, Github, Chrome, AlertCircle, Eye, EyeOff, CheckCircle, Home, Shield, Key } from "lucide-react"
 import Link from "next/link"
 
+const demoAuthMode = process.env.NEXT_PUBLIC_AUTH_MODE === "demo"
+
 export default function SignUpPage() {
   const [formData, setFormData] = useState({
     name: "",
@@ -289,6 +291,15 @@ export default function SignUpPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 sm:space-y-6 px-0">
+                {demoAuthMode && (
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      Registration is disabled when the control plane is running in demo auth mode.
+                    </AlertDescription>
+                  </Alert>
+                )}
+
                 {/* Back to Home Button */}
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }}

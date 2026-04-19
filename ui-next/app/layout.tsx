@@ -8,7 +8,7 @@ import { Sidebar } from "@/components/sidebar";
 import { Toaster } from "@/components/ui/toaster";
 import { DEFAULT_SITE_CONFIG } from "@/lib/config/site-config";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-simple";
+import { authOptions } from "@/lib/auth";
 
 const inter = Inter({ subsets: ["latin"] });
 
