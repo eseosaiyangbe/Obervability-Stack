@@ -380,7 +380,7 @@ We've created convenient scripts to manage your entire monitoring stack:
 # Check project status
 ./scripts/devops-monitor.sh status
 
-# Run comprehensive health check
+# Run comprehensive control-plane smoke check
 ./scripts/devops-monitor.sh health
 
 # View service logs
@@ -434,7 +434,7 @@ We've created convenient scripts to manage your entire monitoring stack:
    # Check status
    ./scripts/devops-monitor.sh status
    
-   # Run health check
+   # Run the control-plane smoke check
    ./scripts/devops-monitor.sh health
    ```
 

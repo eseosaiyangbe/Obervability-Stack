@@ -93,9 +93,9 @@ start_monitoring() {
         echo "   📈 Prometheus:        http://localhost:9090"
         echo "   📜 Loki:              http://localhost:3100"
         echo "   🚨 Alertmanager:      http://localhost:9093"
-        echo "   📊 cAdvisor:          http://localhost:8080"
         echo "   🔍 Node Exporter:     http://localhost:9100"
         echo ""
+        print_info "Run the smoke check: ./scripts/devops-monitor.sh health"
         print_info "Check service status: docker compose ps"
     else
         print_error "Failed to start monitoring stack"
@@ -236,7 +236,8 @@ show_help() {
     echo "  status    - Show current project and service status"
     echo "  logs      - Show logs from all services"
     echo "  clean     - Clean up Docker containers and volumes"
-    echo "  health    - Run health check on all services"
+    echo "  health    - Run control-plane smoke checks"
+    echo "  smoke     - Alias for the control-plane smoke checks"
     echo "  setup     - Setup environment and dependencies"
     echo "  help      - Show this help message"
     echo ""
@@ -336,8 +337,8 @@ main() {
         clean)
             clean_up
             ;;
-        health)
-            ./scripts/health-check.sh
+        health|smoke)
+            "$SCRIPT_DIR/health-check.sh"
             ;;
         setup)
             ./scripts/setup-env.sh

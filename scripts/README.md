@@ -19,6 +19,7 @@ This directory contains all the shell scripts for managing the Monitoring in a B
 ./scripts/devops-monitor.sh logs      # View service logs
 ./scripts/devops-monitor.sh ui        # Start UI development server
 ./scripts/devops-monitor.sh help      # Show help information
+./scripts/devops-monitor.sh smoke     # Run the control-plane smoke check
 ```
 
 **Features:**
@@ -27,6 +28,25 @@ This directory contains all the shell scripts for managing the Monitoring in a B
 - View logs from all services
 - Start UI development server
 - Comprehensive help system
+
+### `health-check.sh`
+**Control-plane smoke check script** for the monitoring stack.
+
+```bash
+# Usage
+./scripts/health-check.sh
+
+# Or through the main wrapper
+./scripts/devops-monitor.sh health
+./scripts/devops-monitor.sh smoke
+```
+
+**Features:**
+- Validates Docker and Compose access
+- Checks the default service set from the live Compose config
+- Verifies public endpoints like Prometheus, Grafana, Loki, Alertmanager, Node Exporter, and the UI
+- Verifies the control-plane API layer through `/api/services/health`, `/api/apps`, and `/api/apps/health`
+- Uses cross-platform resource checks that work on macOS and Linux
 
 ### `start.sh`
 **Quick start script** for the monitoring stack.
@@ -174,6 +194,9 @@ This directory contains all the shell scripts for managing the Monitoring in a B
 ```bash
 # Check all services
 ./scripts/devops-monitor.sh status
+
+# Run the smoke check
+./scripts/devops-monitor.sh health
 
 # View logs
 ./scripts/devops-monitor.sh logs

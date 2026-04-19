@@ -1,455 +1,373 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# DevOps Monitoring Health Check Script
-# This script checks the health of all monitoring services
+set -euo pipefail
 
-# Get the directory where this script is located
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]")" && pwd)"
-# Get the project root directory (parent of scripts directory)
+export PATH="${HOME}/.local/bin:${HOME}/.docker/cli-plugins:${PATH}"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
-# Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
-NC='\033[0m' # No Color
+NC='\033[0m'
+
+COMPOSE=(docker compose -f "$PROJECT_ROOT/docker-compose.yml")
+
+TOTAL_CHECKS=0
+PASSED_CHECKS=0
+FAILED_CHECKS=0
+WARNINGS=0
 
 print_header() {
-    echo -e "${PURPLE}🎯 $1${NC}"
+    echo -e "${PURPLE}$1${NC}"
 }
 
 print_section() {
-    echo -e "${CYAN}📋 $1${NC}"
+    echo -e "${CYAN}$1${NC}"
 }
 
-# Function to print colored output
 print_status() {
-    echo -e "${GREEN}✅ $1${NC}"
+    echo -e "${GREEN}OK${NC}  $1"
 }
 
 print_warning() {
-    echo -e "${YELLOW}⚠️  $1${NC}"
+    echo -e "${YELLOW}WARN${NC} $1"
 }
 
 print_error() {
-    echo -e "${RED}❌ $1${NC}"
+    echo -e "${RED}FAIL${NC} $1"
 }
 
 print_info() {
-    echo -e "${BLUE}ℹ️  $1${NC}"
+    echo -e "${BLUE}INFO${NC} $1"
 }
 
-# Function to check if a service is responding
-check_service() {
-    local service_name=$1
-    local url=$2
-    local expected_status=${3:-200}
-    local timeout=${4:-10}
-    
-    print_info "Checking $service_name at $url..."
-    
-    # Use curl with timeout and follow redirects
-    local response=$(curl -s --max-time "$timeout" -L -o /dev/null -w "%{http_code}" "$url" 2>/dev/null)
-    local curl_exit_code=$?
-    
-    if [ $curl_exit_code -eq 0 ] && echo "$response" | grep -q "$expected_status"; then
-        print_status "$service_name is healthy (HTTP $response)"
-        return 0
-    else
-        if [ $curl_exit_code -ne 0 ]; then
-            print_error "$service_name connection failed (curl error: $curl_exit_code)"
-        else
-            print_error "$service_name returned HTTP $response (expected $expected_status)"
-        fi
-        return 1
-    fi
+record_pass() {
+    TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
+    PASSED_CHECKS=$((PASSED_CHECKS + 1))
+    print_status "$1"
 }
 
-# Function to check Docker containers
-check_containers() {
-    print_section "Checking Docker Containers..."
-    
-    # Change to project root directory
-    cd "$PROJECT_ROOT"
-    
-    # Check if Docker is running
-    if ! docker info >/dev/null 2>&1; then
-        print_error "Docker is not running"
-        return 1
-    fi
-    
-    local containers=("prometheus" "grafana" "loki" "alertmanager" "node-exporter" "cadvisor" "promtail" "devops-monitor-ui")
-    local all_healthy=true
-    local running_count=0
-    
-    print_info "Checking container status..."
-    
-    for container in "${containers[@]}"; do
-        local container_info=$(docker ps --format "{{.Names}}\t{{.Status}}\t{{.Ports}}" | grep "$container" || true)
-        
-        if echo "$container_info" | grep -q "Up"; then
-            local status=$(echo "$container_info" | cut -f2)
-            local ports=$(echo "$container_info" | cut -f3)
-            print_status "$container is running ($status) - Ports: $ports"
-            ((running_count++))
-        else
-            print_error "$container is not running"
-            all_healthy=false
-            
-            # Check if container exists but is stopped
-            if docker ps -a --format "{{.Names}}" | grep -q "$container"; then
-                local stopped_info=$(docker ps -a --format "{{.Names}}\t{{.Status}}" | grep "$container")
-                print_warning "$container exists but stopped: $(echo "$stopped_info" | cut -f2)"
-            else
-                print_warning "$container container not found"
-            fi
-        fi
-    done
-    
-    echo ""
-    print_info "Container Summary: $running_count/${#containers[@]} containers running"
-    
-    if [ "$all_healthy" = true ]; then
-        print_status "All containers are running"
-        return 0
-    else
-        print_error "Some containers are not running"
-        return 1
-    fi
+record_fail() {
+    TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
+    FAILED_CHECKS=$((FAILED_CHECKS + 1))
+    print_error "$1"
 }
 
-# Function to check service endpoints
-check_endpoints() {
-    print_section "Checking Service Endpoints..."
-    
-    local all_healthy=true
-    local healthy_count=0
-    local total_checks=0
-    
-    # Service endpoints to check
-    declare -A services=(
-        ["Prometheus"]="http://localhost:9090/-/healthy"
-        ["Grafana"]="http://localhost:3000/api/health"
-        ["Loki"]="http://localhost:3100/ready"
-        ["Alertmanager"]="http://localhost:9093/-/healthy"
-        ["DevOps Monitor UI"]="http://localhost:4000"
-        ["cAdvisor"]="http://localhost:8080/healthz"
-        ["Node Exporter"]="http://localhost:9100/metrics"
-        ["Promtail"]="http://localhost:9080/metrics"
-    )
-    
-    for service in "${!services[@]}"; do
-        ((total_checks++))
-        if check_service "$service" "${services[$service]}" 200 10; then
-            ((healthy_count++))
-        else
-            all_healthy=false
-        fi
-    done
-    
-    echo ""
-    print_info "Endpoint Summary: $healthy_count/$total_checks endpoints healthy"
-    
-    if [ "$all_healthy" = true ]; then
-        print_status "All service endpoints are healthy"
-        return 0
-    else
-        print_error "Some service endpoints are not healthy"
-        return 1
-    fi
+record_warning() {
+    WARNINGS=$((WARNINGS + 1))
+    print_warning "$1"
 }
 
-# Function to check metrics collection
-check_metrics() {
-    print_section "Checking Metrics Collection..."
-    
-    # Check if Prometheus is collecting metrics
-    print_info "Checking Prometheus metrics collection..."
-    
-    local prometheus_response=$(curl -s --max-time 10 "http://localhost:9090/api/v1/query?query=up" 2>/dev/null)
-    local curl_exit_code=$?
-    
-    if [ $curl_exit_code -ne 0 ]; then
-        print_error "Failed to connect to Prometheus API"
+require_command() {
+    local command_name="$1"
+    if ! command -v "$command_name" >/dev/null 2>&1; then
+        record_fail "Required command not found: $command_name"
         return 1
     fi
-    
-    # Check if jq is available for JSON parsing
+
+    record_pass "Required command available: $command_name"
+}
+
+json_field() {
+    local payload="$1"
+    local jq_filter="$2"
+
     if command -v jq >/dev/null 2>&1; then
-        local metrics_count=$(echo "$prometheus_response" | jq -r '.data.result | length' 2>/dev/null || echo "0")
-        local status=$(echo "$prometheus_response" | jq -r '.status' 2>/dev/null || echo "error")
-        
-        if [ "$status" = "success" ] && [ "$metrics_count" -gt 0 ]; then
-            print_status "Prometheus API is healthy and collecting $metrics_count metrics"
-            
-            # Show some example metrics
-            print_info "Active targets:"
-            echo "$prometheus_response" | jq -r '.data.result[] | "  - \(.instance): \(.value[1])"' 2>/dev/null | head -5 || true
-            
-            return 0
-        else
-            print_error "Prometheus API returned status: $status, metrics: $metrics_count"
-            return 1
-        fi
+        jq -r "$jq_filter" <<<"$payload"
+        return
+    fi
+
+    JSON_PAYLOAD="$payload" python3 - "$jq_filter" <<'PY'
+import json
+import os
+import sys
+
+payload = json.loads(os.environ["JSON_PAYLOAD"])
+query = sys.argv[1]
+
+if query == ".overallStatus":
+    print(payload.get("overallStatus", ""))
+elif query == ".apps | length":
+    print(len(payload.get("apps", [])))
+elif query == ".summary.totalApps":
+    print(payload.get("summary", {}).get("totalApps", ""))
+elif query == ".status":
+    print(payload.get("status", ""))
+else:
+    raise SystemExit(1)
+PY
+}
+
+check_docker_access() {
+    print_section "Runtime Checks"
+
+    if docker info >/dev/null 2>&1; then
+        record_pass "Docker daemon is reachable"
     else
-        # Fallback if jq is not available
-        if echo "$prometheus_response" | grep -q '"status":"success"'; then
-            print_status "Prometheus API is healthy (jq not available for detailed analysis)"
-            return 0
-        else
-            print_error "Prometheus API response indicates issues"
-            return 1
-        fi
+        record_fail "Docker daemon is not reachable"
+        return 1
+    fi
+
+    if "${COMPOSE[@]}" config >/dev/null 2>&1; then
+        record_pass "Docker Compose configuration is valid"
+    else
+        record_fail "Docker Compose configuration is invalid"
+        return 1
+    fi
+
+    if docker network inspect observability-net >/dev/null 2>&1; then
+        record_pass "Shared network exists: observability-net"
+    else
+        record_fail "Shared network missing: observability-net"
     fi
 }
 
-# Function to check logs
-check_logs() {
-    print_section "Checking Service Logs..."
-    
-    local services=("prometheus" "grafana" "loki" "alertmanager" "devops-monitor-ui")
-    local has_errors=false
-    local total_errors=0
-    
+check_compose_services() {
+    print_section "Compose Services"
+
+    local services=()
+    local service
+    while IFS= read -r service; do
+        [ -n "$service" ] && services+=("$service")
+    done < <("${COMPOSE[@]}" config --services)
+
+    if [ "${#services[@]}" -eq 0 ]; then
+        record_fail "No services found in compose configuration"
+        return 1
+    fi
+
+    print_info "Default service set: ${services[*]}"
+
     for service in "${services[@]}"; do
-        print_info "Checking $service logs..."
-        
-        # Check if container exists
-        if docker ps --format "{{.Names}}" | grep -q "$service"; then
-            # Get recent log lines (last 50 lines)
-            local recent_logs=$(docker logs --tail 50 "$service" 2>&1)
-            local error_count=$(echo "$recent_logs" | grep -iE "error|fatal|panic|failed|exception" | wc -l)
-            local warning_count=$(echo "$recent_logs" | grep -iE "warning|warn" | wc -l)
-            
-            if [ "$error_count" -gt 0 ]; then
-                print_error "$service has $error_count error messages in recent logs"
-                # Show last few errors
-                echo "$recent_logs" | grep -iE "error|fatal|panic|failed|exception" | tail -3 | sed 's/^/    /'
-                has_errors=true
-                total_errors=$((total_errors + error_count))
-            elif [ "$warning_count" -gt 2 ]; then
-                print_warning "$service has $warning_count warning messages in recent logs"
+        local container_id
+        container_id="$("${COMPOSE[@]}" ps -q "$service")"
+
+        if [ -z "$container_id" ]; then
+            record_fail "Service not running: $service"
+            continue
+        fi
+
+        local inspect_output
+        inspect_output="$(docker inspect --format '{{.State.Status}}|{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$container_id")"
+        local state="${inspect_output%%|*}"
+        local health="${inspect_output##*|}"
+
+        if [ "$state" != "running" ]; then
+            record_fail "Service state is $state: $service"
+            continue
+        fi
+
+        case "$health" in
+            healthy|none)
+                record_pass "Service running: $service"
+                ;;
+            starting)
+                record_warning "Service still starting: $service"
+                ;;
+            *)
+                record_fail "Service health is $health: $service"
+                ;;
+        esac
+    done
+
+    if docker ps --format '{{.Names}}' | grep -qx 'cadvisor'; then
+        record_warning "Optional profile service running: cadvisor"
+    else
+        print_info "Optional profile service not enabled: cadvisor"
+    fi
+}
+
+check_http_endpoint() {
+    local name="$1"
+    local url="$2"
+    local expected_pattern="$3"
+    local body_check="${4:-}"
+
+    local response_file
+    response_file="$(mktemp)"
+    local status_code
+    status_code="$(curl -sS -L --max-time 10 -o "$response_file" -w '%{http_code}' "$url" || true)"
+
+    if [[ ! "$status_code" =~ $expected_pattern ]]; then
+        rm -f "$response_file"
+        record_fail "$name returned HTTP $status_code from $url"
+        return 1
+    fi
+
+    if [ -n "$body_check" ] && ! grep -Eq "$body_check" "$response_file"; then
+        rm -f "$response_file"
+        record_fail "$name responded but body check failed for pattern: $body_check"
+        return 1
+    fi
+
+    rm -f "$response_file"
+    record_pass "$name responded successfully"
+}
+
+check_public_endpoints() {
+    print_section "Public Endpoints"
+
+    check_http_endpoint "Prometheus health" "http://localhost:9090/-/healthy" '^200$'
+    check_http_endpoint "Grafana health" "http://localhost:3000/api/health" '^200$' '"database"[[:space:]]*:[[:space:]]*"ok"'
+    check_http_endpoint "Loki health" "http://localhost:3100/ready" '^200$'
+    check_http_endpoint "Alertmanager health" "http://localhost:9093/-/healthy" '^200$'
+    check_http_endpoint "Blackbox Exporter health" "http://localhost:9115/-/healthy" '^200$'
+    check_http_endpoint "Node Exporter metrics" "http://localhost:9100/metrics" '^200$' 'node_'
+    check_http_endpoint "DevOps Monitor UI" "http://localhost:4000/" '^(200|302)$'
+
+    if docker ps --format '{{.Names}}' | grep -qx 'cadvisor'; then
+        check_http_endpoint "cAdvisor health" "http://localhost:8080/healthz" '^200$'
+    else
+        print_info "Skipping cAdvisor endpoint because the optional profile is not running"
+    fi
+}
+
+check_control_plane_apis() {
+    print_section "Control Plane APIs"
+
+    local services_payload
+    services_payload="$(curl -fsS --max-time 15 http://localhost:4000/api/services/health)"
+    local overall_status
+    overall_status="$(json_field "$services_payload" ".overallStatus")"
+    if [[ "$overall_status" =~ ^(healthy|degraded|unhealthy)$ ]]; then
+        record_pass "UI service health API responded with overallStatus=$overall_status"
+    else
+        record_fail "UI service health API returned an unexpected overallStatus"
+    fi
+
+    local apps_payload
+    apps_payload="$(curl -fsS --max-time 20 http://localhost:4000/api/apps/health)"
+    local total_apps
+    total_apps="$(json_field "$apps_payload" ".summary.totalApps")"
+    if [[ "$total_apps" =~ ^[0-9]+$ ]] && [ "$total_apps" -gt 0 ]; then
+        record_pass "Workspace app health API returned $total_apps monitored apps"
+    else
+        record_fail "Workspace app health API did not return monitored apps"
+    fi
+
+    local inventory_payload
+    inventory_payload="$(curl -fsS --max-time 20 http://localhost:4000/api/apps)"
+    local inventory_count
+    inventory_count="$(json_field "$inventory_payload" ".apps | length")"
+    if [[ "$inventory_count" =~ ^[0-9]+$ ]] && [ "$inventory_count" -gt 0 ]; then
+        record_pass "Workspace app inventory API returned $inventory_count app definitions"
+    else
+        record_fail "Workspace app inventory API did not return app definitions"
+    fi
+}
+
+check_prometheus_query() {
+    print_section "Prometheus Query Path"
+
+    local payload
+    payload="$(curl -fsS --max-time 15 'http://localhost:9090/api/v1/query?query=up')"
+    local status
+    status="$(json_field "$payload" ".status")"
+
+    if [ "$status" = "success" ]; then
+        record_pass "Prometheus API query path is healthy"
+    else
+        record_fail "Prometheus API query path did not return success"
+    fi
+}
+
+check_system_resources() {
+    print_section "System Resources"
+
+    local disk_usage
+    disk_usage="$(df -P / | awk 'NR==2 {gsub("%", "", $5); print $5}')"
+    local disk_available
+    disk_available="$(df -Ph / | awk 'NR==2 {print $4}')"
+
+    if [ "$disk_usage" -lt 85 ]; then
+        record_pass "Disk usage healthy at ${disk_usage}% with ${disk_available} free"
+    else
+        record_warning "Disk usage elevated at ${disk_usage}% with ${disk_available} free"
+    fi
+
+    case "$(uname -s)" in
+        Darwin)
+            local page_size
+            local free_pages
+            local speculative_pages
+            local free_bytes
+            local free_gib
+
+            page_size="$(sysctl -n hw.pagesize)"
+            free_pages="$(vm_stat | awk '/Pages free/ {gsub("\\.", "", $3); print $3}')"
+            speculative_pages="$(vm_stat | awk '/Pages speculative/ {gsub("\\.", "", $3); print $3}')"
+            free_bytes=$(( (free_pages + speculative_pages) * page_size ))
+            free_gib="$(awk -v bytes="$free_bytes" 'BEGIN {printf "%.2f", bytes / 1024 / 1024 / 1024}')"
+            record_pass "Memory check completed on macOS with about ${free_gib} GiB readily reclaimable"
+            ;;
+        Linux)
+            if command -v free >/dev/null 2>&1; then
+                local available_mem
+                available_mem="$(free -h | awk 'NR==2 {print $7}')"
+                record_pass "Memory check completed on Linux with ${available_mem} available"
             else
-                print_status "$service logs look clean"
+                record_warning "Skipping memory check because 'free' is not available"
             fi
-        else
-            print_warning "$service container not found - cannot check logs"
-        fi
-    done
-    
-    echo ""
-    print_info "Log Summary: $total_errors total errors found"
-    
-    if [ "$has_errors" = false ]; then
-        print_status "All service logs are clean"
-        return 0
-    else
-        print_warning "Some services have errors in logs (check with: docker compose logs [service-name])"
-        return 1
-    fi
+            ;;
+        *)
+            record_warning "Skipping memory check on unsupported OS: $(uname -s)"
+            ;;
+    esac
 }
 
-# Function to check disk space
-check_disk_space() {
-    print_section "Checking System Resources..."
-    
-    print_info "Checking disk space..."
-    
-    local usage=$(df -h / | awk 'NR==2 {print $5}' | sed 's/%//')
-    local available=$(df -h / | awk 'NR==2 {print $4}')
-    
-    if [ "$usage" -lt 80 ]; then
-        print_status "Disk usage is at ${usage}% (${available} available) - Healthy"
-        return 0
-    elif [ "$usage" -lt 90 ]; then
-        print_warning "Disk usage is at ${usage}% (${available} available) - Warning"
-        return 1
-    else
-        print_error "Disk usage is at ${usage}% (${available} available) - Critical"
-        return 1
-    fi
-}
-
-# Function to check memory usage
-check_memory() {
-    print_info "Checking memory usage..."
-    
-    local memory_usage=$(free | awk 'NR==2{printf "%.0f", $3*100/$2}')
-    local available=$(free -h | awk 'NR==2 {print $7}')
-    
-    if [ "$memory_usage" -lt 80 ]; then
-        print_status "Memory usage is at ${memory_usage}% (${available} available) - Healthy"
-        return 0
-    elif [ "$memory_usage" -lt 90 ]; then
-        print_warning "Memory usage is at ${memory_usage}% (${available} available) - Warning"
-        return 1
-    else
-        print_error "Memory usage is at ${memory_usage}% (${available} available) - Critical"
-        return 1
-    fi
-}
-
-# Function to check Docker compose configuration
-check_compose_config() {
-    print_section "Checking Docker Compose Configuration..."
-    
-    # Change to project root directory
-    cd "$PROJECT_ROOT"
-    
-    if [ ! -f "docker-compose.yml" ]; then
-        print_error "docker-compose.yml not found"
-        return 1
-    fi
-    
-    # Validate compose file
-    if docker compose config >/dev/null 2>&1; then
-        print_status "Docker Compose configuration is valid"
-        return 0
-    else
-        print_error "Docker Compose configuration has errors"
-        docker compose config 2>&1 | head -10 | sed 's/^/    /'
-        return 1
-    fi
-}
-
-# Function to check port availability
-check_ports() {
-    print_section "Checking Port Availability..."
-    
-    declare -A ports=(
-        ["Prometheus"]="9090"
-        ["Grafana"]="3000"
-        ["Loki"]="3100"
-        ["Alertmanager"]="9093"
-        ["DevOps Monitor UI"]="4000"
-        ["cAdvisor"]="8080"
-        ["Node Exporter"]="9100"
-        ["Promtail"]="9080"
-    )
-    
-    local all_available=true
-    
-    for service in "${!ports[@]}"; do
-        local port=${ports[$service]}
-        if netstat -tulpn 2>/dev/null | grep -q ":$port " || ss -tulpn 2>/dev/null | grep -q ":$port "; then
-            print_status "Port $port ($service) is in use"
-        else
-            print_warning "Port $port ($service) is not in use"
-            # Check if this is expected (service might be down)
-        fi
-    done
-    
-    return 0
-}
-
-# Main health check function
 main() {
-    echo ""
-    print_header "🔍 DevOps Monitoring Health Check"
-    echo "=================================================="
-    echo ""
-    
-    local overall_status=0
-    local check_count=0
-    local passed_count=0
-    
-    # Check Docker compose configuration
-    ((check_count++))
-    if check_compose_config; then
-        ((passed_count++))
-    else
-        overall_status=1
+    echo
+    print_header "DevOps Monitor Control Plane Smoke Check"
+    echo "========================================="
+    echo
+
+    require_command docker || true
+    require_command curl || true
+
+    check_docker_access || true
+    echo
+    check_compose_services || true
+    echo
+    check_public_endpoints || true
+    echo
+    check_control_plane_apis || true
+    echo
+    check_prometheus_query || true
+    echo
+    check_system_resources || true
+    echo
+
+    print_header "Smoke Check Summary"
+    echo "==================="
+    print_info "Checks passed: $PASSED_CHECKS/$TOTAL_CHECKS"
+
+    if [ "$WARNINGS" -gt 0 ]; then
+        print_warning "Warnings: $WARNINGS"
     fi
-    echo ""
-    
-    # Check Docker containers
-    ((check_count++))
-    if check_containers; then
-        ((passed_count++))
-    else
-        overall_status=1
+
+    if [ "$FAILED_CHECKS" -gt 0 ]; then
+        print_error "Failures: $FAILED_CHECKS"
+        echo
+        print_info "Next steps:"
+        echo "  - Inspect service state: docker compose -f $PROJECT_ROOT/docker-compose.yml ps"
+        echo "  - Inspect logs: docker compose -f $PROJECT_ROOT/docker-compose.yml logs [service]"
+        echo "  - Re-run this smoke check after fixes"
+        exit 1
     fi
-    echo ""
-    
-    # Check service endpoints
-    ((check_count++))
-    if check_endpoints; then
-        ((passed_count++))
-    else
-        overall_status=1
-    fi
-    echo ""
-    
-    # Check metrics collection
-    ((check_count++))
-    if check_metrics; then
-        ((passed_count++))
-    else
-        overall_status=1
-    fi
-    echo ""
-    
-    # Check logs
-    ((check_count++))
-    if check_logs; then
-        ((passed_count++))
-    else
-        overall_status=1
-    fi
-    echo ""
-    
-    # Check system resources
-    ((check_count++))
-    if check_disk_space && check_memory; then
-        ((passed_count++))
-    else
-        overall_status=1
-    fi
-    echo ""
-    
-    # Check ports
-    ((check_count++))
-    check_ports
-    ((passed_count++))
-    echo ""
-    
-    # Summary
-    print_header "📊 Health Check Summary"
-    echo "========================"
-    print_info "Checks Passed: $passed_count/$check_count"
-    echo ""
-    
-    if [ $overall_status -eq 0 ]; then
-        print_status "🎉 All health checks passed! Your monitoring stack is healthy."
-        echo ""
-        print_info "🌐 Access your monitoring tools:"
-        echo "   🎨 DevOps Monitor UI: http://localhost:4000"
-        echo "   📊 Grafana:           http://localhost:3000 (admin/admin)"
-        echo "   📈 Prometheus:        http://localhost:9090"
-        echo "   📜 Loki:              http://localhost:3100"
-        echo "   🚨 Alertmanager:      http://localhost:9093"
-        echo "   📊 cAdvisor:          http://localhost:8080"
-        echo "   🔍 Node Exporter:     http://localhost:9100"
-        echo "   📝 Promtail:          http://localhost:9080/metrics"
-    else
-        print_error "❌ Some health checks failed. Please review the issues above."
-        echo ""
-        print_info "🔧 Troubleshooting tips:"
-        echo "   - Check service logs: docker compose logs [service-name]"
-        echo "   - Restart services: docker compose restart [service-name]"
-        echo "   - Check port conflicts: netstat -tulpn | grep :PORT"
-        echo "   - Verify Docker is running: docker info"
-        echo "   - Check compose file: docker compose config"
-        echo "   - Rebuild services: docker compose up -d --force-recreate"
-        echo "   - Clean and restart: docker compose down && docker compose up -d"
-    fi
-    echo ""
-    
-    exit $overall_status
+
+    print_status "Control plane smoke check passed"
+    echo
+    print_info "Primary URLs:"
+    echo "  - UI:            http://localhost:4000"
+    echo "  - Grafana:       http://localhost:3000"
+    echo "  - Prometheus:    http://localhost:9090"
+    echo "  - Loki:          http://localhost:3100"
+    echo "  - Alertmanager:  http://localhost:9093"
 }
 
-# Run main function
 main "$@"

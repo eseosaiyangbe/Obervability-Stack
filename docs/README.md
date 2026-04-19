@@ -132,7 +132,7 @@ The system supports multiple authentication methods:
 - ✅ **Custom Dashboards**: Configurable Grafana dashboards
 - ✅ **Alert Management**: Intelligent alerting with AlertManager
 - ✅ **Log Aggregation**: Centralized logging with Loki
-- ✅ **Service Health**: Automated health checks and status monitoring
+- ✅ **Service Health**: Automated control-plane smoke checks and status monitoring
 
 ### User Interface
 - ✅ **Modern Web UI**: Next.js-based monitoring interface
