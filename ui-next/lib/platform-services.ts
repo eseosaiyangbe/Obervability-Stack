@@ -126,7 +126,7 @@ export const platformServices: PlatformService[] = [
     healthPath: '/healthz',
     versionPath: '/metrics',
     versionKind: 'metrics',
-    currentVersionFallback: '0.49.1',
+    currentVersionFallback: '0.52.1',
     latestReleaseUrl: 'https://api.github.com/repos/google/cadvisor/releases/latest',
     dockerImage: 'gcr.io/cadvisor/cadvisor',
   },
