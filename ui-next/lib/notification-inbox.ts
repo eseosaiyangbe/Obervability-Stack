@@ -33,10 +33,19 @@ async function readEvents(): Promise<NotificationInboxEvent[]> {
 
   try {
     const content = await fs.readFile(storePath, 'utf8');
-    return JSON.parse(content);
+    if (!content.trim()) {
+      return [];
+    }
+
+    const parsed = JSON.parse(content);
+    return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
     const code = (error as NodeJS.ErrnoException).code;
     if (code === 'ENOENT') {
+      return [];
+    }
+
+    if (error instanceof SyntaxError) {
       return [];
     }
 

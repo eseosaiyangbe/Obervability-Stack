@@ -36,6 +36,7 @@ import {
   SelectValue
 } from "@/components/ui/select"
 import { useAlertmanagerAlerts } from "@/lib/hooks/use-alertmanager-alerts"
+import { useNotificationInbox } from "@/lib/hooks/use-notification-inbox"
 import { alertmanagerAPI } from "@/lib/alertmanager-api"
 
 // Alert component for expandable details
@@ -341,6 +342,7 @@ export default function AlertsPage() {
     filteredAlerts,
     stats,
   } = useAlertmanagerAlerts()
+  const { summary: notificationSummary } = useNotificationInbox(100)
 
   const [expandedAlerts, setExpandedAlerts] = React.useState<Set<string>>(new Set())
   const [actionAlert, setActionAlert] = React.useState<any | null>(null)
@@ -498,15 +500,24 @@ export default function AlertsPage() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3, delay: 0.2 }}
-                  className="text-center p-3 sm:p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl border border-green-200 dark:border-green-800"
+                  className="text-center"
                 >
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-2">
-                    <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                  </div>
-                  <div className="text-lg sm:text-xl font-bold text-green-600 dark:text-green-400">
-                    {stats.total - stats.firing - stats.suppressed}
-                  </div>
-                  <div className="text-xs sm:text-sm text-green-700 dark:text-green-300">Resolved</div>
+                  <a
+                    href="/notifications"
+                    className="block h-full p-3 sm:p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl border border-green-200 dark:border-green-800 hover:border-green-400 dark:hover:border-green-600 hover:shadow-md transition"
+                    title="Resolved alerts are stored in the notification inbox, not the active Alertmanager feed."
+                  >
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-2">
+                      <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                    </div>
+                    <div className="text-lg sm:text-xl font-bold text-green-600 dark:text-green-400">
+                      {notificationSummary.resolved}
+                    </div>
+                    <div className="text-xs sm:text-sm text-green-700 dark:text-green-300">Resolved History</div>
+                    <div className="mt-1 text-[11px] sm:text-xs text-green-700/80 dark:text-green-300/80">
+                      Open inbox
+                    </div>
+                  </a>
                 </motion.div>
 
                 <motion.div
@@ -664,6 +675,9 @@ export default function AlertsPage() {
                         <SelectItem value="unprocessed">Unprocessed</SelectItem>
                       </SelectContent>
                     </Select>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Alertmanager only returns current alerts here. Resolved events live in Notifications.
+                    </p>
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Service</label>
