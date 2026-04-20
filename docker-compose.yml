@@ -133,10 +133,12 @@ services:
 
   # Promtail - Log collection agent
   promtail:
-    image: grafana/promtail:2.8.0
+    image: grafana/promtail:3.5.8
     container_name: promtail
     ports:
       - "9080:9080"
+    environment:
+      - DOCKER_API_VERSION=1.44
     ulimits:
       nofile:
         soft: 65536
@@ -342,10 +344,10 @@ services:
       - CADVISOR_ENABLED=${CADVISOR_ENABLED:-false}
       - NEXT_PUBLIC_PROMETHEUS_BROWSER_URL=${NEXT_PUBLIC_PROMETHEUS_BROWSER_URL:-http://localhost:9090}
       - NEXT_PUBLIC_GRAFANA_BROWSER_URL=${NEXT_PUBLIC_GRAFANA_BROWSER_URL:-http://localhost:3000}
-      - NEXT_PUBLIC_LOKI_BROWSER_URL=${NEXT_PUBLIC_LOKI_BROWSER_URL:-http://localhost:3100}
+      - NEXT_PUBLIC_LOKI_BROWSER_URL=${NEXT_PUBLIC_LOKI_BROWSER_URL:-http://localhost:3100/ready}
       - NEXT_PUBLIC_ALERTMANAGER_BROWSER_URL=${NEXT_PUBLIC_ALERTMANAGER_BROWSER_URL:-http://localhost:9093}
       - NEXT_PUBLIC_NODE_EXPORTER_BROWSER_URL=${NEXT_PUBLIC_NODE_EXPORTER_BROWSER_URL:-http://localhost:9100}
-      - NEXT_PUBLIC_PROMTAIL_BROWSER_URL=${NEXT_PUBLIC_PROMTAIL_BROWSER_URL:-http://localhost:9080}
+      - NEXT_PUBLIC_PROMTAIL_BROWSER_URL=${NEXT_PUBLIC_PROMTAIL_BROWSER_URL:-http://localhost:9080/targets}
       - NEXT_PUBLIC_BLACKBOX_EXPORTER_BROWSER_URL=${NEXT_PUBLIC_BLACKBOX_EXPORTER_BROWSER_URL:-http://localhost:9115}
       - NEXT_PUBLIC_CADVISOR_BROWSER_URL=${NEXT_PUBLIC_CADVISOR_BROWSER_URL:-http://localhost:8082}
       - NOTIFICATION_STORE_PATH=${NOTIFICATION_STORE_PATH:-/app/data/notification-events.json}
