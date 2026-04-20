@@ -229,7 +229,7 @@ groups:
 
       # High container CPU usage
       - alert: HighContainerCPUUsage
-        expr: (rate(container_cpu_usage_seconds_total[5m]) * 100) > 80
+        expr: (rate(container_cpu_usage_seconds_total{id!="/"}[5m]) * 100) > 80
         for: 5m
         labels:
           severity: warning
