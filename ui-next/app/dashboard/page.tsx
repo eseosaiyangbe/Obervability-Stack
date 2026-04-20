@@ -9,6 +9,7 @@ import {
   CheckCircle,
   Clock,
   Cpu,
+  HardDrive,
   LayoutDashboard,
   Loader2,
   RefreshCw,
@@ -220,7 +221,7 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent className="p-4 sm:p-6">
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
                 <DashboardStat
                   title="Healthy Apps"
                   value={`${summary?.healthyApps ?? 0}/${summary?.totalApps ?? health.length}`}
@@ -243,6 +244,19 @@ export default function DashboardPage() {
                   icon={<Cpu className="h-5 w-5" />}
                 />
                 <DashboardStat
+                  title="Disk Usage"
+                  value={formatPercent(metrics.data?.disk)}
+                  detail="Root filesystem utilization"
+                  tone={
+                    metrics.data?.disk && metrics.data.disk >= 90
+                      ? "red"
+                      : metrics.data?.disk && metrics.data.disk >= 80
+                        ? "yellow"
+                        : "green"
+                  }
+                  icon={<HardDrive className="h-5 w-5" />}
+                />
+                <DashboardStat
                   title="Network"
                   value={formatNetwork(networkTotal)}
                   detail="Current traffic sample"
@@ -254,7 +268,7 @@ export default function DashboardPage() {
           </Card>
         </motion.div>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white/80 p-3 shadow-sm backdrop-blur dark:border-gray-800 dark:bg-gray-950/70 sm:flex-row sm:items-center sm:justify-between">
           <Button
             variant="outline"
             size="sm"
@@ -265,7 +279,8 @@ export default function DashboardPage() {
             {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
             Refresh
           </Button>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="flex items-center gap-2 rounded-xl bg-blue-50 px-3 py-2 text-sm font-medium leading-6 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 sm:justify-end sm:text-right">
+            <Shield className="h-4 w-4 shrink-0" />
             The dashboard stays light; the deep operator workflow lives inside each app page.
           </p>
         </div>
