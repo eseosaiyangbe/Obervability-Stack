@@ -55,7 +55,14 @@ groups:
 
       # High disk usage
       - alert: HighDiskUsage
-        expr: (node_filesystem_size_bytes - node_filesystem_avail_bytes) / node_filesystem_size_bytes * 100 > 85
+        expr: |
+          max by(instance, device, fstype) (
+            (
+              node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs|rpc_pipefs|nsfs|autofs|devtmpfs"}
+              - node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs|rpc_pipefs|nsfs|autofs|devtmpfs"}
+            )
+            / node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs|rpc_pipefs|nsfs|autofs|devtmpfs"} * 100
+          ) > 85
         for: 5m
         labels:
           severity: warning
@@ -68,7 +75,14 @@ groups:
 
       # Critical disk usage
       - alert: CriticalDiskUsage
-        expr: (node_filesystem_size_bytes - node_filesystem_avail_bytes) / node_filesystem_size_bytes * 100 > 95
+        expr: |
+          max by(instance, device, fstype) (
+            (
+              node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs|rpc_pipefs|nsfs|autofs|devtmpfs"}
+              - node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs|rpc_pipefs|nsfs|autofs|devtmpfs"}
+            )
+            / node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs|rpc_pipefs|nsfs|autofs|devtmpfs"} * 100
+          ) > 95
         for: 2m
         labels:
           severity: critical
