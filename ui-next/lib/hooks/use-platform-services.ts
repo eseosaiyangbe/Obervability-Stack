@@ -28,6 +28,9 @@ export function usePlatformServices() {
 
   useEffect(() => {
     refresh();
+    const interval = window.setInterval(refresh, 30000);
+
+    return () => window.clearInterval(interval);
   }, [refresh]);
 
   return {

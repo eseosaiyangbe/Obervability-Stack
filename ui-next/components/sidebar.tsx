@@ -22,13 +22,16 @@ import {
   Layout,
   Plug,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  type LucideIcon
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { UserMenu } from "@/components/user-menu"
 import { VersionBadge } from "@/components/version-badge"
+import { usePlatformServices } from "@/lib/hooks/use-platform-services"
+import type { PlatformServiceSnapshot } from "@/lib/platform-services"
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home, color: 'from-blue-500 to-indigo-600' },
@@ -42,21 +45,44 @@ const navigation = [
   { name: 'Settings', href: '/settings', icon: Settings, color: 'from-gray-500 to-slate-600' },
 ]
 
-const serviceStatus = [
-  { name: 'Prometheus', status: 'healthy', icon: Database, color: 'from-orange-500 to-red-600' },
-  { name: 'Grafana', status: 'healthy', icon: BarChart3, color: 'from-blue-500 to-indigo-600' },
-  { name: 'Loki', status: 'healthy', icon: FileText, color: 'from-indigo-500 to-blue-600' },
-  { name: 'Node Exporter', status: 'healthy', icon: Monitor, color: 'from-green-500 to-emerald-600' },
+const serviceIconMap: Record<string, { icon: LucideIcon; color: string }> = {
+  prometheus: { icon: Database, color: 'from-orange-500 to-red-600' },
+  grafana: { icon: BarChart3, color: 'from-blue-500 to-indigo-600' },
+  alertmanager: { icon: Bell, color: 'from-red-500 to-pink-600' },
+  loki: { icon: FileText, color: 'from-indigo-500 to-blue-600' },
+  promtail: { icon: FileText, color: 'from-cyan-500 to-blue-600' },
+  'node-exporter': { icon: Monitor, color: 'from-green-500 to-emerald-600' },
+  'blackbox-exporter': { icon: Activity, color: 'from-slate-500 to-gray-700' },
+  cadvisor: { icon: Server, color: 'from-emerald-500 to-teal-600' },
+}
+
+type SidebarServiceStatus = Omit<Pick<PlatformServiceSnapshot, 'id' | 'name' | 'status' | 'responseTimeMs' | 'error'>, 'status'> & {
+  status: PlatformServiceSnapshot['status'] | 'checking';
+}
+
+const importantServiceOrder = [
+  'prometheus',
+  'grafana',
+  'alertmanager',
+  'loki',
+  'promtail',
+  'node-exporter',
+  'blackbox-exporter',
+  'cadvisor',
 ]
 
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'healthy':
+    case 'up':
       return 'text-green-500 bg-green-100 dark:bg-green-900/20';
     case 'warning':
       return 'text-yellow-500 bg-yellow-100 dark:bg-yellow-900/20';
     case 'error':
+    case 'down':
       return 'text-red-500 bg-red-100 dark:bg-red-900/20';
+    case 'checking':
+      return 'text-blue-500 bg-blue-100 dark:bg-blue-900/20';
     default:
       return 'text-gray-500 bg-gray-100 dark:bg-gray-900/20';
   }
@@ -150,15 +176,20 @@ const NavigationItem = memo(({ item, isActive, isCollapsed }: {
 NavigationItem.displayName = "NavigationItem"
 
 // Modern service status item - optimized for performance
-const ServiceStatusItem = memo(({ service, isCollapsed }: { 
-  service: typeof serviceStatus[0], 
-  isCollapsed: boolean 
-}) => (
-  <div className={cn(
-    "relative overflow-hidden rounded-2xl transition-all duration-200",
-    isCollapsed ? "mx-2 mb-3" : "mb-3"
-  )}>
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 shadow-md hover:shadow-lg transition-all duration-200">
+const ServiceStatusItem = memo(({ service, isCollapsed }: {
+  service: SidebarServiceStatus,
+  isCollapsed: boolean
+}) => {
+  const iconConfig = serviceIconMap[service.id] || { icon: Server, color: 'from-gray-500 to-slate-600' }
+  const ServiceIcon = iconConfig.icon
+  const label = service.status === 'up' ? 'up' : service.status === 'down' ? 'down' : 'checking'
+
+  return (
+    <div className={cn(
+      "relative overflow-hidden rounded-2xl transition-all duration-200",
+      isCollapsed ? "mx-2 mb-3" : "mb-3"
+    )}>
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-3 shadow-md hover:shadow-lg transition-all duration-200">
       <div className={cn(
         "flex items-center",
         isCollapsed ? "justify-center" : "justify-between"
@@ -166,23 +197,28 @@ const ServiceStatusItem = memo(({ service, isCollapsed }: {
         <div className="flex items-center space-x-3">
           <div className={cn(
             "w-10 h-10 rounded-xl bg-gradient-to-br flex items-center justify-center text-white",
-            service.color
+            iconConfig.color
           )}>
-            <service.icon className="h-5 w-5" />
+            <ServiceIcon className="h-5 w-5" />
           </div>
           {!isCollapsed && (
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-semibold text-gray-900 dark:text-white">
                 {service.name}
               </p>
               <div className="flex items-center space-x-1 mt-1">
                 <div className={cn(
                   "w-2 h-2 rounded-full",
-                  getStatusColor(service.status).split(' ')[0]
+                  getStatusColor(label).split(' ')[0]
                 )} />
                 <span className="text-xs text-gray-500 dark:text-gray-400 capitalize">
-                  {service.status}
+                  {label}
                 </span>
+                {service.responseTimeMs !== null && (
+                  <span className="text-xs text-gray-400 dark:text-gray-500">
+                    {service.responseTimeMs}ms
+                  </span>
+                )}
               </div>
             </div>
           )}
@@ -191,9 +227,9 @@ const ServiceStatusItem = memo(({ service, isCollapsed }: {
         {!isCollapsed && (
           <div className={cn(
             "w-8 h-8 rounded-lg flex items-center justify-center",
-            getStatusColor(service.status)
+            getStatusColor(label)
           )}>
-            {service.status === 'healthy' ? (
+            {service.status === 'up' ? (
               <CheckCircle className="h-4 w-4" />
             ) : (
               <AlertCircle className="h-4 w-4" />
@@ -203,7 +239,8 @@ const ServiceStatusItem = memo(({ service, isCollapsed }: {
       </div>
     </div>
   </div>
-))
+  )
+})
 
 ServiceStatusItem.displayName = "ServiceStatusItem"
 
@@ -212,6 +249,12 @@ export const Sidebar = memo(() => {
   const [isDesktop, setIsDesktop] = React.useState(false)
   const [isCollapsed, setIsCollapsed] = React.useState(false)
   const pathname = usePathname()
+  const {
+    services: platformServices,
+    summary: platformSummary,
+    loading: platformLoading,
+    error: platformError,
+  } = usePlatformServices()
 
   // Check if we're on desktop
   React.useEffect(() => {
@@ -279,14 +322,22 @@ export const Sidebar = memo(() => {
   )
 
   // Memoized service status items
+  const liveServiceStatus = useMemo(() => {
+    const sortedServices = [...platformServices].sort((left, right) => (
+      importantServiceOrder.indexOf(left.id) - importantServiceOrder.indexOf(right.id)
+    ))
+
+    return sortedServices.filter((service) => importantServiceOrder.includes(service.id))
+  }, [platformServices])
+
   const serviceStatusItems = useMemo(() =>
-    serviceStatus.map((service) => (
+    liveServiceStatus.map((service) => (
       <ServiceStatusItem
-        key={service.name}
+        key={service.id}
         service={service}
         isCollapsed={isCollapsed}
       />
-    )), [isCollapsed]
+    )), [liveServiceStatus, isCollapsed]
   )
 
   return (
@@ -405,14 +456,52 @@ export const Sidebar = memo(() => {
           )}>
             {!isCollapsed && (
               <div className="mb-4">
-                <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center">
-                  <div className="w-2 h-2 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full mr-2 shadow-lg shadow-green-500/25"></div>
-                  Service Status
-                </h3>
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center">
+                    <div className={cn(
+                      "w-2 h-2 rounded-full mr-2 shadow-lg",
+                      platformError
+                        ? "bg-gradient-to-br from-red-400 to-rose-600 shadow-red-500/25"
+                        : "bg-gradient-to-br from-green-400 to-emerald-600 shadow-green-500/25"
+                    )}></div>
+                    Service Status
+                  </h3>
+                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                    {platformLoading && liveServiceStatus.length === 0
+                      ? "Checking"
+                      : `${platformSummary?.up ?? 0}/${platformSummary?.total ?? liveServiceStatus.length} up`}
+                  </span>
+                </div>
+                {platformError && (
+                  <p className="mt-2 text-xs text-red-500 dark:text-red-400">
+                    Live check unavailable
+                  </p>
+                )}
               </div>
             )}
-            <div className="space-y-2">
-              {serviceStatusItems}
+            <div className={cn(
+              "space-y-2",
+              !isCollapsed && "max-h-80 overflow-y-auto pr-1"
+            )}>
+              {platformLoading && liveServiceStatus.length === 0 ? (
+                importantServiceOrder.slice(0, 4).map((serviceId) => (
+                  <ServiceStatusItem
+                    key={serviceId}
+                    service={{
+                      id: serviceId,
+                      name: serviceId
+                        .split('-')
+                        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+                        .join(' '),
+                      status: 'checking',
+                      responseTimeMs: null,
+                    }}
+                    isCollapsed={isCollapsed}
+                  />
+                ))
+              ) : (
+                serviceStatusItems
+              )}
             </div>
           </div>
 

@@ -154,7 +154,7 @@ export const platformServices: PlatformService[] = [
     healthPath: '/ready',
     versionPath: '/metrics',
     versionKind: 'metrics',
-    currentVersionFallback: '2.8.0',
+    currentVersionFallback: '3.5.8',
     latestReleaseUrl: 'https://api.github.com/repos/grafana/loki/releases/latest',
     dockerImage: 'grafana/promtail',
   },
@@ -304,7 +304,7 @@ export async function getPlatformServices(): Promise<PlatformServicesResult> {
       latestVersion,
       updateAvailable,
       releaseUrl: latestVersion === 'Unknown'
-        ? service.latestReleaseUrl.replace('/api.github.com/repos/', 'github.com/').replace('/releases/latest', '/releases')
+        ? service.latestReleaseUrl.replace('https://api.github.com/repos/', 'https://github.com/').replace('/releases/latest', '/releases')
         : service.latestReleaseUrl.replace('https://api.github.com/repos/', 'https://github.com/').replace('/releases/latest', `/releases/tag/v${latestVersion}`),
       dockerImage: `${service.dockerImage}:${currentVersion}`,
       lastChecked: new Date().toISOString(),
