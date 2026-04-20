@@ -40,20 +40,18 @@ scrape_configs:
         regex: '([^:]+):.*'
         replacement: '${1}'
 
-  # cAdvisor - Container metrics.
-  # Enable later with: docker compose --profile container-metrics up -d cadvisor
-  # This host currently needs higher inotify limits before cAdvisor can run reliably.
-  # - job_name: 'cadvisor'
-  #   static_configs:
-  #     - targets: ['cadvisor:8080']
-  #   scrape_interval: 15s
-  #   metrics_path: /metrics
-  #   honor_labels: true
-  #   relabel_configs:
-  #     - source_labels: [__address__]
-  #       target_label: instance
-  #       regex: '([^:]+):.*'
-  #       replacement: '${1}'
+  # cAdvisor - Container metrics
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    scrape_interval: 15s
+    metrics_path: /metrics
+    honor_labels: true
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        regex: '([^:]+):.*'
+        replacement: '${1}'
 
   # Loki - Log aggregation metrics
   - job_name: 'loki'

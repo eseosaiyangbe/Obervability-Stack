@@ -135,6 +135,8 @@ services:
   promtail:
     image: grafana/promtail:2.8.0
     container_name: promtail
+    ports:
+      - "9080:9080"
     ulimits:
       nofile:
         soft: 65536
@@ -240,13 +242,12 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.49.1
     container_name: cadvisor
-    profiles: ["container-metrics"]
     ulimits:
       nofile:
         soft: 65536
         hard: 65536
     ports:
-      - "8080:8080"
+      - "8082:8080"
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
@@ -334,6 +335,9 @@ services:
       - LOKI_URL=${LOKI_URL:-http://loki:3100}
       - ALERTMANAGER_URL=${ALERTMANAGER_URL:-http://alertmanager:9093}
       - NODE_EXPORTER_URL=${NODE_EXPORTER_URL:-http://node-exporter:9100}
+      - PROMTAIL_URL=${PROMTAIL_URL:-http://promtail:9080}
+      - BLACKBOX_EXPORTER_URL=${BLACKBOX_EXPORTER_URL:-http://blackbox-exporter:9115}
+      - CADVISOR_URL=${CADVISOR_URL:-http://cadvisor:8080}
       - NODE_EXPORTER_ENABLED=${NODE_EXPORTER_ENABLED:-true}
       - CADVISOR_ENABLED=${CADVISOR_ENABLED:-false}
       - NEXT_PUBLIC_PROMETHEUS_BROWSER_URL=${NEXT_PUBLIC_PROMETHEUS_BROWSER_URL:-http://localhost:9090}
@@ -341,6 +345,9 @@ services:
       - NEXT_PUBLIC_LOKI_BROWSER_URL=${NEXT_PUBLIC_LOKI_BROWSER_URL:-http://localhost:3100}
       - NEXT_PUBLIC_ALERTMANAGER_BROWSER_URL=${NEXT_PUBLIC_ALERTMANAGER_BROWSER_URL:-http://localhost:9093}
       - NEXT_PUBLIC_NODE_EXPORTER_BROWSER_URL=${NEXT_PUBLIC_NODE_EXPORTER_BROWSER_URL:-http://localhost:9100}
+      - NEXT_PUBLIC_PROMTAIL_BROWSER_URL=${NEXT_PUBLIC_PROMTAIL_BROWSER_URL:-http://localhost:9080}
+      - NEXT_PUBLIC_BLACKBOX_EXPORTER_BROWSER_URL=${NEXT_PUBLIC_BLACKBOX_EXPORTER_BROWSER_URL:-http://localhost:9115}
+      - NEXT_PUBLIC_CADVISOR_BROWSER_URL=${NEXT_PUBLIC_CADVISOR_BROWSER_URL:-http://localhost:8082}
       - NOTIFICATION_STORE_PATH=${NOTIFICATION_STORE_PATH:-/app/data/notification-events.json}
       - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-}
       - SLACK_CHANNEL=${SLACK_CHANNEL:-#alerts}
