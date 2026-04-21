@@ -96,7 +96,7 @@ export function UserMenu() {
     {
       label: "User Management",
       icon: Users,
-      action: () => router.push("/admin"),
+      action: () => router.push("/admin/users"),
       color: "from-orange-500 to-red-600",
       description: "Manage users"
     }
