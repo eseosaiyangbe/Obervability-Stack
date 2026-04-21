@@ -87,18 +87,17 @@ storage_config:
 compactor:
   working_directory: /tmp/loki/boltdb-shipper-compactor
   shared_store: filesystem
+  retention_enabled: true
+  retention_delete_delay: 2h
 
 limits_config:
   enforce_metric_name: false
   reject_old_samples: true
   reject_old_samples_max_age: 168h
+  retention_period: 168h
 
 chunk_store_config:
   max_look_back_period: 0s
-
-table_manager:
-  retention_deletes_enabled: false
-  retention_period: 0s
 ```
 
 #### Configuration Options Explained
@@ -108,7 +107,9 @@ table_manager:
 - **`chunk_idle_period: 5m`**: How long to keep chunks in memory before flushing
 - **`chunk_retain_period: 30s`**: How long to keep chunks after flushing
 - **`reject_old_samples_max_age: 168h`**: Reject logs older than 7 days
-- **`retention_period: 0s`**: Log retention period (0 = infinite)
+- **`retention_enabled: true`**: Enables Loki compactor retention cleanup
+- **`retention_period: 168h`**: Automatically deletes local logs after 7 days
+- **`retention_delete_delay: 2h`**: Waits 2 hours before deleting marked chunks
 
 ### 2. Promtail Configuration (`loki/promtail-config.yml`)
 

@@ -112,7 +112,19 @@ export default function LogsPage() {
   }
 
   const formatTimestamp = (timestamp: string) => {
-    return new Date(timestamp).toLocaleString()
+    const numericTimestamp = Number(timestamp)
+
+    if (Number.isFinite(numericTimestamp)) {
+      const milliseconds = numericTimestamp > 1_000_000_000_000_000
+        ? numericTimestamp / 1_000_000
+        : numericTimestamp
+      const date = new Date(milliseconds)
+
+      return Number.isNaN(date.getTime()) ? "Unknown time" : date.toLocaleString()
+    }
+
+    const date = new Date(timestamp)
+    return Number.isNaN(date.getTime()) ? "Unknown time" : date.toLocaleString()
   }
 
   const getLogId = (log: any, index: number) => {

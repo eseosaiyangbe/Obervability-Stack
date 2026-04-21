@@ -235,6 +235,7 @@ export class LokiAPI {
         start = end - (6 * 60 * 60 * 1000 * 1000000);
         break;
       case '24h':
+      case '1d':
         start = end - (24 * 60 * 60 * 1000 * 1000000);
         break;
       case '7d':
