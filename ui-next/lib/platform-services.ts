@@ -44,6 +44,16 @@ export interface PlatformServicesResult {
 }
 
 const requestTimeoutMs = 7000;
+const latestVersionCacheTtlMs = 6 * 60 * 60 * 1000;
+const latestVersionFailureTtlMs = 15 * 60 * 1000;
+
+interface LatestVersionCacheEntry {
+  version: string;
+  expiresAt: number;
+}
+
+const latestVersionCache = new Map<string, LatestVersionCacheEntry>();
+const pendingLatestVersionChecks = new Map<string, Promise<string>>();
 
 export const platformServices: PlatformService[] = [
   {
@@ -236,11 +246,47 @@ async function getCurrentVersion(service: PlatformService) {
 }
 
 async function getLatestVersion(service: PlatformService) {
+  const cacheKey = service.latestReleaseUrl;
+  const cached = latestVersionCache.get(cacheKey);
+
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.version;
+  }
+
+  const pendingCheck = pendingLatestVersionChecks.get(cacheKey);
+
+  if (pendingCheck) {
+    return pendingCheck;
+  }
+
+  const check = fetchLatestVersion(service);
+  pendingLatestVersionChecks.set(cacheKey, check);
+
+  try {
+    return await check;
+  } finally {
+    pendingLatestVersionChecks.delete(cacheKey);
+  }
+}
+
+async function fetchLatestVersion(service: PlatformService) {
   try {
     const body = await fetchText(service.latestReleaseUrl);
     const payload = JSON.parse(body);
-    return normalizeVersion(payload.tag_name || service.currentVersionFallback);
+    const version = normalizeVersion(payload.tag_name || service.currentVersionFallback);
+
+    latestVersionCache.set(service.latestReleaseUrl, {
+      version,
+      expiresAt: Date.now() + latestVersionCacheTtlMs,
+    });
+
+    return version;
   } catch {
+    latestVersionCache.set(service.latestReleaseUrl, {
+      version: 'Unknown',
+      expiresAt: Date.now() + latestVersionFailureTtlMs,
+    });
+
     return 'Unknown';
   }
 }
