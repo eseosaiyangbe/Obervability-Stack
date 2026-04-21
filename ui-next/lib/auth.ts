@@ -4,7 +4,7 @@ import GoogleProvider from "next-auth/providers/google"
 import GitHubProvider from "next-auth/providers/github"
 import { prisma } from "./prisma-server"
 import bcrypt from "bcryptjs"
-import { UserRole } from "@prisma/client"
+import { UserRole, UserStatus } from "@prisma/client"
 import { checkAuthConfig } from "./auth-config-check"
 import { getAuthMode, isDemoLoginEnabled, isOAuthProviderEnabled } from "./auth-runtime"
 
@@ -109,7 +109,7 @@ const providers: NextAuthOptions["providers"] = [
           }
         })
 
-        if (!user || !user.password) {
+        if (!user || !user.password || user.status === UserStatus.DISABLED) {
           return null
         }
 
@@ -118,6 +118,11 @@ const providers: NextAuthOptions["providers"] = [
         if (!isPasswordValid) {
           return null
         }
+
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { lastLoginAt: new Date() },
+        })
 
         return {
           id: user.id,
@@ -196,6 +201,10 @@ export const authOptions: NextAuthOptions = {
             where: { email: user.email! }
           })
 
+          if (existingUser?.status === UserStatus.DISABLED) {
+            return false
+          }
+
           if (!existingUser) {
             await prisma.user.create({
               data: {
@@ -203,7 +212,13 @@ export const authOptions: NextAuthOptions = {
                 name: user.name,
                 image: user.image,
                 role: UserRole.VIEWER, // Default role for OAuth users
+                lastLoginAt: new Date(),
               }
+            })
+          } else {
+            await prisma.user.update({
+              where: { id: existingUser.id },
+              data: { lastLoginAt: new Date() },
             })
           }
         } catch (error) {

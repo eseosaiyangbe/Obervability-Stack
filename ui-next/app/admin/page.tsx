@@ -1,122 +1,343 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
-import { motion } from "framer-motion"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { 
-  Users, 
-  Settings, 
-  Shield, 
-  Activity, 
-  Database, 
-  Crown,
-  Eye,
-  Edit,
-  Trash2,
-  Plus,
-  RefreshCw
-} from "lucide-react"
 import { useRouter } from "next/navigation"
+import { motion } from "framer-motion"
+import {
+  Activity,
+  AlertTriangle,
+  CheckCircle,
+  Crown,
+  Edit,
+  Eye,
+  Loader2,
+  Plus,
+  RefreshCw,
+  Save,
+  Shield,
+  UserCog,
+  Users,
+} from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-// Mock data for demonstration
-const mockUsers = [
-  {
-    id: "1",
-    name: "Admin User",
-    email: "admin@example.com",
-    role: "ADMIN",
-    createdAt: "2023-10-01T10:00:00Z",
-    lastLogin: "2023-10-27T15:30:00Z",
-    status: "active"
-  },
-  {
-    id: "2",
-    name: "Demo User",
-    email: "demo@example.com",
-    role: "VIEWER",
-    createdAt: "2023-10-15T14:20:00Z",
-    lastLogin: "2023-10-27T12:15:00Z",
-    status: "active"
-  },
-  {
-    id: "3",
-    name: "Editor User",
-    email: "editor@example.com",
-    role: "EDITOR",
-    createdAt: "2023-10-20T09:45:00Z",
-    lastLogin: "2023-10-26T18:20:00Z",
-    status: "inactive"
+type UserRole = "ADMIN" | "EDITOR" | "VIEWER"
+type UserStatus = "ACTIVE" | "DISABLED"
+
+interface AdminUser {
+  id: string
+  email: string
+  name: string | null
+  image: string | null
+  role: UserRole
+  status: UserStatus
+  lastLoginAt: string | null
+  disabledAt: string | null
+  createdAt: string
+  updatedAt: string
+  _count?: {
+    dashboards: number
+    configurations: number
+    teams: number
   }
-]
+}
 
-const mockSystemStats = {
-  totalUsers: 3,
-  activeUsers: 2,
-  totalConfigs: 15,
-  totalDashboards: 8,
-  systemHealth: "healthy",
-  uptime: "99.9%"
+interface AdminUsersSummary {
+  totalUsers: number
+  activeUsers: number
+  disabledUsers: number
+  admins: number
+  editors: number
+  viewers: number
+  totalDashboards: number
+  totalConfigs: number
+}
+
+interface UserFormState {
+  name: string
+  email: string
+  password: string
+  role: UserRole
+  status: UserStatus
+}
+
+const emptyForm: UserFormState = {
+  name: "",
+  email: "",
+  password: "",
+  role: "VIEWER",
+  status: "ACTIVE",
+}
+
+function roleIcon(role: UserRole) {
+  if (role === "ADMIN") return <Crown className="h-4 w-4" />
+  if (role === "EDITOR") return <Edit className="h-4 w-4" />
+  return <Eye className="h-4 w-4" />
+}
+
+function roleClass(role: UserRole) {
+  if (role === "ADMIN") return "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300"
+  if (role === "EDITOR") return "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-300"
+  return "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-300"
+}
+
+function statusClass(status: UserStatus) {
+  return status === "ACTIVE"
+    ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-300"
+    : "border-slate-200 bg-slate-100 text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+}
+
+function formatDate(value: string | null) {
+  if (!value) return "Never"
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? "Unknown" : date.toLocaleString()
+}
+
+function initials(user: AdminUser) {
+  return (user.name || user.email || "U").charAt(0).toUpperCase()
+}
+
+function UserFields({
+  form,
+  setForm,
+  includeStatus,
+}: {
+  form: UserFormState
+  setForm: (next: UserFormState) => void
+  includeStatus: boolean
+}) {
+  return (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="space-y-2">
+        <Label htmlFor="admin-user-name">Name</Label>
+        <Input
+          id="admin-user-name"
+          value={form.name}
+          onChange={(event) => setForm({ ...form, name: event.target.value })}
+          placeholder="Operator name"
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="admin-user-email">Email</Label>
+        <Input
+          id="admin-user-email"
+          value={form.email}
+          onChange={(event) => setForm({ ...form, email: event.target.value })}
+          placeholder="operator@example.com"
+          type="email"
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="admin-user-role">Role</Label>
+        <Select value={form.role} onValueChange={(role: UserRole) => setForm({ ...form, role })}>
+          <SelectTrigger id="admin-user-role">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ADMIN">Admin</SelectItem>
+            <SelectItem value="EDITOR">Editor</SelectItem>
+            <SelectItem value="VIEWER">Viewer</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      {includeStatus && (
+        <div className="space-y-2">
+          <Label htmlFor="admin-user-status">Status</Label>
+          <Select value={form.status} onValueChange={(status: UserStatus) => setForm({ ...form, status })}>
+            <SelectTrigger id="admin-user-status">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ACTIVE">Active</SelectItem>
+              <SelectItem value="DISABLED">Disabled</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+      <div className="space-y-2 md:col-span-2">
+        <Label htmlFor="admin-user-password">
+          Password {includeStatus ? <span className="text-gray-500">(leave blank to keep current)</span> : null}
+        </Label>
+        <Input
+          id="admin-user-password"
+          value={form.password}
+          onChange={(event) => setForm({ ...form, password: event.target.value })}
+          placeholder="Minimum 8 characters"
+          type="password"
+        />
+      </div>
+    </div>
+  )
 }
 
 export default function AdminPage() {
-  const { data: session } = useSession()
+  const { data: session, status: sessionStatus } = useSession()
   const router = useRouter()
-  const [users, setUsers] = useState(mockUsers)
-  const [systemStats, setSystemStats] = useState(mockSystemStats)
+  const [users, setUsers] = useState<AdminUser[]>([])
+  const [summary, setSummary] = useState<AdminUsersSummary | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [showCreateForm, setShowCreateForm] = useState(false)
+  const [createForm, setCreateForm] = useState<UserFormState>(emptyForm)
+  const [editingUserId, setEditingUserId] = useState<string | null>(null)
+  const [editForm, setEditForm] = useState<UserFormState>(emptyForm)
 
-  // Redirect if not admin
+  const isAdmin = (session?.user as any)?.role === "ADMIN"
+
   useEffect(() => {
-    if (session?.user && (session.user as any).role !== "ADMIN") {
+    if (sessionStatus === "authenticated" && !isAdmin) {
       router.push("/dashboard")
     }
-  }, [session, router])
+  }, [isAdmin, router, sessionStatus])
 
-  const getRoleIcon = (role: string) => {
-    switch (role) {
-      case "ADMIN":
-        return <Crown className="h-4 w-4" />
-      case "EDITOR":
-        return <Edit className="h-4 w-4" />
-      case "VIEWER":
-        return <Eye className="h-4 w-4" />
-      default:
-        return <Users className="h-4 w-4" />
+  async function loadUsers() {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const response = await fetch("/api/admin/users", { cache: "no-store" })
+      const body = await response.json()
+
+      if (!response.ok) {
+        throw new Error(body.message || "Failed to load users")
+      }
+
+      setUsers(body.users || [])
+      setSummary(body.summary || null)
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : "Failed to load users")
+    } finally {
+      setLoading(false)
     }
   }
 
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case "ADMIN":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-      case "EDITOR":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-      case "VIEWER":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+  useEffect(() => {
+    if (sessionStatus === "authenticated" && isAdmin) {
+      loadUsers()
+    }
+  }, [isAdmin, sessionStatus])
+
+  function beginEdit(user: AdminUser) {
+    setEditingUserId(user.id)
+    setEditForm({
+      name: user.name || "",
+      email: user.email,
+      password: "",
+      role: user.role,
+      status: user.status,
+    })
+    setMessage(null)
+    setError(null)
+  }
+
+  async function createUser() {
+    setSaving(true)
+    setError(null)
+    setMessage(null)
+
+    try {
+      const response = await fetch("/api/admin/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(createForm),
+      })
+      const body = await response.json()
+
+      if (!response.ok) {
+        throw new Error(body.message || "Failed to create user")
+      }
+
+      setCreateForm(emptyForm)
+      setShowCreateForm(false)
+      setMessage("User created successfully")
+      await loadUsers()
+    } catch (createError) {
+      setError(createError instanceof Error ? createError.message : "Failed to create user")
+    } finally {
+      setSaving(false)
     }
   }
 
-  const getStatusColor = (status: string) => {
-    return status === "active" 
-      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-      : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+  async function updateUser(userId: string) {
+    setSaving(true)
+    setError(null)
+    setMessage(null)
+
+    try {
+      const payload = {
+        ...editForm,
+        password: editForm.password || undefined,
+      }
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+      const body = await response.json()
+
+      if (!response.ok) {
+        throw new Error(body.message || "Failed to update user")
+      }
+
+      setEditingUserId(null)
+      setMessage("User updated successfully")
+      await loadUsers()
+    } catch (updateError) {
+      setError(updateError instanceof Error ? updateError.message : "Failed to update user")
+    } finally {
+      setSaving(false)
+    }
   }
 
-  if (session?.user && (session.user as any).role !== "ADMIN") {
+  async function disableUser(user: AdminUser) {
+    if (!window.confirm(`Disable ${user.name || user.email}? They will no longer be able to sign in.`)) {
+      return
+    }
+
+    setSaving(true)
+    setError(null)
+    setMessage(null)
+
+    try {
+      const response = await fetch(`/api/admin/users/${user.id}`, { method: "DELETE" })
+      const body = await response.json()
+
+      if (!response.ok) {
+        throw new Error(body.message || "Failed to disable user")
+      }
+
+      setMessage("User disabled successfully")
+      await loadUsers()
+    } catch (disableError) {
+      setError(disableError instanceof Error ? disableError.message : "Failed to disable user")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (sessionStatus === "loading") {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Card className="w-96">
-          <CardContent className="pt-6 text-center">
-            <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
-            <p className="text-muted-foreground">
-              You need admin privileges to access this page.
-            </p>
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-red-600" />
+      </div>
+    )
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Card className="w-full max-w-md border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/30">
+          <CardContent className="p-8 text-center text-red-700 dark:text-red-300">
+            <Shield className="mx-auto mb-4 h-12 w-12" />
+            <h2 className="text-xl font-bold">Access denied</h2>
+            <p className="mt-2 text-sm">You need admin privileges to access this page.</p>
           </CardContent>
         </Card>
       </div>
@@ -124,285 +345,198 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-red-50 dark:from-gray-900 dark:via-gray-900 dark:to-red-900/20">
-      <div className="px-2 sm:px-4 py-3 sm:py-6 max-w-7xl mx-auto space-y-3 sm:space-y-6">
-        {/* Enhanced Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Card className="border border-gray-200 dark:border-gray-700 shadow-xl bg-white dark:bg-gray-900 overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-red-600 via-orange-600 to-yellow-600 dark:from-red-700 dark:via-orange-700 dark:to-yellow-700 text-white p-4 sm:p-8">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2 sm:space-y-4">
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="p-2 sm:p-3 bg-white/20 backdrop-blur-sm rounded-xl">
-                      <Crown className="h-5 w-5 sm:h-7 sm:w-7 text-white" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-xl sm:text-3xl lg:text-4xl font-bold">
-                        Admin Panel
-                      </CardTitle>
-                      <CardDescription className="mt-1 sm:mt-2 text-red-100 text-sm sm:text-base">
-                        Manage users, configurations, and system settings
-                      </CardDescription>
-                    </div>
-                  </div>
-                </div>
-                <div className="hidden sm:block">
-                  <Badge className="bg-white/20 text-white border-white/30 px-3 py-1.5 font-semibold text-sm">
-                    <Shield className="h-3 w-3 mr-1" />
-                    Administration
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-red-50 dark:from-gray-950 dark:via-gray-950 dark:to-red-950/20">
+      <div className="mx-auto max-w-7xl space-y-6 px-3 py-5 sm:px-6">
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
+          <Card className="overflow-hidden border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
+            <CardHeader className="border-b border-red-100 bg-gradient-to-r from-red-700 via-orange-600 to-amber-500 p-6 text-white dark:border-gray-800 sm:p-8">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                  <Badge className="mb-4 border-white/30 bg-white/15 text-white">
+                    <Shield className="mr-1 h-3 w-3" />
+                    Admin control
                   </Badge>
+                  <CardTitle className="text-3xl font-bold tracking-tight sm:text-5xl">User Management</CardTitle>
+                  <CardDescription className="mt-4 max-w-2xl text-base leading-7 text-red-50">
+                    Manage operator access, roles, account state, and the identities that can run the control plane.
+                  </CardDescription>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" onClick={loadUsers} disabled={loading || saving} className="gap-2 rounded-xl bg-white/95 text-gray-950">
+                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                    Refresh
+                  </Button>
+                  <Button onClick={() => setShowCreateForm((value) => !value)} className="gap-2 rounded-xl bg-gray-950 text-white hover:bg-gray-800">
+                    <Plus className="h-4 w-4" />
+                    Add user
+                  </Button>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex flex-wrap items-center gap-2">
-                <Button variant="outline" size="sm" className="gap-2 h-9 sm:h-10 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800">
-                  <RefreshCw className="h-4 w-4" />
-                  <span className="hidden sm:inline">Refresh</span>
-                  <span className="sm:hidden">Sync</span>
+          </Card>
+        </motion.div>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+          <Card className="border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+            <CardContent className="p-5">
+              <Users className="mb-3 h-5 w-5 text-red-600" />
+              <p className="text-sm text-gray-500">Total users</p>
+              <p className="mt-1 text-3xl font-black text-gray-950 dark:text-white">{summary?.totalUsers ?? users.length}</p>
+            </CardContent>
+          </Card>
+          <Card className="border-emerald-100 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/20">
+            <CardContent className="p-5">
+              <CheckCircle className="mb-3 h-5 w-5 text-emerald-700 dark:text-emerald-300" />
+              <p className="text-sm text-emerald-700 dark:text-emerald-300">Active</p>
+              <p className="mt-1 text-3xl font-black text-emerald-700 dark:text-emerald-300">{summary?.activeUsers ?? 0}</p>
+            </CardContent>
+          </Card>
+          <Card className="border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
+            <CardContent className="p-5">
+              <AlertTriangle className="mb-3 h-5 w-5 text-slate-700 dark:text-slate-300" />
+              <p className="text-sm text-slate-600 dark:text-slate-300">Disabled</p>
+              <p className="mt-1 text-3xl font-black text-slate-800 dark:text-slate-200">{summary?.disabledUsers ?? 0}</p>
+            </CardContent>
+          </Card>
+          <Card className="border-blue-100 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/20">
+            <CardContent className="p-5">
+              <Activity className="mb-3 h-5 w-5 text-blue-700 dark:text-blue-300" />
+              <p className="text-sm text-blue-700 dark:text-blue-300">Configs / dashboards</p>
+              <p className="mt-1 text-3xl font-black text-blue-700 dark:text-blue-300">
+                {summary?.totalConfigs ?? 0}/{summary?.totalDashboards ?? 0}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {(message || error) && (
+          <Card className={error ? "border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/30" : "border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/30"}>
+            <CardContent className={error ? "p-4 text-red-700 dark:text-red-300" : "p-4 text-emerald-700 dark:text-emerald-300"}>
+              {error || message}
+            </CardContent>
+          </Card>
+        )}
+
+        {showCreateForm && (
+          <Card className="border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <UserCog className="h-5 w-5 text-red-600" />
+                Create operator
+              </CardTitle>
+              <CardDescription>Add a database-backed user with the minimum role they need.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <UserFields form={createForm} setForm={setCreateForm} includeStatus={false} />
+              <div className="flex flex-wrap gap-2">
+                <Button onClick={createUser} disabled={saving} className="gap-2">
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                  Create user
                 </Button>
-                <Button size="sm" className="gap-2 h-9 sm:h-10 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white">
-                  <Plus className="h-4 w-4" />
-                  Add User
+                <Button variant="outline" onClick={() => setShowCreateForm(false)} disabled={saving}>
+                  Cancel
                 </Button>
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        )}
 
-        {/* Enhanced System Overview */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
-            className="text-center p-3 sm:p-4 bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-xl border border-red-200 dark:border-red-800"
-          >
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-red-500 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <Users className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-            </div>
-            <div className="text-lg sm:text-xl font-bold text-red-600 dark:text-red-400">
-              {systemStats.totalUsers}
-            </div>
-            <div className="text-xs sm:text-sm text-red-700 dark:text-red-300">Total Users</div>
-            <div className="text-xs text-red-600 dark:text-red-400 mt-1">
-              {systemStats.activeUsers} active
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3, delay: 0.2 }}
-            className="text-center p-3 sm:p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800"
-          >
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-            </div>
-            <div className="text-lg sm:text-xl font-bold text-blue-600 dark:text-blue-400">
-              {systemStats.totalConfigs}
-            </div>
-            <div className="text-xs sm:text-sm text-blue-700 dark:text-blue-300">Configurations</div>
-            <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-              User-specific configs
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3, delay: 0.3 }}
-            className="text-center p-3 sm:p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl border border-green-200 dark:border-green-800"
-          >
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-            </div>
-            <div className="text-lg sm:text-xl font-bold text-green-600 dark:text-green-400">
-              {systemStats.totalDashboards}
-            </div>
-            <div className="text-xs sm:text-sm text-green-700 dark:text-green-300">Dashboards</div>
-            <div className="text-xs text-green-600 dark:text-green-400 mt-1">
-              Custom dashboards
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3, delay: 0.4 }}
-            className="text-center p-3 sm:p-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border border-purple-200 dark:border-purple-800"
-          >
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-500 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <Database className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-            </div>
-            <div className="text-lg sm:text-xl font-bold text-green-600 dark:text-green-400">
-              {systemStats.uptime}
-            </div>
-            <div className="text-xs sm:text-sm text-purple-700 dark:text-purple-300">System Health</div>
-            <div className="text-xs text-green-600 dark:text-green-400 mt-1">
-              System uptime
-            </div>
-          </motion.div>
-        </motion.div>
-
-        {/* Enhanced Admin Tabs */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <Card className="border border-gray-200 dark:border-gray-700 shadow-lg bg-white dark:bg-gray-900">
-            <CardContent className="p-4 sm:p-6">
-              <Tabs defaultValue="users" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 h-10 sm:h-11 bg-gradient-to-r from-gray-50 to-red-50 dark:from-gray-800 dark:to-red-900/20 border border-gray-200 dark:border-gray-700">
-                  <TabsTrigger value="users" className="text-xs sm:text-sm data-[state=active]:bg-red-600 data-[state=active]:text-white">User Management</TabsTrigger>
-                  <TabsTrigger value="configs" className="text-xs sm:text-sm data-[state=active]:bg-red-600 data-[state=active]:text-white">Configurations</TabsTrigger>
-                  <TabsTrigger value="system" className="text-xs sm:text-sm data-[state=active]:bg-red-600 data-[state=active]:text-white">System Settings</TabsTrigger>
-                </TabsList>
-
-          <TabsContent value="users" className="mt-6">
+        <Card className="border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <CardHeader>
+            <CardTitle>Operators</CardTitle>
+            <CardDescription>Live users from the control-plane database. Password hashes are never returned to the browser.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="flex items-center justify-center py-16 text-gray-500">
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Loading users
+              </div>
+            ) : users.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-gray-300 p-10 text-center text-gray-500 dark:border-gray-800">
+                No users found.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {users.map((user, index) => (
                   <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    key={user.id}
+                    initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ delay: index * 0.03 }}
+                    className="rounded-2xl border border-gray-200 p-4 dark:border-gray-800"
                   >
-                    <Card className="border border-gray-200 dark:border-gray-700 shadow-lg bg-white dark:bg-gray-900">
-                      <CardHeader className="bg-gradient-to-r from-gray-50 to-red-50 dark:from-gray-800 dark:to-red-900/20 p-4 sm:p-6">
-                        <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-                          <div className="p-2 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl">
-                            <Users className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                          </div>
-                          User Management
-                        </CardTitle>
-                        <CardDescription className="mt-1 text-gray-600 dark:text-gray-400">
-                          Manage user accounts, roles, and permissions
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="p-4 sm:p-6">
-                        <div className="space-y-4">
-                          {users.map((user) => (
-                            <motion.div
-                              key={user.id}
-                              initial={{ opacity: 0, x: -20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ duration: 0.3 }}
-                              className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-300"
-                            >
-                              <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0 flex-1">
-                                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center flex-shrink-0">
-                                  <span className="text-sm sm:text-base font-medium text-white">
-                                    {user.name.charAt(0).toUpperCase()}
-                                  </span>
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                  <div className="flex flex-wrap items-center gap-2 mb-1">
-                                    <h3 className="font-medium text-sm sm:text-base break-words text-gray-900 dark:text-white">{user.name}</h3>
-                                    <Badge className="bg-gradient-to-r from-red-500 to-orange-600 text-white border-0">
-                                      {getRoleIcon(user.role)}
-                                      <span className="ml-1 text-xs">{user.role}</span>
-                                    </Badge>
-                                    <Badge variant="outline" className={getStatusColor(user.status)}>
-                                      <span className="text-xs">{user.status}</span>
-                                    </Badge>
-                                  </div>
-                                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 break-words">{user.email}</p>
-                                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                                    Last login: {new Date(user.lastLogin).toLocaleDateString()}
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2 w-full sm:w-auto">
-                                <Button variant="outline" size="sm" className="h-9 flex-1 sm:flex-initial bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800">
-                                  <Edit className="h-4 w-4 mr-1.5 sm:mr-0" />
-                                  <span className="sm:hidden">Edit</span>
-                                </Button>
-                                <Button variant="outline" size="sm" className="h-9 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 flex-1 sm:flex-initial bg-white dark:bg-gray-900 border-red-300 dark:border-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
-                                  <Trash2 className="h-4 w-4 mr-1.5 sm:mr-0" />
-                                  <span className="sm:hidden">Delete</span>
-                                </Button>
-                              </div>
-                            </motion.div>
-                          ))}
+                    {editingUserId === user.id ? (
+                      <div className="space-y-4">
+                        <UserFields form={editForm} setForm={setEditForm} includeStatus />
+                        <div className="flex flex-wrap gap-2">
+                          <Button onClick={() => updateUser(user.id)} disabled={saving} className="gap-2">
+                            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                            Save changes
+                          </Button>
+                          <Button variant="outline" onClick={() => setEditingUserId(null)} disabled={saving}>
+                            Cancel
+                          </Button>
                         </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                </TabsContent>
-
-                <TabsContent value="configs" className="mt-6">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Card className="border border-gray-200 dark:border-gray-700 shadow-lg bg-white dark:bg-gray-900">
-                      <CardHeader className="bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-800 dark:to-blue-900/20 p-4 sm:p-6">
-                        <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-                          <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl">
-                            <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="flex min-w-0 items-start gap-4">
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-red-600 to-orange-500 font-bold text-white">
+                            {initials(user)}
                           </div>
-                          Configuration Management
-                        </CardTitle>
-                        <CardDescription className="mt-1 text-gray-600 dark:text-gray-400">
-                          View and manage user-specific configurations
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="p-4 sm:p-6">
-                        <div className="text-center py-8">
-                          <Settings className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                          <h3 className="text-lg font-medium mb-2 text-gray-900 dark:text-white">Configuration Management</h3>
-                          <p className="text-gray-600 dark:text-gray-400">
-                            View and manage user-specific configurations here.
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                </TabsContent>
-
-                <TabsContent value="system" className="mt-6">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Card className="border border-gray-200 dark:border-gray-700 shadow-lg bg-white dark:bg-gray-900">
-                      <CardHeader className="bg-gradient-to-r from-gray-50 to-purple-50 dark:from-gray-800 dark:to-purple-900/20 p-4 sm:p-6">
-                        <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-                          <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl">
-                            <Database className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h3 className="font-bold text-gray-950 dark:text-white">{user.name || "Unnamed user"}</h3>
+                              <Badge variant="outline" className={roleClass(user.role)}>
+                                {roleIcon(user.role)}
+                                <span className="ml-1">{user.role}</span>
+                              </Badge>
+                              <Badge variant="outline" className={statusClass(user.status)}>
+                                {user.status}
+                              </Badge>
+                            </div>
+                            <p className="mt-1 break-all text-sm text-gray-600 dark:text-gray-400">{user.email}</p>
+                            <p className="mt-2 text-xs text-gray-500 dark:text-gray-500">
+                              Last login: {formatDate(user.lastLoginAt)} | Created: {formatDate(user.createdAt)}
+                            </p>
+                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">
+                              Dashboards: {user._count?.dashboards ?? 0} | Configs: {user._count?.configurations ?? 0} | Teams: {user._count?.teams ?? 0}
+                            </p>
                           </div>
-                          System Settings
-                        </CardTitle>
-                        <CardDescription className="mt-1 text-gray-600 dark:text-gray-400">
-                          Configure system-wide settings and preferences
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="p-4 sm:p-6">
-                        <div className="text-center py-8">
-                          <Database className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                          <h3 className="text-lg font-medium mb-2 text-gray-900 dark:text-white">System Settings</h3>
-                          <p className="text-gray-600 dark:text-gray-400">
-                            Configure system-wide settings and preferences here.
-                          </p>
                         </div>
-                      </CardContent>
-                    </Card>
+                        <div className="flex flex-wrap gap-2">
+                          <Button variant="outline" size="sm" onClick={() => beginEdit(user)} disabled={saving}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                          </Button>
+                          {user.status === "ACTIVE" ? (
+                            <Button variant="outline" size="sm" onClick={() => disableUser(user)} disabled={saving} className="border-red-200 text-red-700 hover:bg-red-50 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950/30">
+                              Disable
+                            </Button>
+                          ) : (
+                            <Button variant="outline" size="sm" onClick={() => {
+                              setEditingUserId(user.id)
+                              setEditForm({
+                                name: user.name || "",
+                                email: user.email,
+                                password: "",
+                                role: user.role,
+                                status: "ACTIVE",
+                              })
+                            }} disabled={saving}>
+                              Reactivate
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </motion.div>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-        </motion.div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
