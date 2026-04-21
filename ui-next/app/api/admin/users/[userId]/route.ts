@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import bcrypt from "bcryptjs"
-import { UserRole, UserStatus } from "@prisma/client"
+import { AdminAuditAction, UserRole, UserStatus } from "@prisma/client"
+import { recordAdminAudit } from "@/lib/admin-audit"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma-server"
 
@@ -61,6 +62,13 @@ async function wouldRemoveLastActiveAdmin(userId: string, nextRole: UserRole, ne
   return otherActiveAdmins === 0
 }
 
+function auditActor(session: any) {
+  return {
+    id: session?.user?.id,
+    email: session?.user?.email ?? null,
+  }
+}
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
@@ -86,6 +94,22 @@ export async function PATCH(
     const isSelf = (session!.user as any).id === userId
 
     if (isSelf && (nextRole !== existingUser.role || nextStatus !== existingUser.status)) {
+      await recordAdminAudit({
+        action: AdminAuditAction.ACTION_BLOCKED,
+        actor: auditActor(session!),
+        targetUser: {
+          id: existingUser.id,
+          email: existingUser.email,
+        },
+        message: `Blocked self role or status change for ${existingUser.email}`,
+        metadata: {
+          reason: "self_role_or_status_change",
+          requestedRole: nextRole,
+          requestedStatus: nextStatus,
+          currentRole: existingUser.role,
+          currentStatus: existingUser.status,
+        },
+      })
       return NextResponse.json(
         { message: "You cannot change your own role or account status" },
         { status: 400 }
@@ -93,6 +117,22 @@ export async function PATCH(
     }
 
     if (await wouldRemoveLastActiveAdmin(userId, nextRole, nextStatus)) {
+      await recordAdminAudit({
+        action: AdminAuditAction.ACTION_BLOCKED,
+        actor: auditActor(session!),
+        targetUser: {
+          id: existingUser.id,
+          email: existingUser.email,
+        },
+        message: `Blocked change that would remove the last active admin ${existingUser.email}`,
+        metadata: {
+          reason: "last_active_admin",
+          requestedRole: nextRole,
+          requestedStatus: nextStatus,
+          currentRole: existingUser.role,
+          currentStatus: existingUser.status,
+        },
+      })
       return NextResponse.json(
         { message: "At least one active admin must remain" },
         { status: 400 }
@@ -107,6 +147,7 @@ export async function PATCH(
       disabledAt?: Date | null
       password?: string
     } = {}
+    let passwordChanged = false
 
     if (typeof body.name === "string") {
       const name = body.name.trim()
@@ -141,6 +182,7 @@ export async function PATCH(
         return NextResponse.json({ message: "Password must be at least 8 characters long" }, { status: 400 })
       }
       data.password = await bcrypt.hash(body.password, 12)
+      passwordChanged = true
     }
 
     data.role = nextRole
@@ -171,6 +213,65 @@ export async function PATCH(
       },
     })
 
+    const auditEvents: Array<{
+      action: AdminAuditAction
+      message: string
+      metadata?: Record<string, string | null>
+    }> = []
+
+    if (existingUser.role !== user.role) {
+      auditEvents.push({
+        action: AdminAuditAction.ROLE_CHANGED,
+        message: `Changed ${user.email} role from ${existingUser.role} to ${user.role}`,
+        metadata: {
+          previousRole: existingUser.role,
+          nextRole: user.role,
+        },
+      })
+    }
+
+    if (existingUser.status !== user.status) {
+      auditEvents.push({
+        action: user.status === UserStatus.ACTIVE ? AdminAuditAction.USER_REACTIVATED : AdminAuditAction.STATUS_CHANGED,
+        message: `Changed ${user.email} status from ${existingUser.status} to ${user.status}`,
+        metadata: {
+          previousStatus: existingUser.status,
+          nextStatus: user.status,
+        },
+      })
+    }
+
+    if (passwordChanged) {
+      auditEvents.push({
+        action: AdminAuditAction.PASSWORD_CHANGED,
+        message: `Updated password for ${user.email}`,
+      })
+    }
+
+    if (existingUser.name !== user.name || existingUser.email !== user.email) {
+      auditEvents.push({
+        action: AdminAuditAction.USER_UPDATED,
+        message: `Updated profile details for ${user.email}`,
+        metadata: {
+          previousEmail: existingUser.email,
+          nextEmail: user.email,
+          previousName: existingUser.name,
+          nextName: user.name,
+        },
+      })
+    }
+
+    await Promise.all(auditEvents.map((event) => recordAdminAudit({
+      action: event.action,
+      actor: auditActor(session!),
+      targetUser: {
+        id: user.id,
+        email: user.email,
+      },
+      message: event.message,
+      metadata: event.metadata,
+    })))
+
     return NextResponse.json({ message: "User updated", user })
   } catch (error) {
     console.error("Admin user update error:", error)
@@ -194,10 +295,37 @@ export async function DELETE(
     }
 
     if ((session!.user as any).id === userId) {
+      await recordAdminAudit({
+        action: AdminAuditAction.ACTION_BLOCKED,
+        actor: auditActor(session!),
+        targetUser: {
+          id: existingUser.id,
+          email: existingUser.email,
+        },
+        message: `Blocked self-disable attempt for ${existingUser.email}`,
+        metadata: {
+          reason: "self_disable",
+        },
+      })
       return NextResponse.json({ message: "You cannot disable your own account" }, { status: 400 })
     }
 
     if (await wouldRemoveLastActiveAdmin(userId, existingUser.role, UserStatus.DISABLED)) {
+      await recordAdminAudit({
+        action: AdminAuditAction.ACTION_BLOCKED,
+        actor: auditActor(session!),
+        targetUser: {
+          id: existingUser.id,
+          email: existingUser.email,
+        },
+        message: `Blocked disable that would remove the last active admin ${existingUser.email}`,
+        metadata: {
+          reason: "last_active_admin",
+          requestedStatus: UserStatus.DISABLED,
+          currentRole: existingUser.role,
+          currentStatus: existingUser.status,
+        },
+      })
       return NextResponse.json(
         { message: "At least one active admin must remain" },
         { status: 400 }
@@ -209,6 +337,20 @@ export async function DELETE(
       data: {
         status: UserStatus.DISABLED,
         disabledAt: existingUser.disabledAt || new Date(),
+      },
+    })
+
+    await recordAdminAudit({
+      action: AdminAuditAction.USER_DISABLED,
+      actor: auditActor(session!),
+      targetUser: {
+        id: existingUser.id,
+        email: existingUser.email,
+      },
+      message: `Disabled user ${existingUser.email}`,
+      metadata: {
+        previousStatus: existingUser.status,
+        nextStatus: UserStatus.DISABLED,
       },
     })
 

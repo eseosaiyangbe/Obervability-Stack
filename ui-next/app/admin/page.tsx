@@ -50,10 +50,10 @@ const adminCards = [
   {
     title: "Audit Logs",
     description: "Track admin actions such as role changes, disables, and password resets.",
-    href: "#audit-coming-soon",
+    href: "/admin/audit",
     icon: Activity,
     accent: "from-amber-600 to-yellow-500",
-    status: "Next",
+    status: "Live",
   },
   {
     title: "System Settings",
@@ -224,19 +224,12 @@ export default function AdminOverviewPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  {card.href.startsWith("#") ? (
-                    <Button variant="outline" disabled className="gap-2">
-                      Coming next
+                  <Button asChild variant="outline" className="gap-2 bg-white dark:bg-gray-950">
+                    <Link href={card.href}>
+                      Open
                       <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  ) : (
-                    <Button asChild variant="outline" className="gap-2 bg-white dark:bg-gray-950">
-                      <Link href={card.href}>
-                        Open
-                        <ArrowRight className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                  )}
+                    </Link>
+                  </Button>
                 </CardContent>
               </Card>
             </motion.div>

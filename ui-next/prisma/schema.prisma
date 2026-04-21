@@ -153,6 +153,25 @@ model Configuration {
   @@map("configurations")
 }
 
+// Immutable admin action trail for access-management accountability.
+model AdminAuditLog {
+  id              String           @id @default(cuid())
+  action          AdminAuditAction
+  actorId         String?
+  actorEmail      String?
+  targetUserId    String?
+  targetUserEmail String?
+  message         String
+  metadata        Json?
+  createdAt       DateTime         @default(now())
+
+  @@index([createdAt])
+  @@index([action])
+  @@index([actorEmail])
+  @@index([targetUserEmail])
+  @@map("admin_audit_logs")
+}
+
 // Enums
 enum UserRole {
   ADMIN
@@ -177,4 +196,15 @@ enum ConfigType {
   ALERTING
   LOGGING
   DASHBOARD
+}
+
+enum AdminAuditAction {
+  USER_CREATED
+  USER_UPDATED
+  USER_DISABLED
+  USER_REACTIVATED
+  ROLE_CHANGED
+  STATUS_CHANGED
+  PASSWORD_CHANGED
+  ACTION_BLOCKED
 }

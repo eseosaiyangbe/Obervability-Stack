@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import bcrypt from "bcryptjs"
-import { UserRole, UserStatus } from "@prisma/client"
+import { AdminAuditAction, UserRole, UserStatus } from "@prisma/client"
+import { recordAdminAudit } from "@/lib/admin-audit"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma-server"
 
@@ -99,7 +100,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const { response } = await requireAdmin()
+  const { session, response } = await requireAdmin()
   if (response) return response
 
   try {
@@ -146,6 +147,23 @@ export async function POST(request: NextRequest) {
         disabledAt: true,
         createdAt: true,
         updatedAt: true,
+      },
+    })
+
+    await recordAdminAudit({
+      action: AdminAuditAction.USER_CREATED,
+      actor: {
+        id: (session?.user as any).id,
+        email: session?.user?.email ?? null,
+      },
+      targetUser: {
+        id: user.id,
+        email: user.email,
+      },
+      message: `Created user ${user.email} with ${user.role} role`,
+      metadata: {
+        role: user.role,
+        status: user.status,
       },
     })
 
