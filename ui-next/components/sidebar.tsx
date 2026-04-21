@@ -315,7 +315,7 @@ export const Sidebar = memo(() => {
       <NavigationItem
         key={item.name}
         item={item}
-        isActive={pathname === item.href}
+        isActive={pathname === item.href || pathname.startsWith(`${item.href}/`)}
         isCollapsed={isCollapsed}
       />
     )), [pathname, isCollapsed]

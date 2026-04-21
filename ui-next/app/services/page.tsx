@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import {
   Activity,
   AlertTriangle,
+  BarChart3,
   ArrowRight,
   CheckCircle,
   Clock,
@@ -322,6 +323,12 @@ export default function ServicesPage() {
               >
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                 Refresh
+              </Button>
+              <Button asChild size="sm" className="h-11 gap-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700">
+                <Link href="/services/compare">
+                  <BarChart3 className="h-4 w-4" />
+                  Compare Apps
+                </Link>
               </Button>
             </div>
           </div>
