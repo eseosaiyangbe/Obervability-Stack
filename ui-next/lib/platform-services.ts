@@ -1,4 +1,5 @@
 export type PlatformServiceStatus = 'up' | 'down';
+export type LatestVersionCheckStatus = 'checked' | 'rate_limited' | 'unavailable';
 
 export interface PlatformService {
   id: string;
@@ -25,6 +26,8 @@ export interface PlatformServiceSnapshot {
   responseTimeMs: number | null;
   currentVersion: string;
   latestVersion: string;
+  latestVersionStatus: LatestVersionCheckStatus;
+  latestVersionError?: string;
   updateAvailable: boolean;
   releaseUrl: string;
   dockerImage: string;
@@ -49,11 +52,19 @@ const latestVersionFailureTtlMs = 15 * 60 * 1000;
 
 interface LatestVersionCacheEntry {
   version: string;
+  status: LatestVersionCheckStatus;
+  error?: string;
   expiresAt: number;
 }
 
+interface LatestVersionResult {
+  version: string;
+  status: LatestVersionCheckStatus;
+  error?: string;
+}
+
 const latestVersionCache = new Map<string, LatestVersionCacheEntry>();
-const pendingLatestVersionChecks = new Map<string, Promise<string>>();
+const pendingLatestVersionChecks = new Map<string, Promise<LatestVersionResult>>();
 
 export const platformServices: PlatformService[] = [
   {
@@ -174,6 +185,16 @@ function withTimeout(ms = requestTimeoutMs) {
   return AbortSignal.timeout(ms);
 }
 
+class FetchHttpError extends Error {
+  constructor(
+    public readonly status: number,
+    message: string
+  ) {
+    super(message);
+    this.name = 'FetchHttpError';
+  }
+}
+
 async function fetchText(url: string) {
   const response = await fetch(url, {
     headers: { Accept: 'application/json,text/plain,*/*' },
@@ -183,7 +204,7 @@ async function fetchText(url: string) {
   const body = await response.text();
 
   if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
+    throw new FetchHttpError(response.status, `HTTP ${response.status}: ${body.slice(0, 240)}`);
   }
 
   return body;
@@ -250,7 +271,11 @@ async function getLatestVersion(service: PlatformService) {
   const cached = latestVersionCache.get(cacheKey);
 
   if (cached && cached.expiresAt > Date.now()) {
-    return cached.version;
+    return {
+      version: cached.version,
+      status: cached.status,
+      error: cached.error,
+    };
   }
 
   const pendingCheck = pendingLatestVersionChecks.get(cacheKey);
@@ -277,17 +302,35 @@ async function fetchLatestVersion(service: PlatformService) {
 
     latestVersionCache.set(service.latestReleaseUrl, {
       version,
+      status: 'checked',
       expiresAt: Date.now() + latestVersionCacheTtlMs,
     });
 
-    return version;
-  } catch {
+    return {
+      version,
+      status: 'checked' as const,
+    };
+  } catch (error) {
+    const rateLimited = error instanceof FetchHttpError && error.status === 403;
+    const status: LatestVersionCheckStatus = rateLimited ? 'rate_limited' : 'unavailable';
+    const message = rateLimited
+      ? 'GitHub API rate limit reached'
+      : error instanceof Error
+        ? error.message
+        : 'Latest version check failed';
+
     latestVersionCache.set(service.latestReleaseUrl, {
       version: 'Unknown',
+      status,
+      error: message,
       expiresAt: Date.now() + latestVersionFailureTtlMs,
     });
 
-    return 'Unknown';
+    return {
+      version: 'Unknown',
+      status,
+      error: message,
+    };
   }
 }
 
@@ -330,11 +373,12 @@ async function checkHealth(service: PlatformService) {
 
 export async function getPlatformServices(): Promise<PlatformServicesResult> {
   const services = await Promise.all(platformServices.map(async (service) => {
-    const [health, currentVersion, latestVersion] = await Promise.all([
+    const [health, currentVersion, latestVersionCheck] = await Promise.all([
       checkHealth(service),
       getCurrentVersion(service),
       getLatestVersion(service),
     ]);
+    const latestVersion = latestVersionCheck.version;
 
     const updateAvailable = compareVersions(currentVersion, latestVersion);
 
@@ -348,6 +392,8 @@ export async function getPlatformServices(): Promise<PlatformServicesResult> {
       responseTimeMs: health.responseTimeMs,
       currentVersion,
       latestVersion,
+      latestVersionStatus: latestVersionCheck.status,
+      latestVersionError: latestVersionCheck.error,
       updateAvailable,
       releaseUrl: latestVersion === 'Unknown'
         ? service.latestReleaseUrl.replace('https://api.github.com/repos/', 'https://github.com/').replace('/releases/latest', '/releases')

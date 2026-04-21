@@ -144,6 +144,20 @@ function formatResponseTime(value: number | null) {
   return value < 1000 ? `${value}ms` : `${(value / 1000).toFixed(1)}s`
 }
 
+function latestVersionLabel(service: PlatformServiceSnapshot) {
+  if (service.latestVersion !== "Unknown") return `v${service.latestVersion}`
+  if (service.latestVersionStatus === "rate_limited") return "Rate limited"
+  if (service.latestVersionStatus === "unavailable") return "Check unavailable"
+  return "Not checked"
+}
+
+function versionCheckLabel(service: PlatformServiceSnapshot) {
+  if (service.updateAvailable) return "Update available"
+  if (service.latestVersionStatus === "rate_limited") return "Rate limited"
+  if (service.latestVersionStatus === "unavailable") return "Check unavailable"
+  return "Version checked"
+}
+
 function PlatformServiceLabel({ service, index }: { service: PlatformServiceSnapshot; index: number }) {
   const styles = platformStatusStyles(service.status)
 
@@ -193,7 +207,7 @@ function PlatformServiceLabel({ service, index }: { service: PlatformServiceSnap
             <div className="rounded-xl border border-gray-100 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950/40">
               <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-500">Latest</p>
               <p className="mt-1 font-semibold text-gray-950 dark:text-white">
-                {service.latestVersion === "Unknown" ? "Unknown" : `v${service.latestVersion}`}
+                {latestVersionLabel(service)}
               </p>
             </div>
           </div>
@@ -206,9 +220,11 @@ function PlatformServiceLabel({ service, index }: { service: PlatformServiceSnap
               variant="outline"
               className={service.updateAvailable
                 ? "border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-900 dark:bg-orange-900/20 dark:text-orange-300"
-                : "border-green-200 bg-green-50 text-green-700 dark:border-green-900 dark:bg-green-900/20 dark:text-green-300"}
+                : service.latestVersionStatus === "checked"
+                  ? "border-green-200 bg-green-50 text-green-700 dark:border-green-900 dark:bg-green-900/20 dark:text-green-300"
+                  : "border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-900 dark:bg-yellow-900/20 dark:text-yellow-300"}
             >
-              {service.updateAvailable ? "Update available" : "Version checked"}
+              {versionCheckLabel(service)}
             </Badge>
           </div>
 

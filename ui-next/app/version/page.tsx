@@ -36,7 +36,16 @@ function statusClass(service: PlatformServiceSnapshot) {
 function serviceStatusLabel(service: PlatformServiceSnapshot) {
   if (service.status === "down") return "Down"
   if (service.updateAvailable) return "Update available"
+  if (service.latestVersionStatus === "rate_limited") return "Rate limited"
+  if (service.latestVersionStatus === "unavailable") return "Check unavailable"
   return "Current"
+}
+
+function latestVersionLabel(service: PlatformServiceSnapshot) {
+  if (service.latestVersion !== "Unknown") return service.latestVersion
+  if (service.latestVersionStatus === "rate_limited") return "Rate limited"
+  if (service.latestVersionStatus === "unavailable") return "Check unavailable"
+  return "Not checked"
 }
 
 function formatChecked(value: string | null) {
@@ -72,7 +81,10 @@ function VersionServiceCard({ service, index }: { service: PlatformServiceSnapsh
         </div>
         <div className="rounded-xl border border-gray-100 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950/40">
           <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-500">Latest</p>
-          <p className="mt-1 font-mono text-sm font-bold text-gray-950 dark:text-white">{service.latestVersion}</p>
+          <p className="mt-1 font-mono text-sm font-bold text-gray-950 dark:text-white">{latestVersionLabel(service)}</p>
+          {service.latestVersionError && (
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">{service.latestVersionError}</p>
+          )}
         </div>
       </div>
 
