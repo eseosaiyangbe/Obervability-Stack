@@ -7,6 +7,27 @@ export interface LokiLogEntry {
   labels: Record<string, string>;
 }
 
+export function inferLokiLogSeverity(log: Pick<LokiLogEntry, 'line' | 'labels'>): string {
+  const labeledSeverity = log.labels.level || log.labels.severity;
+  if (labeledSeverity) return labeledSeverity.toLowerCase();
+
+  if (/\b(error|err|fatal|panic|exception|failed|failure)\b/i.test(log.line)) return 'error';
+  if (/\b(warn|warning)\b/i.test(log.line)) return 'warn';
+  if (/\b(debug|trace)\b/i.test(log.line)) return 'debug';
+  return 'info';
+}
+
+export function matchesLokiLogSeverity(log: LokiLogEntry, severity?: string): boolean {
+  if (!severity || severity === 'all') return true;
+
+  const inferredSeverity = inferLokiLogSeverity(log);
+
+  if (severity === 'warn') return inferredSeverity === 'warn' || inferredSeverity === 'warning';
+  if (severity === 'error') return inferredSeverity === 'error' || inferredSeverity === 'fatal';
+
+  return inferredSeverity === severity;
+}
+
 export interface LokiQueryResponse {
   status: string;
   data: {
@@ -193,10 +214,6 @@ export class LokiAPI {
       labelFilters.push(`container=~".*${namespace}.*"`);
     }
     
-    if (filters.severity && filters.severity !== 'all') {
-      labelFilters.push(`level="${this.escapeLogQLValue(filters.severity)}"`);
-    }
-
     if (labelFilters.length > 0) {
       query += labelFilters.join(', ');
     } else {
@@ -233,6 +250,9 @@ export class LokiAPI {
         break;
       case '6h':
         start = end - (6 * 60 * 60 * 1000 * 1000000);
+        break;
+      case '12h':
+        start = end - (12 * 60 * 60 * 1000 * 1000000);
         break;
       case '24h':
       case '1d':

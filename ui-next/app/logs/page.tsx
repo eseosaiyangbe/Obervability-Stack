@@ -80,6 +80,17 @@ const getSeverityIcon = (severity: string) => {
   }
 }
 
+const inferSeverity = (log: { line?: string; labels?: Record<string, string> }) => {
+  const labeledSeverity = log.labels?.level || log.labels?.severity
+  if (labeledSeverity) return labeledSeverity
+
+  const line = log.line || ""
+  if (/\b(error|err|fatal|panic|exception|failed|failure)\b/i.test(line)) return "error"
+  if (/\b(warn|warning)\b/i.test(line)) return "warn"
+  if (/\b(debug|trace)\b/i.test(line)) return "debug"
+  return "info"
+}
+
 export default function LogsPage() {
   const { 
     logs, 
@@ -415,8 +426,8 @@ export default function LogsPage() {
                   {logs.map((log, index) => {
                     const logId = getLogId(log, index)
                     const isExpanded = expandedLogs.has(logId)
-                    const SeverityIcon = getSeverityIcon(log.labels?.severity || 'info')
-                    const severity = log.labels?.severity || 'info'
+                    const severity = inferSeverity(log)
+                    const SeverityIcon = getSeverityIcon(severity)
                     
                     return (
                       <motion.div

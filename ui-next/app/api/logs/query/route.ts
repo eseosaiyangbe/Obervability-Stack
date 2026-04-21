@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { lokiAPI } from '@/lib/loki-api';
+import { lokiAPI, matchesLokiLogSeverity } from '@/lib/loki-api';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,15 +14,21 @@ export async function GET(request: NextRequest) {
   };
 
   try {
+    const requestedLimit = Number(searchParams.get('limit')) || 1000;
+    const queryLimit = filters.severity === 'all'
+      ? requestedLimit
+      : Math.min(Math.max(requestedLimit * 5, 1000), 5000);
     const query = lokiAPI.buildQuery(filters);
     const { start, end } = lokiAPI.getTimeRange(filters.timeRange);
-    const logs = await lokiAPI.queryLogs({
+    const logs = (await lokiAPI.queryLogs({
       query,
       start,
       end,
-      limit: Number(searchParams.get('limit')) || 1000,
+      limit: queryLimit,
       direction: 'backward',
-    });
+    }))
+      .filter((log) => matchesLokiLogSeverity(log, filters.severity))
+      .slice(0, requestedLimit);
 
     return NextResponse.json({ logs, query, filters });
   } catch (error) {
