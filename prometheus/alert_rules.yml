@@ -203,7 +203,7 @@ groups:
 
       # High container memory usage
       - alert: HighContainerMemoryUsage
-        expr: (container_memory_usage_bytes / container_spec_memory_limit_bytes * 100) > 80
+        expr: (container_memory_working_set_bytes{job="cadvisor",id!="/",image!=""} / container_spec_memory_limit_bytes{job="cadvisor",id!="/",image!=""} * 100) > 80
         for: 5m
         labels:
           severity: warning
@@ -211,12 +211,12 @@ groups:
           component: memory
         annotations:
           summary: "High container memory usage on {{ $labels.instance }}"
-          description: "Container {{ $labels.name }} memory usage is above 80% on {{ $labels.instance }}"
+          description: "Container {{ $labels.name }} memory working set is above 80% of its limit on {{ $labels.instance }}"
           runbook_url: "https://docs.example.com/runbooks/high-container-memory-usage"
 
       # Critical container memory usage
       - alert: CriticalContainerMemoryUsage
-        expr: (container_memory_usage_bytes / container_spec_memory_limit_bytes * 100) > 95
+        expr: (container_memory_working_set_bytes{job="cadvisor",id!="/",image!=""} / container_spec_memory_limit_bytes{job="cadvisor",id!="/",image!=""} * 100) > 95
         for: 2m
         labels:
           severity: critical
@@ -224,7 +224,7 @@ groups:
           component: memory
         annotations:
           summary: "Critical container memory usage on {{ $labels.instance }}"
-          description: "Container {{ $labels.name }} memory usage is above 95% on {{ $labels.instance }}"
+          description: "Container {{ $labels.name }} memory working set is above 95% of its limit on {{ $labels.instance }}"
           runbook_url: "https://docs.example.com/runbooks/critical-container-memory-usage"
 
       # High container CPU usage

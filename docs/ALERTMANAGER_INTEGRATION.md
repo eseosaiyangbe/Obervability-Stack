@@ -213,13 +213,13 @@ groups:
 
       # High container memory usage
       - alert: HighContainerMemoryUsage
-        expr: (container_memory_usage_bytes / container_spec_memory_limit_bytes * 100) > 80
+        expr: (container_memory_working_set_bytes{job="cadvisor",id!="/",image!=""} / container_spec_memory_limit_bytes{job="cadvisor",id!="/",image!=""} * 100) > 80
         for: 5m
         labels:
           severity: warning
         annotations:
           summary: "High container memory usage on {{ $labels.instance }}"
-          description: "Container {{ $labels.name }} memory usage is above 80%"
+          description: "Container {{ $labels.name }} memory working set is above 80% of its limit"
 ```
 
 ### 3. Docker Compose Integration

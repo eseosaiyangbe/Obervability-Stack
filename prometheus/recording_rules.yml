@@ -29,7 +29,7 @@ groups:
 
       # Container memory usage percentage
       - record: container_memory_usage_percent
-        expr: (container_memory_usage_bytes / container_spec_memory_limit_bytes) * 100
+        expr: (container_memory_working_set_bytes{job="cadvisor",id!="/",image!=""} / container_spec_memory_limit_bytes{job="cadvisor",id!="/",image!=""}) * 100
 
       # Container restart count
       - record: container_restart_count
