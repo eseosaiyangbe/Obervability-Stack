@@ -29,7 +29,11 @@ type OperatorGuide = {
   firstChecks: string[]
   drill: string
   runbook: string
+  runbookUrl: string
 }
+
+const repositoryUrl = "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main"
+const incidentDrillUrl = `${repositoryUrl}/Obervability-Stack/docs/INCIDENT_DRILLS.md`
 
 const operatorGuides: Record<string, OperatorGuide> = {
   opensis: {
@@ -41,6 +45,7 @@ const operatorGuides: Record<string, OperatorGuide> = {
     ],
     drill: "OpenSIS Vault unavailable",
     runbook: "Obervability-Stack/docs/OPENSIS_OPERATOR_RUNBOOK.md",
+    runbookUrl: `${repositoryUrl}/Obervability-Stack/docs/OPENSIS_OPERATOR_RUNBOOK.md`,
   },
   swiftpay: {
     story: "Microservices money-flow app for gateway health, wallet dependencies, async transaction processing, and business metrics.",
@@ -51,6 +56,7 @@ const operatorGuides: Record<string, OperatorGuide> = {
     ],
     drill: "SwiftPay transaction worker down",
     runbook: "Obervability-Stack/docs/SWIFTPAY_OPERATOR_RUNBOOK.md",
+    runbookUrl: `${repositoryUrl}/Obervability-Stack/docs/SWIFTPAY_OPERATOR_RUNBOOK.md`,
   },
   foodpulse: {
     story: "Resilience lab for Redis Sentinel, Postgres replicas, HAProxy routing, and application health during failover.",
@@ -61,6 +67,7 @@ const operatorGuides: Record<string, OperatorGuide> = {
     ],
     drill: "FoodPulse Redis failover",
     runbook: "Obervability-Stack/docs/FOODPULSE_OPERATOR_RUNBOOK.md",
+    runbookUrl: `${repositoryUrl}/Obervability-Stack/docs/FOODPULSE_OPERATOR_RUNBOOK.md`,
   },
   memflip: {
     story: "Lightweight onboarding app that teaches the minimum frontend/backend observability integration pattern.",
@@ -71,6 +78,7 @@ const operatorGuides: Record<string, OperatorGuide> = {
     ],
     drill: "MemFlip backend down",
     runbook: "Obervability-Stack/docs/MEMFLIP_OPERATOR_RUNBOOK.md",
+    runbookUrl: `${repositoryUrl}/Obervability-Stack/docs/MEMFLIP_OPERATOR_RUNBOOK.md`,
   },
 }
 
@@ -373,6 +381,26 @@ export default function ManagedAppDetailPage() {
               <div>
                 <p className="text-sm font-semibold text-gray-950 dark:text-white">Runbook</p>
                 <p className="mt-1 break-all font-mono text-xs text-gray-600 dark:text-gray-400">{guide?.runbook || "Obervability-Stack/docs/INCIDENT_DRILLS.md"}</p>
+              </div>
+              <div className="grid grid-cols-1 gap-2">
+                <a
+                  href={guide?.runbookUrl || incidentDrillUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-700"
+                >
+                  Open operator runbook
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+                <a
+                  href={incidentDrillUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100 dark:hover:bg-gray-900"
+                >
+                  View incident drills
+                  <BookOpen className="h-4 w-4" />
+                </a>
               </div>
               <div>
                 <p className="mb-2 text-sm font-semibold text-gray-950 dark:text-white">First commands</p>
