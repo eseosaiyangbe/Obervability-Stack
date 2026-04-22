@@ -83,6 +83,68 @@ groups:
       - record: swiftpay:wallet_circuit_breaker_state
         expr: max(swiftpay_circuit_breaker_state{job="swiftpay-transaction-service"} or vector(0))
 
+  - name: managed_app_probe_recording_rules
+    rules:
+      # Per-endpoint blackbox availability for the managed app estate.
+      - record: app:probe_availability_5m
+        expr: avg_over_time(probe_success{job="blackbox-http"}[5m])
+
+      # Per-endpoint blackbox latency for the managed app estate.
+      - record: app:probe_p95_latency_seconds_5m
+        expr: quantile_over_time(0.95, probe_duration_seconds{job="blackbox-http"}[5m])
+
+  - name: memflip_recording_rules
+    rules:
+      # Backend request throughput.
+      - record: memflip:http_request_rate_5m
+        expr: sum(rate(http_requests_total{job="memflip-backend"}[5m]))
+
+      # Backend error throughput across client and server failures.
+      - record: memflip:http_error_rate_5m
+        expr: sum(rate(http_errors_total{job="memflip-backend"}[5m]))
+
+      # Backend error ratio with divide-by-zero protection for quiet demo periods.
+      - record: memflip:http_error_ratio_5m
+        expr: sum(rate(http_errors_total{job="memflip-backend"}[5m])) / clamp_min(sum(rate(http_requests_total{job="memflip-backend"}[5m])), 1)
+
+      # Backend p95 request latency.
+      - record: memflip:http_p95_latency_seconds
+        expr: histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{job="memflip-backend"}[5m])))
+
+      # Completed game submissions.
+      - record: memflip:games_completed_rate_5m
+        expr: sum(rate(game_scores_total{job="memflip-backend"}[5m]))
+
+      # Current active games.
+      - record: memflip:active_games
+        expr: sum(active_games_current{job="memflip-backend"} or vector(0))
+
+      # Application-reported backend health.
+      - record: memflip:app_health
+        expr: min(app_health_status{job="memflip-backend"}) or vector(0)
+
+  - name: foodpulse_recording_rules
+    rules:
+      # FoodPulse API scrape health.
+      - record: foodpulse:api_up
+        expr: max(up{job="foodpulse-api"} or vector(0))
+
+      # User voting activity.
+      - record: foodpulse:votes_rate_5m
+        expr: sum(rate(foodpulse_votes_total{job="foodpulse-api"}[5m]))
+
+      # Current pageview counter exported by the API.
+      - record: foodpulse:pageviews
+        expr: max(foodpulse_pageviews{job="foodpulse-api"} or vector(0))
+
+      # Current leading venue vote count.
+      - record: foodpulse:leading_venue_votes
+        expr: max(foodpulse_leading_venue_votes{job="foodpulse-api"} or vector(0))
+
+      # API process memory from prom-client default metrics.
+      - record: foodpulse:api_process_resident_memory_bytes
+        expr: max(foodpulse_api_process_resident_memory_bytes{job="foodpulse-api"} or vector(0))
+
   - name: infrastructure_recording_rules
     rules:
       # Prometheus uptime

@@ -203,6 +203,30 @@ scrape_configs:
     metrics_path: /metrics
     honor_labels: true
 
+  # MemFlip application metrics.
+  # The backend exposes bounded technical and game metrics on observability-net.
+  - job_name: 'memflip-backend'
+    static_configs:
+      - targets: ['memflip-backend:3001']
+        labels:
+          app: memflip
+          component: backend
+    scrape_interval: 15s
+    metrics_path: /metrics
+    honor_labels: true
+
+  # FoodPulse application metrics.
+  # The API exposes vote and Node.js process metrics on observability-net.
+  - job_name: 'foodpulse-api'
+    static_configs:
+      - targets: ['foodpulse-api:4567']
+        labels:
+          app: foodpulse
+          component: api
+    scrape_interval: 15s
+    metrics_path: /metrics
+    honor_labels: true
+
   # Service Discovery - Docker containers (optional - requires additional setup)
   # - job_name: 'docker'
   #   docker_sd_configs:

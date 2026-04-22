@@ -266,10 +266,10 @@ else
   fail "MemFlip backend metrics captured the complete route"
 fi
 
-if grep -Fq "game_scores_total{difficulty=\"easy\",username=\"$USERNAME\"" <<<"$backend_metrics"; then
-  pass "MemFlip backend metrics recorded the completed game score"
+if grep -Fq 'game_scores_total{difficulty="easy",score_range="beginner"}' <<<"$backend_metrics"; then
+  pass "MemFlip backend metrics recorded the completed game score with bounded labels"
 else
-  fail "MemFlip backend metrics recorded the completed game score"
+  fail "MemFlip backend metrics recorded the completed game score with bounded labels"
 fi
 
 echo
