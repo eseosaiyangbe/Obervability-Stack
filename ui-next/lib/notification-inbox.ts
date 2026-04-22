@@ -19,6 +19,7 @@ export interface NotificationInboxEvent {
 }
 
 const MAX_EVENTS = 200;
+let writeQueue = Promise.resolve();
 
 function getStorePath() {
   return process.env.NOTIFICATION_STORE_PATH || '/tmp/devops-monitor-notifications.json';
@@ -46,6 +47,7 @@ async function readEvents(): Promise<NotificationInboxEvent[]> {
     }
 
     if (error instanceof SyntaxError) {
+      console.error(`Notification inbox store is invalid JSON: ${storePath}`, error);
       return [];
     }
 
@@ -55,8 +57,21 @@ async function readEvents(): Promise<NotificationInboxEvent[]> {
 
 async function writeEvents(events: NotificationInboxEvent[]) {
   const storePath = getStorePath();
+  const tempPath = `${storePath}.${process.pid}.${Date.now()}.tmp`;
+
   await ensureStoreDirectory(storePath);
-  await fs.writeFile(storePath, JSON.stringify(events.slice(0, MAX_EVENTS), null, 2));
+  await fs.writeFile(tempPath, JSON.stringify(events.slice(0, MAX_EVENTS), null, 2));
+  await fs.rename(tempPath, storePath);
+}
+
+async function withSerializedWrite<T>(operation: () => Promise<T>): Promise<T> {
+  const nextWrite = writeQueue.then(operation, operation);
+  writeQueue = nextWrite.then(
+    () => undefined,
+    () => undefined,
+  );
+
+  return nextWrite;
 }
 
 export async function listNotificationEvents(limit = 50): Promise<NotificationInboxEvent[]> {
@@ -79,24 +94,30 @@ export async function saveNotificationEvents(events: NotificationInboxEvent[]) {
     return;
   }
 
-  const existingEvents = await readEvents();
-  await writeEvents([...events, ...existingEvents]);
+  await withSerializedWrite(async () => {
+    const existingEvents = await readEvents();
+    await writeEvents([...events, ...existingEvents]);
+  });
 }
 
 export async function deleteNotificationEvent(id: string) {
-  const existingEvents = await readEvents();
-  const nextEvents = existingEvents.filter((event) => event.id !== id);
+  return withSerializedWrite(async () => {
+    const existingEvents = await readEvents();
+    const nextEvents = existingEvents.filter((event) => event.id !== id);
 
-  if (nextEvents.length === existingEvents.length) {
-    return false;
-  }
+    if (nextEvents.length === existingEvents.length) {
+      return false;
+    }
 
-  await writeEvents(nextEvents);
-  return true;
+    await writeEvents(nextEvents);
+    return true;
+  });
 }
 
 export async function clearNotificationEvents() {
-  await writeEvents([]);
+  await withSerializedWrite(async () => {
+    await writeEvents([]);
+  });
 }
 
 export function alertmanagerPayloadToEvents(payload: any): NotificationInboxEvent[] {

@@ -578,14 +578,17 @@ export default function AlertsPage() {
               <span className="sm:hidden">Sync</span>
             </Button>
 
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
               className="gap-1.5 h-9 sm:h-10 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800"
             >
-              <Calendar className="h-4 w-4" />
-              <span className="hidden sm:inline">History</span>
-              <span className="sm:hidden">Hist</span>
+              <a href="/notifications" title="Open resolved alert history in the notification inbox">
+                <Calendar className="h-4 w-4" />
+                <span className="hidden sm:inline">History</span>
+                <span className="sm:hidden">Hist</span>
+              </a>
             </Button>
 
             <Button 
