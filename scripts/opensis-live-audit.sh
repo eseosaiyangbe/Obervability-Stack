@@ -217,6 +217,24 @@ else
   exit 1
 fi
 
+if opensis_apache_target=$(prom_query 'up{job="opensis-apache"}'); then
+  pass "Prometheus returns OpenSIS Apache exporter scrape health"
+  assert_json "$opensis_apache_target" '.data.result | length == 1' "Prometheus sees the OpenSIS Apache exporter target"
+  assert_json "$opensis_apache_target" '.data.result[0].value[1] == "1"' "OpenSIS Apache exporter target is up"
+else
+  fail "Prometheus OpenSIS Apache exporter query failed"
+  exit 1
+fi
+
+if opensis_apache_up=$(prom_query 'opensis:apache_up'); then
+  pass "Prometheus returns OpenSIS Apache runtime health"
+  assert_json "$opensis_apache_up" '.data.result | length >= 1' "OpenSIS Apache runtime recording rule has data"
+  assert_json "$opensis_apache_up" '.data.result[0].value[1] == "1"' "OpenSIS Apache runtime reports up"
+else
+  fail "Prometheus OpenSIS Apache runtime health query failed"
+  exit 1
+fi
+
 echo
 header "Audit Summary"
 echo "==============="

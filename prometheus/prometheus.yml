@@ -227,6 +227,18 @@ scrape_configs:
     metrics_path: /metrics
     honor_labels: true
 
+  # OpenSIS Apache/PHP runtime metrics.
+  # The exporter reads Apache mod_status from the OpenSIS UI container.
+  - job_name: 'opensis-apache'
+    static_configs:
+      - targets: ['opensis-apache-exporter:9117']
+        labels:
+          app: opensis
+          component: apache
+    scrape_interval: 15s
+    metrics_path: /metrics
+    honor_labels: true
+
   # MemFlip application metrics.
   # The backend exposes bounded technical and game metrics on observability-net.
   - job_name: 'memflip-backend'
