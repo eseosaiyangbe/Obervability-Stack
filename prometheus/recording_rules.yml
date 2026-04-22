@@ -129,6 +129,22 @@ groups:
       - record: foodpulse:api_up
         expr: max(up{job="foodpulse-api"} or vector(0))
 
+      # API request throughput, excluding metrics scrapes.
+      - record: foodpulse:http_request_rate_5m
+        expr: sum(rate(foodpulse_http_requests_total{job="foodpulse-api",route!="/metrics"}[5m]))
+
+      # API error throughput, excluding metrics scrapes.
+      - record: foodpulse:http_error_rate_5m
+        expr: sum(rate(foodpulse_http_errors_total{job="foodpulse-api",route!="/metrics"}[5m]))
+
+      # API error ratio with divide-by-zero protection for quiet demo periods.
+      - record: foodpulse:http_error_ratio_5m
+        expr: sum(rate(foodpulse_http_errors_total{job="foodpulse-api",route!="/metrics"}[5m])) / clamp_min(sum(rate(foodpulse_http_requests_total{job="foodpulse-api",route!="/metrics"}[5m])), 1)
+
+      # API p95 request latency, excluding metrics scrapes.
+      - record: foodpulse:http_p95_latency_seconds
+        expr: histogram_quantile(0.95, sum by (le) (rate(foodpulse_http_request_duration_seconds_bucket{job="foodpulse-api",route!="/metrics"}[5m])))
+
       # User voting activity.
       - record: foodpulse:votes_rate_5m
         expr: sum(rate(foodpulse_votes_total{job="foodpulse-api"}[5m]))

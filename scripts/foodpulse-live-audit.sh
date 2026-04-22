@@ -155,6 +155,31 @@ else
   exit 1
 fi
 
+if foodpulse_api_up=$(prom_query 'up{job="foodpulse-api"}'); then
+  pass "Prometheus returns FoodPulse API scrape health"
+  assert_json "$foodpulse_api_up" '.data.result | length == 1' "Prometheus sees the FoodPulse API metrics target"
+  assert_json "$foodpulse_api_up" '.data.result[0].value[1] == "1"' "FoodPulse API metrics target is up"
+else
+  fail "Prometheus FoodPulse API scrape query failed"
+  exit 1
+fi
+
+if foodpulse_http_metrics=$(prom_query 'foodpulse_http_requests_total{job="foodpulse-api",route!="/metrics"}'); then
+  pass "Prometheus returns FoodPulse HTTP request metrics"
+  assert_json "$foodpulse_http_metrics" '.data.result | length >= 1' "FoodPulse HTTP request metrics are present"
+else
+  fail "Prometheus FoodPulse HTTP request metric query failed"
+  exit 1
+fi
+
+if foodpulse_latency=$(prom_query 'foodpulse:http_p95_latency_seconds'); then
+  pass "Prometheus returns FoodPulse p95 latency recording rule"
+  assert_json "$foodpulse_latency" '.data.result | length >= 1' "FoodPulse p95 latency recording rule has data"
+else
+  fail "Prometheus FoodPulse p95 latency query failed"
+  exit 1
+fi
+
 echo
 header "Operator Workflow Check"
 
