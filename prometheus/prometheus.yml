@@ -215,6 +215,18 @@ scrape_configs:
     metrics_path: /metrics
     honor_labels: true
 
+  # OpenSIS Vault synthetic checks.
+  # This verifies both Vault health and AppRole-based reads for required secret paths.
+  - job_name: 'opensis-vault'
+    static_configs:
+      - targets: ['opensis-vault-checker:9105']
+        labels:
+          app: opensis
+          component: vault
+    scrape_interval: 15s
+    metrics_path: /metrics
+    honor_labels: true
+
   # MemFlip application metrics.
   # The backend exposes bounded technical and game metrics on observability-net.
   - job_name: 'memflip-backend'

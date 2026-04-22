@@ -179,6 +179,18 @@ groups:
       - record: opensis:mariadb_slow_queries_rate_5m
         expr: sum(rate(mysql_global_status_slow_queries{job="opensis-mariadb"}[5m]))
 
+      # Vault is reachable, initialized, and unsealed.
+      - record: opensis:vault_health
+        expr: max(opensis_vault_health_status{job="opensis-vault"} or vector(0))
+
+      # Per-secret AppRole read result for required OpenSIS secret paths.
+      - record: opensis:vault_secret_read_success
+        expr: opensis_vault_secret_read_success{job="opensis-vault"}
+
+      # All required OpenSIS Vault secret paths are readable.
+      - record: opensis:vault_all_required_secrets_readable
+        expr: min(opensis_vault_secret_read_success{job="opensis-vault"}) or vector(0)
+
   - name: infrastructure_recording_rules
     rules:
       # Prometheus uptime

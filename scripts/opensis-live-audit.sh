@@ -190,6 +190,33 @@ else
   exit 1
 fi
 
+if opensis_vault_target=$(prom_query 'up{job="opensis-vault"}'); then
+  pass "Prometheus returns OpenSIS Vault synthetic scrape health"
+  assert_json "$opensis_vault_target" '.data.result | length == 1' "Prometheus sees the OpenSIS Vault synthetic target"
+  assert_json "$opensis_vault_target" '.data.result[0].value[1] == "1"' "OpenSIS Vault synthetic target is up"
+else
+  fail "Prometheus OpenSIS Vault synthetic query failed"
+  exit 1
+fi
+
+if opensis_vault_health=$(prom_query 'opensis:vault_health'); then
+  pass "Prometheus returns OpenSIS Vault health recording rule"
+  assert_json "$opensis_vault_health" '.data.result | length >= 1' "OpenSIS Vault health recording rule has data"
+  assert_json "$opensis_vault_health" '.data.result[0].value[1] == "1"' "OpenSIS Vault reports initialized and unsealed"
+else
+  fail "Prometheus OpenSIS Vault health query failed"
+  exit 1
+fi
+
+if opensis_vault_secrets=$(prom_query 'opensis:vault_all_required_secrets_readable'); then
+  pass "Prometheus returns OpenSIS Vault required-secret recording rule"
+  assert_json "$opensis_vault_secrets" '.data.result | length >= 1' "OpenSIS required-secret recording rule has data"
+  assert_json "$opensis_vault_secrets" '.data.result[0].value[1] == "1"' "OpenSIS required Vault secrets are readable"
+else
+  fail "Prometheus OpenSIS required-secret query failed"
+  exit 1
+fi
+
 echo
 header "Audit Summary"
 echo "==============="
