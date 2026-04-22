@@ -172,6 +172,24 @@ else
   exit 1
 fi
 
+if opensis_mariadb_target=$(prom_query 'up{job="opensis-mariadb"}'); then
+  pass "Prometheus returns OpenSIS MariaDB exporter scrape health"
+  assert_json "$opensis_mariadb_target" '.data.result | length == 1' "Prometheus sees the OpenSIS MariaDB exporter target"
+  assert_json "$opensis_mariadb_target" '.data.result[0].value[1] == "1"' "OpenSIS MariaDB exporter target is up"
+else
+  fail "Prometheus OpenSIS MariaDB exporter query failed"
+  exit 1
+fi
+
+if opensis_mariadb_up=$(prom_query 'opensis:mariadb_up'); then
+  pass "Prometheus returns OpenSIS MariaDB database health"
+  assert_json "$opensis_mariadb_up" '.data.result | length >= 1' "OpenSIS MariaDB health recording rule has data"
+  assert_json "$opensis_mariadb_up" '.data.result[0].value[1] == "1"' "OpenSIS MariaDB reports up"
+else
+  fail "Prometheus OpenSIS MariaDB health query failed"
+  exit 1
+fi
+
 echo
 header "Audit Summary"
 echo "==============="

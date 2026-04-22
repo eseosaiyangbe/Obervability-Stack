@@ -203,6 +203,18 @@ scrape_configs:
     metrics_path: /metrics
     honor_labels: true
 
+  # OpenSIS MariaDB metrics.
+  # The exporter runs beside the OpenSIS database and exposes database health to the shared control plane.
+  - job_name: 'opensis-mariadb'
+    static_configs:
+      - targets: ['opensis-mysqld-exporter:9104']
+        labels:
+          app: opensis
+          component: mariadb
+    scrape_interval: 15s
+    metrics_path: /metrics
+    honor_labels: true
+
   # MemFlip application metrics.
   # The backend exposes bounded technical and game metrics on observability-net.
   - job_name: 'memflip-backend'
