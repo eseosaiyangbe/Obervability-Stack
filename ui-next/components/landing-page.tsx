@@ -85,7 +85,7 @@ export function LandingPage() {
           className="overflow-hidden rounded-3xl border border-gray-200 bg-white/90 shadow-xl backdrop-blur dark:border-gray-800 dark:bg-gray-950/80"
         >
           <div className="border-b border-blue-100 bg-gradient-to-r from-slate-950 via-blue-950 to-slate-900 p-6 text-white dark:border-gray-800 sm:p-10">
-            <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+            <div className="flex flex-col gap-6">
               <div className="max-w-3xl">
                 <Badge className="mb-4 border-white/20 bg-white/10 text-white">
                   <ShieldCheck className="mr-1 h-3 w-3" />
@@ -99,25 +99,6 @@ export function LandingPage() {
                   a legacy platform, a resilience lab, and a lightweight onboarding app into one shared
                   monitoring, incident, and operator experience.
                 </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:w-[28rem]">
-                <div className="flex min-h-[108px] flex-col justify-between rounded-2xl border border-white/20 bg-white/10 p-4 shadow-inner">
-                  <p className="text-sm leading-5 text-blue-100">Workloads</p>
-                  <p className="mt-4 text-2xl font-black leading-none">4</p>
-                </div>
-                <div className="flex min-h-[108px] flex-col justify-between rounded-2xl border border-white/20 bg-white/10 p-4 shadow-inner">
-                  <p className="text-sm leading-5 text-blue-100">Control Plane</p>
-                  <p className="mt-4 text-2xl font-black leading-none">1</p>
-                </div>
-                <div className="flex min-h-[108px] flex-col justify-between rounded-2xl border border-white/20 bg-white/10 p-4 shadow-inner">
-                  <p className="text-sm leading-5 text-blue-100">Current Phase</p>
-                  <p className="mt-4 text-2xl font-black leading-none">6</p>
-                </div>
-                <div className="flex min-h-[108px] flex-col justify-between rounded-2xl border border-white/20 bg-white/10 p-4 shadow-inner">
-                  <p className="text-sm leading-5 text-blue-100">Direction</p>
-                  <p className="mt-4 text-2xl font-black leading-none">K8s</p>
-                </div>
               </div>
             </div>
           </div>
