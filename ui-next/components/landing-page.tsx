@@ -85,13 +85,13 @@ export function LandingPage() {
           className="overflow-hidden rounded-3xl border border-gray-200 bg-white/90 shadow-xl backdrop-blur dark:border-gray-800 dark:bg-gray-950/80"
         >
           <div className="border-b border-blue-100 bg-gradient-to-r from-slate-950 via-blue-950 to-slate-900 p-6 text-white dark:border-gray-800 sm:p-10">
-            <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+            <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
               <div className="max-w-3xl">
                 <Badge className="mb-4 border-white/20 bg-white/10 text-white">
                   <ShieldCheck className="mr-1 h-3 w-3" />
                   DevOps Easy Learning
                 </Badge>
-                <h1 className="text-3xl font-black tracking-tight sm:text-5xl">
+                <h1 className="text-2xl font-black tracking-tight sm:text-4xl lg:text-5xl">
                   One control plane for four different workload stories
                 </h1>
                 <p className="mt-4 max-w-2xl text-base leading-7 text-blue-100 sm:text-lg">
@@ -101,22 +101,22 @@ export function LandingPage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <div className="rounded-2xl border border-white/20 bg-white/10 p-4">
-                  <p className="text-sm text-blue-100">Workloads</p>
-                  <p className="mt-1 text-2xl font-black">4</p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:w-[28rem]">
+                <div className="flex min-h-[108px] flex-col justify-between rounded-2xl border border-white/20 bg-white/10 p-4 shadow-inner">
+                  <p className="text-sm leading-5 text-blue-100">Workloads</p>
+                  <p className="mt-4 text-2xl font-black leading-none">4</p>
                 </div>
-                <div className="rounded-2xl border border-white/20 bg-white/10 p-4">
-                  <p className="text-sm text-blue-100">Control Plane</p>
-                  <p className="mt-1 text-2xl font-black">1</p>
+                <div className="flex min-h-[108px] flex-col justify-between rounded-2xl border border-white/20 bg-white/10 p-4 shadow-inner">
+                  <p className="text-sm leading-5 text-blue-100">Control Plane</p>
+                  <p className="mt-4 text-2xl font-black leading-none">1</p>
                 </div>
-                <div className="rounded-2xl border border-white/20 bg-white/10 p-4">
-                  <p className="text-sm text-blue-100">Current Phase</p>
-                  <p className="mt-1 text-2xl font-black">6</p>
+                <div className="flex min-h-[108px] flex-col justify-between rounded-2xl border border-white/20 bg-white/10 p-4 shadow-inner">
+                  <p className="text-sm leading-5 text-blue-100">Current Phase</p>
+                  <p className="mt-4 text-2xl font-black leading-none">6</p>
                 </div>
-                <div className="rounded-2xl border border-white/20 bg-white/10 p-4">
-                  <p className="text-sm text-blue-100">Direction</p>
-                  <p className="mt-1 text-2xl font-black">K8s</p>
+                <div className="flex min-h-[108px] flex-col justify-between rounded-2xl border border-white/20 bg-white/10 p-4 shadow-inner">
+                  <p className="text-sm leading-5 text-blue-100">Direction</p>
+                  <p className="mt-4 text-2xl font-black leading-none">K8s</p>
                 </div>
               </div>
             </div>
