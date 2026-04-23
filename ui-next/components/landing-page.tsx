@@ -76,15 +76,15 @@ const quickLinks = [
 
 export function LandingPage() {
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(6,182,212,0.18),_transparent_32%),linear-gradient(135deg,#f8fafc,#ffffff_45%,#e0f2fe)] dark:bg-[radial-gradient(circle_at_top_left,_rgba(6,182,212,0.18),_transparent_28%),linear-gradient(135deg,#020617,#0f172a_45%,#111827)]">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#dbeafe,_transparent_34%),linear-gradient(135deg,#f8fafc,#ffffff_45%,#eef2ff)] dark:bg-[radial-gradient(circle_at_top_left,_rgba(37,99,235,0.22),_transparent_32%),linear-gradient(135deg,#020617,#0f172a_48%,#111827)]">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
         <motion.section
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="overflow-hidden rounded-3xl border border-gray-200 bg-white/90 shadow-xl backdrop-blur dark:border-gray-800 dark:bg-gray-950/85"
+          className="overflow-hidden rounded-3xl border border-gray-200 bg-white/90 shadow-xl backdrop-blur dark:border-gray-800 dark:bg-gray-950/80"
         >
-          <div className="border-b border-cyan-100 bg-gradient-to-r from-slate-950 via-cyan-950 to-emerald-900 p-6 text-white dark:border-gray-800 sm:p-10">
+          <div className="border-b border-blue-100 bg-gradient-to-r from-slate-950 via-blue-950 to-slate-900 p-6 text-white dark:border-gray-800 sm:p-10">
             <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
                 <Badge className="mb-4 border-white/20 bg-white/10 text-white">
@@ -94,7 +94,7 @@ export function LandingPage() {
                 <h1 className="text-3xl font-black tracking-tight sm:text-5xl">
                   One control plane for four different workload stories
                 </h1>
-                <p className="mt-4 max-w-2xl text-base leading-7 text-cyan-50 sm:text-lg">
+                <p className="mt-4 max-w-2xl text-base leading-7 text-blue-100 sm:text-lg">
                   This workspace is a mixed-architecture operations lab. It turns a microservices app,
                   a legacy platform, a resilience lab, and a lightweight onboarding app into one shared
                   monitoring, incident, and operator experience.
@@ -103,19 +103,19 @@ export function LandingPage() {
 
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <div className="rounded-2xl border border-white/20 bg-white/10 p-4">
-                  <p className="text-sm text-cyan-50">Workloads</p>
+                  <p className="text-sm text-blue-100">Workloads</p>
                   <p className="mt-1 text-2xl font-black">4</p>
                 </div>
                 <div className="rounded-2xl border border-white/20 bg-white/10 p-4">
-                  <p className="text-sm text-cyan-50">Control Plane</p>
+                  <p className="text-sm text-blue-100">Control Plane</p>
                   <p className="mt-1 text-2xl font-black">1</p>
                 </div>
                 <div className="rounded-2xl border border-white/20 bg-white/10 p-4">
-                  <p className="text-sm text-cyan-50">Current Phase</p>
+                  <p className="text-sm text-blue-100">Current Phase</p>
                   <p className="mt-1 text-2xl font-black">6</p>
                 </div>
                 <div className="rounded-2xl border border-white/20 bg-white/10 p-4">
-                  <p className="text-sm text-cyan-50">Direction</p>
+                  <p className="text-sm text-blue-100">Direction</p>
                   <p className="mt-1 text-2xl font-black">K8s</p>
                 </div>
               </div>
@@ -125,7 +125,7 @@ export function LandingPage() {
           <div className="grid gap-6 p-6 lg:grid-cols-[1.2fr_0.8fr] lg:p-10">
             <div className="space-y-5">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700 dark:text-cyan-300">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-700 dark:text-blue-300">
                   Demo Promise
                 </p>
                 <h2 className="mt-2 text-2xl font-black tracking-tight text-gray-950 dark:text-white">
@@ -139,7 +139,7 @@ export function LandingPage() {
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <Button asChild size="lg" className="gap-2 rounded-2xl bg-cyan-600 px-6 text-white hover:bg-cyan-700">
+                <Button asChild size="lg" className="gap-2 rounded-2xl bg-blue-600 px-6 text-white hover:bg-blue-700">
                   <Link href={authRedirect("/demo")}>
                     Open Demo Center
                     <ArrowRight className="h-4 w-4" />
@@ -167,9 +167,9 @@ export function LandingPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.35, delay: 0.08 * index }}
                   >
-                    <Card className="h-full border-gray-200 bg-gray-50/80 shadow-sm transition hover:border-cyan-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-900/60 dark:hover:border-cyan-800">
+                    <Card className="h-full border-gray-200 bg-gray-50/80 shadow-sm transition hover:border-blue-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-900/60 dark:hover:border-blue-800">
                       <CardHeader className="pb-3">
-                        <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-100 text-cyan-700 dark:bg-cyan-900/20 dark:text-cyan-300">
+                        <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
                           <item.icon className="h-5 w-5" />
                         </div>
                         <CardTitle className="text-lg text-gray-950 dark:text-white">{item.title}</CardTitle>
@@ -178,7 +178,7 @@ export function LandingPage() {
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <Button asChild variant="ghost" className="h-auto px-0 text-cyan-700 hover:bg-transparent hover:text-cyan-800 dark:text-cyan-300 dark:hover:text-cyan-200">
+                        <Button asChild variant="ghost" className="h-auto px-0 text-blue-700 hover:bg-transparent hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200">
                           {item.external ? (
                             <a href={item.href} target="_blank" rel="noreferrer">
                               Open reference
@@ -197,7 +197,7 @@ export function LandingPage() {
             <Card className="border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-xl text-gray-950 dark:text-white">
-                  <Activity className="h-5 w-5 text-cyan-600 dark:text-cyan-300" />
+                  <Activity className="h-5 w-5 text-blue-600 dark:text-blue-300" />
                   Workload Storyboard
                 </CardTitle>
                 <CardDescription>
@@ -212,7 +212,7 @@ export function LandingPage() {
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="text-base font-bold text-gray-950 dark:text-white">{workload.name}</p>
-                      <Badge variant="outline" className="border-cyan-200 bg-cyan-50 text-cyan-700 dark:border-cyan-900 dark:bg-cyan-900/20 dark:text-cyan-300">
+                      <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900 dark:bg-blue-900/20 dark:text-blue-300">
                         {workload.role}
                       </Badge>
                     </div>
