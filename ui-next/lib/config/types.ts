@@ -223,8 +223,8 @@ export interface ConfigUpdate {
 export const DEFAULT_CONFIG: MonitoringConfig = {
   dashboard: {
     refresh_interval: '15s',
-    title: 'Monitoring in a Box',
-    description: 'System monitoring dashboard',
+    title: 'DevOps Easy Learning Control Plane',
+    description: 'Control plane for the managed application portfolio',
     theme: 'system',
   },
   metrics: [
@@ -325,18 +325,18 @@ export const DEFAULT_CONFIG: MonitoringConfig = {
         enabled: false,
         webhook_url: '',
         default_channel: '#alerts',
-        username: 'Monitoring in a Box',
+        username: 'DevOps Easy Learning',
         icon_emoji: ':bell:',
       },
       teams: {
         enabled: false,
         webhook_url: '',
-        title: 'Monitoring in a Box Alert',
+        title: 'DevOps Easy Learning Alert',
       },
       discord: {
         enabled: false,
         webhook_url: '',
-        username: 'Monitoring in a Box',
+        username: 'DevOps Easy Learning',
         avatar_url: '',
       },
       email: {
@@ -350,8 +350,8 @@ export const DEFAULT_CONFIG: MonitoringConfig = {
             pass: '',
           },
         },
-        from: 'alerts@monitoringinabox.local',
-        to: ['admin@monitoringinabox.local'],
+        from: 'alerts@devopseasylearning.local',
+        to: ['admin@devopseasylearning.local'],
       },
       webhook: {
         enabled: false,

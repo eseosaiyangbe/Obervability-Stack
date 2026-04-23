@@ -94,12 +94,45 @@ prom_query() {
   curl -fsS --get "$PROMETHEUS_QUERY_URL" --data-urlencode "query=$query"
 }
 
+prom_query_max_value() {
+  local query="$1"
+  local response
+
+  response="$(prom_query "$query")"
+  jq -r '([.data.result[]? | (.value[1] | tonumber)] | max // 0)' <<<"$response"
+}
+
+wait_for_prom_query_min_value() {
+  local query="$1"
+  local min_value="$2"
+  local attempts="${3:-20}"
+  local delay_seconds="${4:-2}"
+  local response='{"status":"success","data":{"result":[]}}'
+
+  for (( attempt=1; attempt<=attempts; attempt++ )); do
+    if response="$(prom_query "$query")"; then
+      if jq -e --argjson min_value "$min_value" \
+        '([.data.result[]? | (.value[1] | tonumber)] | max // 0) >= $min_value' \
+        >/dev/null 2>&1 <<<"$response"; then
+        printf '%s' "$response"
+        return 0
+      fi
+    fi
+
+    sleep "$delay_seconds"
+  done
+
+  printf '%s' "$response"
+  return 1
+}
+
 assert_json() {
   local json="$1"
   local jq_expr="$2"
   local label="$3"
+  shift 3
 
-  if jq -e "$jq_expr" >/dev/null 2>&1 <<<"$json"; then
+  if jq -e "$@" "$jq_expr" >/dev/null 2>&1 <<<"$json"; then
     pass "$label"
   else
     fail "$label"
@@ -193,6 +226,9 @@ fi
 
 echo
 header "Synthetic Transfer Flow"
+
+baseline_completed_counter="$(prom_query_max_value 'transactions_total{job="swiftpay-transaction-service",service="transaction-service",status="completed",type="transfer"}')"
+baseline_completed_rule="$(prom_query_max_value 'swiftpay:completed_transfers_total')"
 
 TS="$(date +%s)"
 EMAIL1="live.audit.${TS}.a@example.com"
@@ -300,19 +336,26 @@ fi
 echo
 header "Metrics Reaction Checks"
 
-if completed_transfer_query=$(prom_query 'transactions_total{job="swiftpay-transaction-service",service="transaction-service",status="completed",type="transfer"}'); then
+expected_completed_counter="$(awk -v baseline="$baseline_completed_counter" 'BEGIN { printf "%.0f", baseline + 1 }')"
+expected_completed_rule="$(awk -v baseline="$baseline_completed_rule" 'BEGIN { printf "%.0f", baseline + 1 }')"
+
+if completed_transfer_query=$(wait_for_prom_query_min_value \
+  'transactions_total{job="swiftpay-transaction-service",service="transaction-service",status="completed",type="transfer"}' \
+  "$expected_completed_counter" \
+  20 \
+  2); then
   pass "Prometheus returns completed transfer counters"
   assert_json "$completed_transfer_query" '.data.result | length >= 1' "Prometheus sees at least one completed transfer series"
-  assert_json "$completed_transfer_query" '([.data.result[] | (.value[1] | tonumber)] | max) >= 1' "Completed transfer counter is at least 1"
+  assert_json "$completed_transfer_query" '([.data.result[] | (.value[1] | tonumber)] | max) >= $min_value' "Completed transfer counter reflects the new audit transfer" --argjson min_value "$expected_completed_counter"
 else
   fail "Prometheus completed transfer query failed"
   exit 1
 fi
 
-if completed_transfer_rule=$(prom_query 'swiftpay:completed_transfers_total'); then
+if completed_transfer_rule=$(wait_for_prom_query_min_value 'swiftpay:completed_transfers_total' "$expected_completed_rule" 20 2); then
   pass "Prometheus returns the completed-transfer recording rule"
   assert_json "$completed_transfer_rule" '.data.result | length >= 1' "Completed-transfer recording rule is present"
-  assert_json "$completed_transfer_rule" '([.data.result[] | (.value[1] | tonumber)] | max) >= 1' "Completed-transfer recording rule is at least 1"
+  assert_json "$completed_transfer_rule" '([.data.result[] | (.value[1] | tonumber)] | max) >= $min_value' "Completed-transfer recording rule reflects the new audit transfer" --argjson min_value "$expected_completed_rule"
 else
   fail "Prometheus completed-transfer recording rule query failed"
   exit 1

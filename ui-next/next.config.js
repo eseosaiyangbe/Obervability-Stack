@@ -40,9 +40,9 @@ const nextConfig = {
   },
   // Site configuration support
   env: {
-    SITE_NAME: process.env.SITE_NAME || 'Monitoring in a Box',
+    SITE_NAME: process.env.SITE_NAME || 'DevOps Easy Learning',
     SITE_URL: process.env.SITE_URL || 'http://localhost:4000',
-    SITE_DESCRIPTION: process.env.SITE_DESCRIPTION || 'Comprehensive DevOps monitoring solution with real-time metrics, centralized logging, and intelligent alerting.',
+    SITE_DESCRIPTION: process.env.SITE_DESCRIPTION || 'Unified control plane for observability, incidents, and app operations across the DevOps Easy Learning portfolio.',
   },
   // Only apply rewrites in development
   async rewrites() {

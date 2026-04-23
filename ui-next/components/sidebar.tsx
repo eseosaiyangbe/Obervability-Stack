@@ -417,8 +417,8 @@ export const Sidebar = memo(() => {
                       <Activity className="h-7 w-7" />
                     </div>
                     <div>
-                      <h1 className="text-xl font-bold text-gray-900 dark:text-white">DevOps Monitor</h1>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Infrastructure Dashboard</p>
+                      <h1 className="text-xl font-bold text-gray-900 dark:text-white">DevOps Easy Learning</h1>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Control Plane</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -518,7 +518,7 @@ export const Sidebar = memo(() => {
                 <div className="flex items-center justify-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                   <span>Built with</span>
                   <Heart className="h-4 w-4 text-red-500 animate-pulse" />
-                  <span>by Harshhaa</span>
+                  <span>Portfolio operations lab</span>
                 </div>
               </div>
             ) : (

@@ -231,7 +231,7 @@ export function useConfig() {
         version: '1.0.0',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        dashboard: { title: 'DevOps Monitor', refresh_interval: '15s' },
+        dashboard: { title: 'DevOps Easy Learning Control Plane', refresh_interval: '15s' },
         metrics: { total: 0, enabled: 0, groups: 0 },
         services: { total: 0, enabled: 0 },
         logs: { default_query: '{job="varlogs"}', limit: 100 },

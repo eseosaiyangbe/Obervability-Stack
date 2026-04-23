@@ -1,11 +1,33 @@
 import { withAuth } from "next-auth/middleware"
 import { NextResponse } from "next/server"
 
+const publicRoutePatterns = [
+  /^\/$/,
+  /^\/auth(\/.*)?$/,
+  /^\/api\/auth(\/.*)?$/,
+  /^\/dashboard$/,
+  /^\/demo$/,
+  /^\/services$/,
+  /^\/services\/compare$/,
+  /^\/services\/[^/]+$/,
+  /^\/alerts$/,
+  /^\/notifications$/,
+]
+
+function isPublicRoute(pathname: string) {
+  return publicRoutePatterns.some((pattern) => pattern.test(pathname))
+}
+
 export default withAuth(
   function middleware(req) {
     const token = req.nextauth.token
     const isAuth = !!token
-    const isAuthPage = req.nextUrl.pathname.startsWith("/auth")
+    const pathname = req.nextUrl.pathname
+    const isAuthPage = pathname.startsWith("/auth")
+
+    if (isPublicRoute(pathname) && !isAuthPage) {
+      return null
+    }
 
     if (isAuthPage) {
       if (isAuth) {
@@ -27,7 +49,6 @@ export default withAuth(
 
     // Role-based access control
     const userRole = token?.role
-    const pathname = req.nextUrl.pathname
 
     // Admin-only routes
     if (pathname.startsWith("/admin") && userRole !== "ADMIN") {
@@ -44,13 +65,7 @@ export default withAuth(
   {
     callbacks: {
       authorized: ({ token, req }) => {
-        // Allow access to public routes
-        const publicRoutes = ["/", "/auth", "/api/auth"]
-        const isPublicRoute = publicRoutes.some(route => 
-          req.nextUrl.pathname.startsWith(route)
-        )
-        
-        if (isPublicRoute) {
+        if (isPublicRoute(req.nextUrl.pathname)) {
           return true
         }
 

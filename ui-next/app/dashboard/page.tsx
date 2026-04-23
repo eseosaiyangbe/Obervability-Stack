@@ -50,6 +50,15 @@ const statToneStyles: Record<StatTone, string> = {
   slate: "border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-300",
 }
 
+function normalizeDashboardTitle(title?: string | null) {
+  if (!title) return "DevOps Easy Learning Control Plane"
+  const trimmed = title.trim()
+  if (trimmed === "DevOps Monitor" || trimmed === "Monitoring in a Box") {
+    return "DevOps Easy Learning Control Plane"
+  }
+  return trimmed
+}
+
 function formatPercent(value?: number | null) {
   if (value === null || value === undefined || Number.isNaN(value)) return "--"
   return `${value.toFixed(1)}%`
@@ -177,7 +186,7 @@ export default function DashboardPage() {
   const { stats, loading: alertsLoading, error: alertsError, refresh: refreshAlerts } = useAlertmanagerAlerts()
   const metrics = useAllCurrentMetrics()
 
-  const dashboardTitle = dashboardConfig?.title || "DevOps Monitor"
+  const dashboardTitle = normalizeDashboardTitle(dashboardConfig?.title)
   const networkTotal = (metrics.data?.network?.inbound || 0) + (metrics.data?.network?.outbound || 0)
   const monitoredEndpointCount = health.reduce((total, app) => total + app.endpoints.length, 0)
   const isLoading = appHealthLoading || alertsLoading || metrics.isLoading

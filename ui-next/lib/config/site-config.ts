@@ -1,48 +1,99 @@
-// Site Configuration for DevOps Monitoring System
+// Site configuration for the DevOps Easy Learning control plane.
 import { SiteConfig } from './types';
+
+const legacySiteNames = new Set([
+  'Monitoring in a Box',
+  'DevOps Monitor',
+]);
+
+function isLegacySiteName(value?: string | null) {
+  return typeof value === 'string' && legacySiteNames.has(value.trim());
+}
+
+function sanitizeLoadedConfig(config: SiteConfig): SiteConfig {
+  const sanitized = { ...config };
+
+  if (isLegacySiteName(sanitized.name)) {
+    sanitized.name = DEFAULT_SITE_CONFIG.name;
+  }
+
+  if (isLegacySiteName(sanitized.company?.name)) {
+    sanitized.company = {
+      ...sanitized.company,
+      name: DEFAULT_SITE_CONFIG.company.name,
+    };
+  }
+
+  if (sanitized.seo?.title?.includes('Monitoring in a Box')) {
+    sanitized.seo = {
+      ...sanitized.seo,
+      title: DEFAULT_SITE_CONFIG.seo.title,
+      description: DEFAULT_SITE_CONFIG.seo.description,
+      author: DEFAULT_SITE_CONFIG.seo.author,
+      canonical: DEFAULT_SITE_CONFIG.seo.canonical,
+      og: { ...DEFAULT_SITE_CONFIG.seo.og },
+      twitter: { ...DEFAULT_SITE_CONFIG.seo.twitter },
+    };
+  }
+
+  if (sanitized.contact?.email?.includes('monitoringinabox')) {
+    sanitized.contact = {
+      ...sanitized.contact,
+      email: DEFAULT_SITE_CONFIG.contact.email,
+      social: { ...DEFAULT_SITE_CONFIG.contact.social },
+    };
+  }
+
+  if (sanitized.legal?.copyright?.includes('Monitoring in a Box')) {
+    sanitized.legal = {
+      ...sanitized.legal,
+      copyright: DEFAULT_SITE_CONFIG.legal.copyright,
+    };
+  }
+
+  return sanitized;
+}
 
 export const DEFAULT_SITE_CONFIG: SiteConfig = {
   // Basic Site Information
-  name: 'Monitoring in a Box',
-  description: 'Modern monitoring solution for your DevOps infrastructure with real-time metrics, logs, and alerts',
+  name: 'DevOps Easy Learning',
+  description: 'Control plane for the DevOps Easy Learning portfolio with real-time metrics, logs, alerts, and operator guidance.',
   url: 'http://localhost:4000',
   version: '1.0.0',
   
   // SEO Configuration
   seo: {
-    title: 'Monitoring in a Box - Modern Infrastructure Monitoring',
-    description: 'Comprehensive DevOps monitoring solution with real-time metrics, centralized logging, and intelligent alerting. Monitor your infrastructure with Prometheus, Grafana, and Loki integration.',
+    title: 'DevOps Easy Learning Control Plane',
+    description: 'Unified control plane for OpenSIS, SwiftPay, FoodPulse, and MemFlip with monitoring, logging, alerts, and operator guidance.',
     keywords: [
-      'devops monitoring',
-      'infrastructure monitoring',
+      'devops easy learning',
+      'control plane',
+      'application monitoring',
       'prometheus',
       'grafana',
       'loki',
       'alertmanager',
-      'metrics',
-      'logs',
-      'alerts',
       'observability',
-      'system monitoring',
-      'application monitoring'
+      'incident response',
+      'operator guide'
     ],
-    author: 'Monitoring in a Box Team',
+    author: 'DevOps Easy Learning Team',
     robots: 'index, follow',
     canonical: 'http://localhost:4000',
     og: {
-      title: 'Monitoring in a Box - Modern Infrastructure Monitoring',
-      description: 'Comprehensive DevOps monitoring solution with real-time metrics, centralized logging, and intelligent alerting.',
+      title: 'DevOps Easy Learning Control Plane',
+      description: 'Unified control plane for app demos, observability, incident response, and operator handoff.',
       type: 'website',
       image: '/banner.png',
       url: 'http://localhost:4000',
-      site_name: 'Monitoring in a Box'
+      site_name: 'DevOps Easy Learning'
     },
     twitter: {
       card: 'summary_large_image',
-      site: '@monitoringinabox',
-      creator: '@monitoringinabox',
-      title: 'Monitoring in a Box - Modern Infrastructure Monitoring',
-      description: 'Comprehensive DevOps monitoring solution with real-time metrics, centralized logging, and intelligent alerting.',
+      site: '@devopseasylearn',
+      creator: '@devopseasylearn',
+      title: 'DevOps Easy Learning Control Plane',
+      description: 'Unified control plane for app demos, observability, and operator readiness.',
       image: '/banner.png'
     }
   },
@@ -70,23 +121,22 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
   
   // Contact Information
   contact: {
-    email: 'support@monitoringinabox.com',
-    phone: '+1 (555) 123-4567',
-    address: '123 DevOps Street, Monitoring City, MC 12345',
+    email: 'support@devopseasylearning.local',
+    phone: '+1 (000) 000-0000',
+    address: 'DevOps Easy Learning Lab',
     social: {
-      twitter: 'https://twitter.com/monitoringinabox',
-      linkedin: 'https://linkedin.com/company/devops-monitor',
-      github: 'https://github.com/monitoring-in-a-box',
-      discord: 'https://discord.gg/monitoring-in-a-box'
+      twitter: 'https://twitter.com/devopseasylearn',
+      linkedin: 'https://linkedin.com/company/devops-easy-learning',
+      github: 'https://github.com/eseosaiyangbe/DevOps-Easy-Learning'
     }
   },
   
   // Company Information
   company: {
-    name: 'Monitoring in a Box Inc.',
-    description: 'Leading provider of modern DevOps monitoring solutions',
-    founded: '2025',
-    location: 'San Francisco, CA'
+    name: 'DevOps Easy Learning',
+    description: 'Hands-on portfolio environment for operating mixed-architecture workloads through one control plane.',
+    founded: '2026',
+    location: 'Toronto, ON'
   },
   
   // Legal Information
@@ -94,7 +144,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
     privacy_policy_url: '/privacy-policy',
     terms_of_service_url: '/terms-of-service',
     cookie_policy_url: '/cookie-policy',
-    copyright: '© 2025 Monitoring in a Box Inc. All rights reserved.'
+    copyright: '© 2026 DevOps Easy Learning. All rights reserved.'
   },
   
   // Feature Flags
@@ -182,13 +232,13 @@ export class SiteConfigManager {
         const stored = localStorage.getItem('site-config');
         if (stored) {
           const parsed = JSON.parse(stored);
-          return { ...DEFAULT_SITE_CONFIG, ...parsed };
+          return sanitizeLoadedConfig({ ...DEFAULT_SITE_CONFIG, ...parsed });
         }
       } catch (error) {
         console.warn('Failed to load site config from localStorage:', error);
       }
     }
-    return DEFAULT_SITE_CONFIG;
+    return sanitizeLoadedConfig(DEFAULT_SITE_CONFIG);
   }
 
   private saveConfig(): void {
