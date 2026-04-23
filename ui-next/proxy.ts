@@ -5,13 +5,6 @@ const publicRoutePatterns = [
   /^\/$/,
   /^\/auth(\/.*)?$/,
   /^\/api\/auth(\/.*)?$/,
-  /^\/dashboard$/,
-  /^\/demo$/,
-  /^\/services$/,
-  /^\/services\/compare$/,
-  /^\/services\/[^/]+$/,
-  /^\/alerts$/,
-  /^\/notifications$/,
 ]
 
 function isPublicRoute(pathname: string) {

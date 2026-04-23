@@ -18,6 +18,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 const repositoryUrl = "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main"
 
+function authRedirect(path: string) {
+  return `/auth/signin?from=${encodeURIComponent(path)}`
+}
+
 const workloadCards = [
   {
     name: "SwiftPay",
@@ -45,13 +49,13 @@ const quickLinks = [
   {
     title: "Open Demo Center",
     description: "Walk the polished presenter flow from control plane to app handoff.",
-    href: "/demo",
+    href: authRedirect("/demo"),
     icon: Compass,
   },
   {
     title: "View Managed Apps",
     description: "See the launch board for OpenSIS, SwiftPay, FoodPulse, and MemFlip.",
-    href: "/services",
+    href: authRedirect("/services"),
     icon: Layers,
   },
   {
@@ -136,13 +140,13 @@ export function LandingPage() {
 
               <div className="flex flex-wrap gap-3">
                 <Button asChild size="lg" className="gap-2 rounded-2xl bg-cyan-600 px-6 text-white hover:bg-cyan-700">
-                  <Link href="/demo">
+                  <Link href={authRedirect("/demo")}>
                     Open Demo Center
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
                 <Button asChild variant="outline" size="lg" className="gap-2 rounded-2xl bg-white dark:bg-gray-950">
-                  <Link href="/services">
+                  <Link href={authRedirect("/services")}>
                     Managed Apps
                     <Layers className="h-4 w-4" />
                   </Link>

@@ -3,7 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { QueryProvider } from "@/components/query-provider";
 import { SessionProvider } from "@/components/session-provider";
-import { Sidebar } from "@/components/sidebar";
+import { AppShell } from "@/components/app-shell";
 import { Toaster } from "@/components/ui/toaster";
 import { DEFAULT_SITE_CONFIG } from "@/lib/config/site-config";
 import { getServerSession } from "next-auth";
@@ -66,14 +66,7 @@ export default async function RootLayout({
             disableTransitionOnChange
           >
             <QueryProvider>
-              <div className="flex h-screen bg-background overflow-hidden">
-                <Sidebar />
-                <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 lg:p-8 min-w-0 main-content transition-all duration-300 ease-in-out">
-                  <div className="max-w-[1920px] mx-auto">
-                    {children}
-                  </div>
-                </main>
-              </div>
+              <AppShell>{children}</AppShell>
               <Toaster />
             </QueryProvider>
           </ThemeProvider>
