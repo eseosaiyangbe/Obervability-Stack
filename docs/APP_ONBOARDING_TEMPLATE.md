@@ -49,6 +49,38 @@ If the app has a user-facing surface, document:
 - the main local browser URL
 - the user-facing health path if the preferred check runs through a frontend proxy
 
+### 2a. Port Contract
+
+Every onboarded app must declare its host-exposed ports intentionally.
+
+Rules:
+
+- do not assume common defaults are free on the shared workstation
+- keep service-internal ports unchanged unless there is a hard technical reason
+- make host ports env-driven when there is any realistic chance of collision
+- check the workspace matrix before assigning a new host port
+
+Primary reference:
+
+- [PORT-ALLOCATION-MATRIX.md](/Users/raymond/Documents/DevOps-Easy-Learning/PORT-ALLOCATION-MATRIX.md)
+
+Preferred host-port strategy:
+
+- control plane and shared observability services keep their reserved ports
+- app UIs use app-specific high ports or loopback-only bindings
+- databases should not publish to the host unless there is a clear operator need
+- optional reverse proxies and local edge layers must never take shared monitoring ports by accident
+
+Recommended local host-port bands for future apps:
+
+- `80-99`: reserved for explicit local ingress simulation only
+- `3000-3199`: application APIs and internal operator UIs
+- `4000-4199`: control-plane and shared workspace UIs
+- `5400-5499`: host-published PostgreSQL listeners and database proxies
+- `6300-6399`: host-published Redis listeners and Redis proxies
+- `8080-8099`: user-facing application frontends
+- `9000-9199`: shared monitoring and exporter surfaces
+
 ### 3. Health Contract
 
 Every onboarded app must expose at least one HTTP health surface that an operator can check without entering a container.
@@ -131,6 +163,8 @@ Use this checklist before calling an app onboarded.
 
 - repo has a root `README` with a clear local start path
 - repo has `.env.example` if runtime env is required
+- repo documents or parameterizes every host-exposed port
+- repo host ports were checked against [PORT-ALLOCATION-MATRIX.md](/Users/raymond/Documents/DevOps-Easy-Learning/PORT-ALLOCATION-MATRIX.md)
 - app joins `observability-net`
 - monitored app inventory entry exists and validates
 - operator health check works from the host
