@@ -195,7 +195,7 @@ ui-next/lib/
 ### Database Configuration
 ```bash
 ui-next/prisma/
-├── dev.db                       # SQLite development database
+├── migrations/                  # PostgreSQL schema migrations
 ├── schema.prisma                # Database schema definition
 └── seed.ts                      # Database seeding script
 ```

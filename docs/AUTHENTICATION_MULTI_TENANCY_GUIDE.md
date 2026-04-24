@@ -392,7 +392,7 @@ The system can include pre-configured demo users for testing when demo login is 
 ### **1. Environment Configuration**
 ```bash
 # Database
-DATABASE_URL="file:./dev.db"
+DATABASE_URL="postgresql://observability_app:observability_dev_password@localhost:5434/observability_dev?schema=public"
 
 # NextAuth.js
 NEXTAUTH_URL="http://localhost:4000"
@@ -415,7 +415,7 @@ GITHUB_CLIENT_SECRET=""
 npx prisma generate
 
 # Run database migrations
-npx prisma migrate dev --name init
+npx prisma migrate deploy
 
 # Seed demo users
 npx tsx prisma/seed.ts
@@ -538,7 +538,7 @@ The implementation includes:
 - ✅ **User Management** with admin panel
 - ✅ **Security Features** with proper authentication and authorization
 - ✅ **Responsive UI** with mobile-friendly design
-- ✅ **Database Integration** with Prisma and SQLite
+- ✅ **Database Integration** with Prisma and PostgreSQL
 - ✅ **Controlled Demo Access** for testing and demonstration
 
 The remaining work in this area is mostly about reconciling aspirational multi-tenancy concepts with the current runtime and deciding how far to harden the operator model next. 🚀

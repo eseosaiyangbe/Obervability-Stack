@@ -119,8 +119,10 @@ cd devops-monitoring-in-a-box
 ./devops-monitor.sh start
 
 # Or manually with Docker Compose
-docker compose up -d
+docker compose up -d --build
 ```
+
+The control-plane app now runs on PostgreSQL by default. For local host access outside Docker, the bundled database is published on `localhost:5434`.
 
 ### 🌐 **Cloud Deployment**
 

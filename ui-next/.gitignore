@@ -16,6 +16,7 @@ pids
 *.pid
 *.seed
 *.pid.lock
+*.db
 
 # Coverage directory used by tools like istanbul
 coverage/

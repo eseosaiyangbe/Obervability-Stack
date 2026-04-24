@@ -89,7 +89,7 @@ That keeps the auth surface aligned with the actual environment instead of adver
 The key auth-related variables are:
 
 ```bash
-DATABASE_URL=file:./dev.db
+DATABASE_URL=postgresql://observability_app:replace-me@localhost:5434/observability_dev?schema=public
 NEXTAUTH_URL=http://localhost:4000
 NEXTAUTH_SECRET=replace-me
 AUTH_MODE=database

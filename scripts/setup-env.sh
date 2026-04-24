@@ -119,7 +119,7 @@ SITE_DESCRIPTION="Comprehensive DevOps monitoring solution"
 DOCKERHUB_USERNAME=yourusername
 
 # Database Configuration
-DATABASE_URL="file:./dev.db"
+DATABASE_URL="postgresql://observability_app:observability_dev_password@localhost:5434/observability_dev?schema=public"
 
 # Authentication
 NEXTAUTH_SECRET="your-super-secret-key-change-this-in-production"
@@ -139,7 +139,7 @@ EOF
             print_warning "ui-next/env.example not found, creating basic ui-next/.env file"
             cat > ui-next/.env << EOF
 # Database
-DATABASE_URL="file:./dev.db"
+DATABASE_URL="postgresql://observability_app:observability_dev_password@localhost:5434/observability_dev?schema=public"
 
 # NextAuth
 NEXTAUTH_URL="http://localhost:4000"

@@ -1,6 +1,25 @@
-version: '3.8'
-
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: observability-postgres-dev
+    ports:
+      - "${DB_PORT:-5434}:5432"
+    environment:
+      POSTGRES_DB: ${DB_NAME:-observability_dev}
+      POSTGRES_USER: ${DB_USER:-observability_app}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-observability_dev_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-observability_app} -d ${DB_NAME:-observability_dev}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - monitoring
+
   # Prometheus - Metrics collection and storage
   prometheus:
     image: prom/prometheus:latest
@@ -121,12 +140,35 @@ services:
     networks:
       - monitoring
 
+  devops-monitor-db-init:
+    build:
+      context: ./ui-next
+      dockerfile: Dockerfile
+      target: builder
+      args:
+        DATABASE_URL: ${BUILD_DATABASE_URL:-postgresql://build_user:build_password@build-postgres:5432/build_db?schema=public}
+        NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:4000}
+        ENABLE_DEMO_LOGIN: ${ENABLE_DEMO_LOGIN:-true}
+        NEXT_PUBLIC_AUTH_MODE: ${NEXT_PUBLIC_AUTH_MODE:-database}
+        NEXT_PUBLIC_ENABLE_DEMO_LOGIN: ${NEXT_PUBLIC_ENABLE_DEMO_LOGIN:-true}
+    container_name: devops-monitor-db-init-dev
+    command: ["sh", "-c", "npx prisma migrate deploy && npm run db:seed"]
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://observability_app:observability_dev_password@postgres:5432/observability_dev?schema=public}
+    restart: "no"
+    networks:
+      - monitoring
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   # DevOps Monitor UI - Development mode with hot reloading
   devops-monitor-ui:
     build:
       context: ./ui-next
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     container_name: devops-monitor-ui-dev
+    command: ["npm", "run", "dev"]
     ports:
       - "4000:3000"
     volumes:
@@ -137,15 +179,30 @@ services:
       - NODE_ENV=development
       - PORT=3000
       - WATCHPACK_POLLING=true
+      - DATABASE_URL=${DATABASE_URL:-postgresql://observability_app:observability_dev_password@postgres:5432/observability_dev?schema=public}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:4000}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-change-this-secret}
+      - AUTH_MODE=${AUTH_MODE:-database}
+      - ENABLE_DEMO_LOGIN=${ENABLE_DEMO_LOGIN:-true}
+      - NEXT_PUBLIC_AUTH_MODE=${NEXT_PUBLIC_AUTH_MODE:-database}
+      - NEXT_PUBLIC_ENABLE_DEMO_LOGIN=${NEXT_PUBLIC_ENABLE_DEMO_LOGIN:-true}
     restart: unless-stopped
     networks:
       - monitoring
     depends_on:
-      - prometheus
-      - grafana
-      - loki
+      postgres:
+        condition: service_healthy
+      devops-monitor-db-init:
+        condition: service_completed_successfully
+      prometheus:
+        condition: service_started
+      grafana:
+        condition: service_started
+      loki:
+        condition: service_started
 
 volumes:
+  postgres_data:
   prometheus_data:
   grafana_data:
   loki_data:

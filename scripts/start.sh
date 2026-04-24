@@ -30,7 +30,7 @@ fi
 
 # Start the services
 echo "📦 Starting monitoring services..."
-docker compose up -d
+docker compose up -d --build
 
 # Wait for services to be ready
 echo "⏳ Waiting for services to be ready..."

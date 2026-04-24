@@ -39,8 +39,8 @@ NEXTAUTH_SECRET="your-secret-key-here"             # Required for JWT tokens
 NEXTAUTH_URL="http://localhost:3000"               # Your app URL
 
 # Database
-DATABASE_URL="file:./dev.db"                       # SQLite for development
-# DATABASE_URL="postgresql://user:pass@localhost:5432/monitoring"  # PostgreSQL for production
+DATABASE_URL="postgresql://observability_app:password@localhost:5434/observability_dev?schema=public"  # PostgreSQL for development
+# DATABASE_URL="postgresql://observability_app:password@postgres-prod:5432/observability_prod?schema=public"  # PostgreSQL for production
 
 # Session Configuration
 SESSION_MAX_AGE="30d"                              # Session duration
@@ -145,15 +145,21 @@ SENTRY_DSN="https://..."                           # Sentry DSN for error tracki
 
 ### 🗄️ Database Configuration
 ```bash
-# SQLite (Development)
-DATABASE_URL="file:./dev.db"                       # SQLite database file
+# PostgreSQL (Development)
+DATABASE_URL="postgresql://observability_app:password@localhost:5434/observability_dev?schema=public"
+DB_HOST="localhost"                                # Database host
+DB_PORT="5434"                                     # Database port
+DB_NAME="observability_dev"                        # Database name
+DB_USER="observability_app"                        # Database user
+DB_PASSWORD="observability_dev_password"           # Database password
+DB_SSL="false"                                     # Use SSL connection
 
 # PostgreSQL (Production)
-DATABASE_URL="postgresql://user:password@localhost:5432/monitoring"
+DATABASE_URL="postgresql://observability_app:password@postgres-prod:5432/observability_prod?schema=public"
 DB_HOST="localhost"                                # Database host
 DB_PORT="5432"                                     # Database port
-DB_NAME="monitoring"                               # Database name
-DB_USER="monitoring_user"                          # Database user
+DB_NAME="observability_prod"                       # Database name
+DB_USER="observability_app"                        # Database user
 DB_PASSWORD="secure_password"                      # Database password
 DB_SSL="true"                                      # Use SSL connection
 
@@ -290,7 +296,7 @@ npm run test-config
 ```bash
 # .env for development
 NODE_ENV=development
-DATABASE_URL=file:./dev.db
+DATABASE_URL=postgresql://observability_app:password@db:5432/observability_dev?schema=public
 PROMETHEUS_URL=http://localhost:9090
 GRAFANA_URL=http://localhost:3000
 LOKI_URL=http://localhost:3100

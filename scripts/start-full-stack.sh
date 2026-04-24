@@ -51,7 +51,7 @@ docker compose pull
 
 # Start the services
 echo "🏗️  Starting monitoring stack..."
-docker compose up -d
+docker compose up -d --build
 
 # Wait for services to be ready
 echo "⏳ Waiting for services to start..."

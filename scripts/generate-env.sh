@@ -24,8 +24,8 @@ echo ""
 
 # Database URL examples
 echo "3. DATABASE_URL (database connection):"
-echo "   For SQLite (development): file:./dev.db"
-echo "   For PostgreSQL (production): postgresql://user:pass@host:port/db"
+echo "   For local development: postgresql://observability_app:password@localhost:5434/observability_dev?schema=public"
+echo "   For production: postgresql://user:pass@host:port/observability_prod?schema=public"
 echo "   For Vercel Postgres: (get from Vercel dashboard)"
 echo ""
 
@@ -33,7 +33,7 @@ echo "📋 Copy these to your .env.local file:"
 echo "======================================"
 echo "NEXTAUTH_SECRET=\"$NEXTAUTH_SECRET\""
 echo "NEXTAUTH_URL=\"http://localhost:3000\""
-echo "DATABASE_URL=\"file:./dev.db\""
+echo "DATABASE_URL=\"postgresql://observability_app:replace-me@localhost:5434/observability_dev?schema=public\""
 echo ""
 
 echo "🌐 For Vercel deployment, add these environment variables:"
