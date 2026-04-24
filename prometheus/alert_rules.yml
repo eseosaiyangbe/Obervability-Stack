@@ -56,7 +56,7 @@ groups:
       # High disk usage
       - alert: HighDiskUsage
         expr: |
-          max by(instance, device, fstype) (
+          max by(instance, device, fstype, mountpoint) (
             (
               node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs|rpc_pipefs|nsfs|autofs|devtmpfs"}
               - node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs|rpc_pipefs|nsfs|autofs|devtmpfs"}
@@ -76,7 +76,7 @@ groups:
       # Critical disk usage
       - alert: CriticalDiskUsage
         expr: |
-          max by(instance, device, fstype) (
+          max by(instance, device, fstype, mountpoint) (
             (
               node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs|rpc_pipefs|nsfs|autofs|devtmpfs"}
               - node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs|rpc_pipefs|nsfs|autofs|devtmpfs"}
