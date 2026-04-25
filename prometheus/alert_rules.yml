@@ -258,7 +258,7 @@ groups:
       # OpenSIS UI down
       - alert: OpenSISDown
         expr: probe_success{job="blackbox-http",app="opensis"} == 0
-        for: 2m
+        for: 1m
         labels:
           severity: critical
           service: opensis
@@ -266,7 +266,7 @@ groups:
           component: availability
         annotations:
           summary: "OpenSIS is down"
-          description: "OpenSIS endpoint {{ $labels.instance }} has failed Blackbox probing for more than 2 minutes"
+          description: "OpenSIS endpoint {{ $labels.instance }} has failed Blackbox probing for more than 1 minute"
           runbook_url: "https://docs.example.com/runbooks/opensis-down"
 
       # OpenSIS high probe latency
@@ -286,7 +286,7 @@ groups:
       # SwiftPay component down
       - alert: SwiftPayComponentDown
         expr: probe_success{job="blackbox-http",app="swiftpay"} == 0
-        for: 2m
+        for: 1m
         labels:
           severity: critical
           service: swiftpay
@@ -294,7 +294,7 @@ groups:
           component: availability
         annotations:
           summary: "SwiftPay component is down"
-          description: "SwiftPay {{ $labels.component }} endpoint {{ $labels.instance }} has failed Blackbox probing for more than 2 minutes"
+          description: "SwiftPay {{ $labels.component }} endpoint {{ $labels.instance }} has failed Blackbox probing for more than 1 minute"
           runbook_url: "https://docs.example.com/runbooks/swiftpay-component-down"
 
       # SwiftPay high probe latency
@@ -620,7 +620,7 @@ groups:
       # MemFlip health check failing
       - alert: MemFlipAppHealthDown
         expr: memflip:app_health == 0
-        for: 2m
+        for: 1m
         labels:
           severity: critical
           service: memflip
@@ -628,7 +628,7 @@ groups:
           component: backend
         annotations:
           summary: "MemFlip application health is down"
-          description: "MemFlip health signals have been unhealthy for more than 2 minutes."
+          description: "MemFlip health signals have been unhealthy for more than 1 minute."
           runbook_url: "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main/Obervability-Stack/docs/MEMFLIP_OPERATOR_RUNBOOK.md"
 
       # MemFlip high API error ratio
@@ -662,7 +662,7 @@ groups:
       # FoodPulse API metrics down
       - alert: FoodPulseAPIMetricsDown
         expr: foodpulse:api_up == 0
-        for: 2m
+        for: 1m
         labels:
           severity: warning
           service: foodpulse
@@ -670,7 +670,7 @@ groups:
           component: api
         annotations:
           summary: "FoodPulse API metrics are down"
-          description: "Prometheus cannot scrape FoodPulse API metrics for more than 2 minutes."
+          description: "Prometheus cannot scrape FoodPulse API metrics for more than 1 minute."
           runbook_url: "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main/Obervability-Stack/docs/FOODPULSE_OPERATOR_RUNBOOK.md"
 
       # FoodPulse high API error ratio
