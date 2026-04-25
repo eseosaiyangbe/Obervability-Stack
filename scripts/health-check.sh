@@ -130,6 +130,9 @@ check_docker_access() {
 check_compose_services() {
     print_section "Compose Services"
 
+    local oneshot_services=(
+        "devops-monitor-db-init"
+    )
     local services=()
     local service
     while IFS= read -r service; do
@@ -144,18 +147,52 @@ check_compose_services() {
     print_info "Default service set: ${services[*]}"
 
     for service in "${services[@]}"; do
+        local is_oneshot=0
+        local oneshot_service
+        for oneshot_service in "${oneshot_services[@]}"; do
+            if [ "$service" = "$oneshot_service" ]; then
+                is_oneshot=1
+                break
+            fi
+        done
+
         local container_id
         container_id="$("${COMPOSE[@]}" ps -q "$service")"
 
+        if [ -z "$container_id" ] && [ "$is_oneshot" -eq 1 ]; then
+            container_id="$("${COMPOSE[@]}" ps -aq "$service" | head -n 1)"
+        fi
+
         if [ -z "$container_id" ]; then
+            if [ "$is_oneshot" -eq 1 ]; then
+                record_pass "One-shot init completed and no container remains: $service"
+                continue
+            fi
             record_fail "Service not running: $service"
             continue
         fi
 
         local inspect_output
-        inspect_output="$(docker inspect --format '{{.State.Status}}|{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$container_id")"
+        inspect_output="$(docker inspect --format '{{.State.Status}}|{{.State.ExitCode}}|{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$container_id")"
         local state="${inspect_output%%|*}"
+        local remainder="${inspect_output#*|}"
+        local exit_code="${remainder%%|*}"
         local health="${inspect_output##*|}"
+
+        if [ "$is_oneshot" -eq 1 ]; then
+            case "$state:$exit_code" in
+                running:*)
+                    record_pass "One-shot init still running: $service"
+                    ;;
+                exited:0)
+                    record_pass "One-shot init completed successfully: $service"
+                    ;;
+                *)
+                    record_fail "One-shot init failed with state=$state exit_code=$exit_code: $service"
+                    ;;
+            esac
+            continue
+        fi
 
         if [ "$state" != "running" ]; then
             record_fail "Service state is $state: $service"
