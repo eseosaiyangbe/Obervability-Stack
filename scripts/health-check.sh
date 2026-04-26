@@ -212,11 +212,6 @@ check_compose_services() {
         esac
     done
 
-    if docker ps --format '{{.Names}}' | grep -qx 'cadvisor'; then
-        record_warning "Optional profile service running: cadvisor"
-    else
-        print_info "Optional profile service not enabled: cadvisor"
-    fi
 }
 
 check_http_endpoint() {
@@ -258,9 +253,7 @@ check_public_endpoints() {
     check_http_endpoint "DevOps Monitor UI" "http://localhost:4000/" '^(200|302)$'
 
     if docker ps --format '{{.Names}}' | grep -qx 'cadvisor'; then
-        check_http_endpoint "cAdvisor health" "http://localhost:8080/healthz" '^200$'
-    else
-        print_info "Skipping cAdvisor endpoint because the optional profile is not running"
+        check_http_endpoint "cAdvisor health" "http://localhost:8082/healthz" '^200$'
     fi
 }
 
