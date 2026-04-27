@@ -56,10 +56,10 @@ const appProfiles: Record<string, {
   },
   swiftpay: {
     demoRole: "Flagship microservices story",
-    operatorValue: "Shows gateway health, wallet services, transaction flow, async dependencies, and business telemetry.",
-    k8sFocus: "Service discovery, per-service health probes, queue dependency checks, and horizontal scaling boundaries.",
+    operatorValue: "Shows gateway health, wallet services, transaction flow, async dependencies, business telemetry, and the second real k3s migration slice.",
+    k8sFocus: "Service discovery, per-service health probes, queue dependency checks, migration jobs, and horizontal scaling boundaries.",
     liveAudit: "./Obervability-Stack/scripts/devops-monitor.sh swiftpay-live",
-    risk: "Multiple services can fail independently, so operators need fast dependency mapping.",
+    risk: "Multiple services can fail independently, so operators need fast dependency mapping and clear infrastructure contracts.",
   },
   foodpulse: {
     demoRole: "Resilience and failover story",

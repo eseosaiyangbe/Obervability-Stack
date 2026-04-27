@@ -70,7 +70,7 @@ const demoSteps = [
     label: "Microservices",
     href: "/services/swiftpay",
     command: "./Obervability-Stack/scripts/devops-monitor.sh swiftpay-live",
-    talkingPoint: "Use SwiftPay to explain money movement, service health, async workers, and business telemetry.",
+    talkingPoint: "Use SwiftPay to explain money movement, service health, async workers, business telemetry, and the second real k3s migration slice.",
     icon: Network,
   },
   {
@@ -121,7 +121,7 @@ const workloadRoles = [
   {
     name: "SwiftPay",
     role: "Microservices",
-    summary: "Money movement, async workers, service health, and business telemetry.",
+    summary: "Money movement, async workers, service health, business telemetry, and the second reusable k3s migration path.",
   },
   {
     name: "OpenSIS",

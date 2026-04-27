@@ -48,11 +48,12 @@ const operatorGuides: Record<string, OperatorGuide> = {
     runbookUrl: `${repositoryUrl}/Obervability-Stack/docs/OPENSIS_OPERATOR_RUNBOOK.md`,
   },
   swiftpay: {
-    story: "Microservices money-flow app for gateway health, wallet dependencies, async transaction processing, and business metrics.",
+    story: "Microservices money-flow app for gateway health, wallet dependencies, async transaction processing, business metrics, and the second real k3s migration slice.",
     firstChecks: [
       "./Obervability-Stack/scripts/devops-monitor.sh swiftpay-live",
+      "cd SwiftPay && ./scripts/k8s-dev-verify.sh",
       "curl -fsS http://localhost:4000/api/apps/swiftpay/business | jq .",
-      "cd SwiftPay && docker compose ps api-gateway wallet-service transaction-service rabbitmq",
+      "kubectl get pods,svc,ingress -n swiftpay-dev",
     ],
     drill: "SwiftPay transaction worker down",
     runbook: "Obervability-Stack/docs/SWIFTPAY_OPERATOR_RUNBOOK.md",

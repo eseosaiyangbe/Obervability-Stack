@@ -123,11 +123,11 @@ export const monitoredApps: MonitoredApp[] = [
   {
     id: 'swiftpay',
     name: 'SwiftPay',
-    description: 'Wallet/payment microservices app cloned from a public repo.',
+    description: 'Wallet/payment microservices app that now serves as the second real k3s migration slice.',
     ownership: 'cloned-public-repo',
     status: 'active',
     priority: 2,
-    environment: 'local',
+    environment: 'hybrid',
     category: 'wallet-platform',
     docker: {
       composeProject: 'swiftpay',
@@ -160,7 +160,7 @@ export const monitoredApps: MonitoredApp[] = [
       },
     },
     kubernetes: {
-      namespace: 'swiftpay',
+      namespace: 'swiftpay-dev',
       recommendedServiceLabels: {
         'app.kubernetes.io/name': 'swiftpay',
         'app.kubernetes.io/part-of': 'wallet-platform',
@@ -169,12 +169,12 @@ export const monitoredApps: MonitoredApp[] = [
     },
     observability: {
       endpoints: [
-        endpoint('swiftpay-frontend', 'SwiftPay Frontend', 'frontend', 'http://swiftpay-frontend/', 'http://localhost:8081', 'swiftpay', 'frontend'),
-        endpoint('swiftpay-api-gateway', 'SwiftPay API Gateway', 'api', 'http://swiftpay-api-gateway:3000/health', 'http://localhost:3007/health', 'swiftpay', 'api-gateway', '/health'),
-        endpoint('swiftpay-auth-service', 'SwiftPay Auth Service', 'service', 'http://swiftpay-auth-service:3004/health', undefined, 'swiftpay', 'auth-service', '/health'),
-        endpoint('swiftpay-wallet-service', 'SwiftPay Wallet Service', 'service', 'http://swiftpay-wallet-service:3001/health', undefined, 'swiftpay', 'wallet-service', '/health'),
-        endpoint('swiftpay-transaction-service', 'SwiftPay Transaction Service', 'service', 'http://swiftpay-transaction-service:3002/health', undefined, 'swiftpay', 'transaction-service', '/health'),
-        endpoint('swiftpay-notification-service', 'SwiftPay Notification Service', 'service', 'http://swiftpay-notification-service:3003/health', undefined, 'swiftpay', 'notification-service', '/health'),
+        endpoint('swiftpay-frontend', 'SwiftPay Frontend', 'frontend', 'http://swiftpay-frontend/', 'http://localhost:8081', 'swiftpay', 'frontend', '/', 'swiftpay-dev'),
+        endpoint('swiftpay-api-gateway', 'SwiftPay API Gateway', 'api', 'http://swiftpay-api-gateway:3000/health', 'http://localhost:3007/health', 'swiftpay', 'api-gateway', '/health', 'swiftpay-dev'),
+        endpoint('swiftpay-auth-service', 'SwiftPay Auth Service', 'service', 'http://swiftpay-auth-service:3004/health', undefined, 'swiftpay', 'auth-service', '/health', 'swiftpay-dev'),
+        endpoint('swiftpay-wallet-service', 'SwiftPay Wallet Service', 'service', 'http://swiftpay-wallet-service:3001/health', undefined, 'swiftpay', 'wallet-service', '/health', 'swiftpay-dev'),
+        endpoint('swiftpay-transaction-service', 'SwiftPay Transaction Service', 'service', 'http://swiftpay-transaction-service:3002/health', undefined, 'swiftpay', 'transaction-service', '/health', 'swiftpay-dev'),
+        endpoint('swiftpay-notification-service', 'SwiftPay Notification Service', 'service', 'http://swiftpay-notification-service:3003/health', undefined, 'swiftpay', 'notification-service', '/health', 'swiftpay-dev'),
       ],
       primaryHealthEndpointId: 'swiftpay-frontend',
       logQuery: '{compose_project=~".*swiftpay.*"}',
@@ -183,9 +183,11 @@ export const monitoredApps: MonitoredApp[] = [
     },
     runbooks: {
       localStart: 'cd SwiftPay && docker compose up -d',
+      kubernetesDeploy: 'cd SwiftPay && ./scripts/k8s-dev-deploy.sh',
+      kubernetesVerify: 'cd SwiftPay && ./scripts/k8s-dev-verify.sh',
       healthCheck: 'curl -fsS http://localhost:3007/health && curl -I http://localhost:8081',
     },
-    tags: ['microservices', 'nodejs', 'payments'],
+    tags: ['microservices', 'nodejs', 'payments', 'k3s-second-slice'],
   },
   {
     id: 'memflip',
