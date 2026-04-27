@@ -29,7 +29,7 @@ export interface MonitoredApp {
   ownership: AppOwnership;
   status: MonitoredAppStatus;
   priority: number;
-  environment: 'local';
+  environment: 'local' | 'hybrid';
   category: string;
   docker: {
     composeProject?: string;
@@ -53,6 +53,8 @@ export interface MonitoredApp {
   };
   runbooks: {
     localStart?: string;
+    kubernetesDeploy?: string;
+    kubernetesVerify?: string;
     healthCheck?: string;
   };
   tags: string[];
@@ -188,11 +190,11 @@ export const monitoredApps: MonitoredApp[] = [
   {
     id: 'memflip',
     name: 'MemFlip',
-    description: 'Frontend and backend app cloned from a public repo.',
+    description: 'Frontend/backend onboarding app that now doubles as the first real k3s migration template.',
     ownership: 'cloned-public-repo',
     status: 'active',
     priority: 3,
-    environment: 'local',
+    environment: 'hybrid',
     category: 'demo-app',
     docker: {
       composeProject: 'memflip',
@@ -204,7 +206,7 @@ export const monitoredApps: MonitoredApp[] = [
       },
     },
     kubernetes: {
-      namespace: 'memflip',
+      namespace: 'memflip-dev',
       recommendedServiceLabels: {
         'app.kubernetes.io/name': 'memflip',
         'app.kubernetes.io/part-of': 'demo-app',
@@ -213,8 +215,8 @@ export const monitoredApps: MonitoredApp[] = [
     },
     observability: {
       endpoints: [
-        endpoint('memflip-frontend', 'MemFlip Frontend', 'frontend', 'http://memflip-frontend/api/health', 'http://localhost:8080', 'memflip', 'frontend', '/api/health'),
-        endpoint('memflip-backend', 'MemFlip Backend', 'api', 'http://memflip-backend:3001/health', undefined, 'memflip', 'backend', '/health'),
+        endpoint('memflip-frontend', 'MemFlip Frontend', 'frontend', 'http://memflip-frontend/api/health', 'http://localhost:8080', 'memflip', 'frontend', '/api/health', 'memflip-dev'),
+        endpoint('memflip-backend', 'MemFlip Backend', 'api', 'http://memflip-backend:3001/health', undefined, 'memflip', 'backend', '/health', 'memflip-dev'),
       ],
       primaryHealthEndpointId: 'memflip-frontend',
       logQuery: '{compose_project=~".*memflip.*"}',
@@ -223,9 +225,11 @@ export const monitoredApps: MonitoredApp[] = [
     },
     runbooks: {
       localStart: 'cd MemFlip && docker compose up -d',
+      kubernetesDeploy: 'cd MemFlip && ./scripts/k8s-dev-deploy.sh',
+      kubernetesVerify: 'cd MemFlip && ./scripts/k8s-dev-verify.sh',
       healthCheck: 'curl -fsS http://localhost:8080/api/health',
     },
-    tags: ['frontend', 'backend'],
+    tags: ['frontend', 'backend', 'k3s-first-slice'],
   },
   {
     id: 'foodpulse',
@@ -282,7 +286,8 @@ function endpoint(
   browserUrl: string | undefined,
   app: string,
   component: string,
-  path = '/'
+  path = '/',
+  namespace = app
 ): MonitoredEndpoint {
   return {
     id,
@@ -298,7 +303,7 @@ function endpoint(
     },
     kubernetes: {
       serviceName: id,
-      namespace: app,
+      namespace,
       portName: 'http',
       path,
     },

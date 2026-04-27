@@ -70,11 +70,12 @@ const operatorGuides: Record<string, OperatorGuide> = {
     runbookUrl: `${repositoryUrl}/Obervability-Stack/docs/FOODPULSE_OPERATOR_RUNBOOK.md`,
   },
   memflip: {
-    story: "Lightweight onboarding app that teaches the minimum frontend/backend observability integration pattern.",
+    story: "Lightweight onboarding app that now serves as the first real k3s migration slice and the repeatable frontend/backend template for the workspace.",
     firstChecks: [
       "./Obervability-Stack/scripts/devops-monitor.sh memflip-live",
+      "cd MemFlip && ./scripts/k8s-dev-verify.sh",
       "curl -fsS http://localhost:8080/api/health | jq .",
-      "cd MemFlip && docker compose ps frontend backend postgres redis",
+      "kubectl get pods,svc,ingress -n memflip-dev",
     ],
     drill: "MemFlip backend down",
     runbook: "Obervability-Stack/docs/MEMFLIP_OPERATOR_RUNBOOK.md",
@@ -470,8 +471,16 @@ export default function ManagedAppDetailPage() {
               <code className="text-sm text-gray-100">{app.runbooks.localStart || "Not documented"}</code>
             </div>
             <div className="rounded-2xl bg-gray-950 p-4">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">Kubernetes deploy</p>
+              <code className="text-sm text-gray-100">{app.runbooks.kubernetesDeploy || "Not documented"}</code>
+            </div>
+            <div className="rounded-2xl bg-gray-950 p-4">
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">Health check</p>
               <code className="text-sm text-gray-100">{app.runbooks.healthCheck || "Not documented"}</code>
+            </div>
+            <div className="rounded-2xl bg-gray-950 p-4">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">Kubernetes verify</p>
+              <code className="text-sm text-gray-100">{app.runbooks.kubernetesVerify || "Not documented"}</code>
             </div>
           </CardContent>
         </Card>

@@ -94,7 +94,7 @@ const demoSteps = [
     label: "Onboarding pattern",
     href: "/services/memflip",
     command: "./Obervability-Stack/scripts/devops-monitor.sh memflip-live",
-    talkingPoint: "Use MemFlip to show the smallest repeatable integration pattern for a new app.",
+    talkingPoint: "Use MemFlip to show the smallest repeatable integration pattern and the first real k3s migration slice in the workspace.",
     icon: Gauge,
   },
   {
@@ -136,7 +136,7 @@ const workloadRoles = [
   {
     name: "MemFlip",
     role: "Onboarding app",
-    summary: "Small frontend/backend app that shows the minimum control-plane pattern.",
+    summary: "Small frontend/backend app that shows the minimum control-plane pattern and the first reusable k3s migration path.",
   },
 ]
 

@@ -69,11 +69,11 @@ const appProfiles: Record<string, {
     risk: "HA labs become misleading if the UI hides topology or treats failover as a generic frontend check.",
   },
   memflip: {
-    demoRole: "Fast onboarding reference",
-    operatorValue: "Shows the minimum pattern for integrating a simple frontend/backend app into the control plane.",
-    k8sFocus: "Small-service probes, clear labels, and a repeatable onboarding contract.",
+    demoRole: "Onboarding plus first k3s slice",
+    operatorValue: "Shows the minimum frontend/backend integration pattern and proves the first real workload migration into the local k3s cluster.",
+    k8sFocus: "Repeatable deploy and verify workflow, ingress on Traefik, explicit network policy, and a reusable small-service contract.",
     liveAudit: "./Obervability-Stack/scripts/devops-monitor.sh memflip-live",
-    risk: "Simple apps are easy to under-document, which makes onboarding patterns drift.",
+    risk: "Simple apps are easy to under-document, which makes migration templates drift unless deploy and verification steps stay explicit.",
   },
 }
 
