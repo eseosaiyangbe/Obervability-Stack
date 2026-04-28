@@ -86,7 +86,7 @@ const demoSteps = [
     label: "Resilience lab",
     href: "/services/foodpulse",
     command: "./Obervability-Stack/scripts/devops-monitor.sh foodpulse-live",
-    talkingPoint: "Use FoodPulse to explain Redis, Postgres, HAProxy, failover posture, and app-level user experience.",
+    talkingPoint: "Use FoodPulse to explain the Compose HAProxy lab, the k3s CloudNativePG plus Redis Sentinel path, and how resilience changes across environments.",
     icon: Activity,
   },
   {
@@ -131,7 +131,7 @@ const workloadRoles = [
   {
     name: "FoodPulse",
     role: "Resilience lab",
-    summary: "Redis, Postgres, HAProxy, topology awareness, and failover behavior.",
+    summary: "Compose HAProxy drills plus a real k3s path with CloudNativePG, Redis Sentinel, topology awareness, and failover behavior.",
   },
   {
     name: "MemFlip",

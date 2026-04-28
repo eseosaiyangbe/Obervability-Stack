@@ -236,23 +236,23 @@ export const monitoredApps: MonitoredApp[] = [
   {
     id: 'foodpulse',
     name: 'FoodPulse',
-    description: 'Food app UI cloned from a public repo.',
+    description: 'Resilience lab app that now carries an owned k3s slice with CloudNativePG and Sentinel-aware Redis failover.',
     ownership: 'cloned-public-repo',
     status: 'active',
     priority: 4,
-    environment: 'local',
+    environment: 'hybrid',
     category: 'resilience-lab',
     docker: {
       composeProject: 'foodpulse',
-      networkAliases: ['foodpulse-ui'],
+      networkAliases: ['foodpulse-ui', 'foodpulse-api'],
       logLabels: {
         composeProjects: ['foodpulse'],
-        containers: ['foodpulse-ui'],
-        services: ['foodpulse-ui'],
+        containers: ['foodpulse-ui', 'foodpulse-api'],
+        services: ['foodpulse-ui', 'foodpulse-api'],
       },
     },
     kubernetes: {
-      namespace: 'foodpulse',
+      namespace: 'foodpulse-dev',
       recommendedServiceLabels: {
         'app.kubernetes.io/name': 'foodpulse',
         'app.kubernetes.io/part-of': 'resilience-lab',
@@ -261,7 +261,8 @@ export const monitoredApps: MonitoredApp[] = [
     },
     observability: {
       endpoints: [
-        endpoint('foodpulse-ui', 'FoodPulse UI', 'frontend', 'http://foodpulse-ui/', 'http://localhost:8090', 'foodpulse', 'frontend'),
+        endpoint('foodpulse-ui', 'FoodPulse UI', 'frontend', 'http://foodpulse-ui/', 'http://localhost:8090', 'foodpulse', 'frontend', '/', 'foodpulse-dev'),
+        endpoint('foodpulse-api', 'FoodPulse API', 'api', 'http://foodpulse-api:4567/health', undefined, 'foodpulse', 'api', '/health', 'foodpulse-dev'),
       ],
       primaryHealthEndpointId: 'foodpulse-ui',
       logQuery: '{compose_project=~".*foodpulse.*"}',
@@ -270,9 +271,11 @@ export const monitoredApps: MonitoredApp[] = [
     },
     runbooks: {
       localStart: 'cd FoodPulse && cp .env.example .env && ./scripts/start.sh',
+      kubernetesDeploy: 'cd FoodPulse && ./scripts/k8s-dev-deploy.sh',
+      kubernetesVerify: 'cd FoodPulse && ./scripts/k8s-dev-verify.sh',
       healthCheck: 'curl -I http://localhost:8090',
     },
-    tags: ['frontend'],
+    tags: ['frontend', 'redis-sentinel', 'cnpg', 'k3s-third-slice'],
   },
 ];
 

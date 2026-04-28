@@ -60,11 +60,12 @@ const operatorGuides: Record<string, OperatorGuide> = {
     runbookUrl: `${repositoryUrl}/Obervability-Stack/docs/SWIFTPAY_OPERATOR_RUNBOOK.md`,
   },
   foodpulse: {
-    story: "Resilience lab for Redis Sentinel, Postgres replicas, HAProxy routing, and application health during failover.",
+    story: "Resilience lab that now spans both worlds: Compose keeps the HAProxy teaching path, while k3s uses CloudNativePG and Sentinel-aware Redis failover.",
     firstChecks: [
       "./Obervability-Stack/scripts/devops-monitor.sh foodpulse-live",
+      "cd FoodPulse && ./scripts/k8s-dev-verify.sh",
       "cd FoodPulse && ./scripts/cluster-status.sh",
-      "cd FoodPulse && docker compose ps redis-master redis-replica-1 redis-replica-2 redis-haproxy",
+      "kubectl get pods,svc,ingress -n foodpulse-dev",
     ],
     drill: "FoodPulse Redis failover",
     runbook: "Obervability-Stack/docs/FOODPULSE_OPERATOR_RUNBOOK.md",

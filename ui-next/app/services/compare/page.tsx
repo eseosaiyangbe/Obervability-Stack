@@ -63,10 +63,10 @@ const appProfiles: Record<string, {
   },
   foodpulse: {
     demoRole: "Resilience and failover story",
-    operatorValue: "Shows how the platform explains HAProxy, Redis/Sentinel, Postgres topology, and failover readiness.",
-    k8sFocus: "Stateful dependencies, readiness gates, failover behavior, and topology-aware recovery.",
+    operatorValue: "Shows both the Compose-era HAProxy lab and the owned k3s path with CloudNativePG plus Sentinel-aware Redis failover.",
+    k8sFocus: "Stateful dependencies, operator-managed Postgres, Sentinel-aware Redis discovery, readiness gates, and topology-aware recovery.",
     liveAudit: "./Obervability-Stack/scripts/devops-monitor.sh foodpulse-live",
-    risk: "HA labs become misleading if the UI hides topology or treats failover as a generic frontend check.",
+    risk: "Resilience stories become misleading if Compose teaching paths and Kubernetes platform paths are mixed together without explicit operator guidance.",
   },
   memflip: {
     demoRole: "Onboarding plus first k3s slice",
