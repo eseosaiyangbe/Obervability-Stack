@@ -156,6 +156,8 @@ When making onboarding changes, prefer choices that survive the Kubernetes move:
 - keep one app entrypoint and one health story
 - avoid baking local-only container names into user-facing docs
 - treat aliases today as Service names tomorrow
+- treat Vault as the secret source of truth for both `dev` and `prod`
+- use External Secrets Operator or an equivalent Vault-backed materialization path instead of checked-in Kubernetes Secret values
 
 ## Onboarding Checklist
 
@@ -172,6 +174,7 @@ Use this checklist before calling an app onboarded.
 - live audit exists for non-trivial workloads
 - browser URL is documented if there is a UI
 - Kubernetes migration note is captured in repo or workspace docs
+- Kubernetes `dev` and `prod` overlays follow the Vault-first secret pattern when the app has entered the Kubernetes path
 
 ## Recommended Validation Flow
 
