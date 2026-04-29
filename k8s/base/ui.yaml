@@ -51,6 +51,7 @@ metadata:
   name: devops-monitor-db-init
 spec:
   backoffLimit: 3
+  ttlSecondsAfterFinished: 600
   template:
     metadata:
       labels:
@@ -59,7 +60,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: db-init
-          image: devops-monitor-ui:dev
+          image: devops-monitor-db-init:dev
           imagePullPolicy: IfNotPresent
           command: ["sh", "-c", "npx prisma migrate deploy && npm run db:seed"]
           envFrom:
@@ -111,11 +112,11 @@ spec:
             periodSeconds: 15
           resources:
             requests:
-              cpu: 250m
-              memory: 256Mi
+              cpu: 100m
+              memory: 192Mi
             limits:
-              cpu: "1"
-              memory: 1Gi
+              cpu: 500m
+              memory: 768Mi
       volumes:
         - name: data
           emptyDir: {}

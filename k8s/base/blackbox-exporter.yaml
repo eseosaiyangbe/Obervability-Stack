@@ -47,6 +47,13 @@ spec:
               port: http
             initialDelaySeconds: 30
             periodSeconds: 15
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
       volumes:
         - name: config
           configMap:

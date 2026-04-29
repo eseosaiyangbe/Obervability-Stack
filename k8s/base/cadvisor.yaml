@@ -23,11 +23,13 @@ spec:
       labels:
         app.kubernetes.io/name: cadvisor
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: cadvisor
           image: gcr.io/cadvisor/cadvisor:v0.52.1
           args:
             - --docker_only=false
+            - --containerd=/run/containerd/containerd.sock
             - --housekeeping_interval=30s
           securityContext:
             privileged: true
@@ -39,7 +41,10 @@ spec:
               mountPath: /rootfs
               readOnly: true
             - name: run
-              mountPath: /var/run
+              mountPath: /host/var/run
+              readOnly: true
+            - name: run-containerd
+              mountPath: /run/containerd
               readOnly: true
             - name: sys
               mountPath: /sys
@@ -47,6 +52,13 @@ spec:
             - name: containerd
               mountPath: /var/lib/containerd
               readOnly: true
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
       volumes:
         - name: root
           hostPath:
@@ -54,6 +66,9 @@ spec:
         - name: run
           hostPath:
             path: /var/run
+        - name: run-containerd
+          hostPath:
+            path: /run/containerd
         - name: sys
           hostPath:
             path: /sys

@@ -22,6 +22,8 @@ SKIP_RUNTIME=0
 SKIP_SECRETS_PLATFORM=0
 SKIP_BUILD=0
 SKIP_APPLY=0
+UI_IMAGE="devops-monitor-ui:dev"
+DB_INIT_IMAGE="devops-monitor-db-init:dev"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -53,6 +55,30 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+import_image_to_k3s() {
+  local image_ref="$1"
+
+  if ! docker image inspect "${image_ref}" >/dev/null 2>&1; then
+    echo "ERROR: Required local image not found: ${image_ref}" >&2
+    exit 1
+  fi
+
+  if command -v colima >/dev/null 2>&1; then
+    echo "[observability-k8s] Importing ${image_ref} into Colima k3s containerd"
+    docker save "${image_ref}" | colima ssh -- sh -lc 'ctr -n k8s.io images import -' >/dev/null
+    return 0
+  fi
+
+  if command -v k3s >/dev/null 2>&1; then
+    echo "[observability-k8s] Importing ${image_ref} into local k3s containerd"
+    docker save "${image_ref}" | sudo k3s ctr images import - >/dev/null
+    return 0
+  fi
+
+  echo "ERROR: Unable to determine how to import ${image_ref} into the k3s runtime." >&2
+  exit 1
+}
+
 cd "${ROOT_DIR}"
 
 if [[ "${SKIP_RUNTIME}" -eq 0 ]]; then
@@ -69,8 +95,13 @@ kubectl apply --dry-run=client -k k8s/overlays/dev >/dev/null
 
 if [[ "${SKIP_BUILD}" -eq 0 ]]; then
   echo "[observability-k8s] Building local UI image"
-  docker build -t devops-monitor-ui:dev ui-next
+  docker build -t "${UI_IMAGE}" ui-next
+  echo "[observability-k8s] Building local database init image"
+  docker build --target builder -t "${DB_INIT_IMAGE}" ui-next
 fi
+
+import_image_to_k3s "${UI_IMAGE}"
+import_image_to_k3s "${DB_INIT_IMAGE}"
 
 if [[ "${SKIP_APPLY}" -eq 1 ]]; then
   echo "[observability-k8s] Skipping apply by request"
@@ -78,6 +109,7 @@ if [[ "${SKIP_APPLY}" -eq 1 ]]; then
 fi
 
 echo "[observability-k8s] Applying dev overlay"
+kubectl delete job devops-monitor-db-init -n platform-observability-dev --ignore-not-found --wait=true >/dev/null 2>&1 || true
 kubectl apply -k k8s/overlays/dev
 
 echo "[observability-k8s] Waiting for PostgreSQL cluster"

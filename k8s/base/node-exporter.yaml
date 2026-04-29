@@ -23,7 +23,7 @@ spec:
       labels:
         app.kubernetes.io/name: node-exporter
     spec:
-      hostNetwork: true
+      automountServiceAccountToken: false
       hostPID: true
       containers:
         - name: node-exporter
@@ -36,7 +36,6 @@ spec:
           ports:
             - name: http
               containerPort: 9100
-              hostPort: 9100
           volumeMounts:
             - name: proc
               mountPath: /host/proc
@@ -47,6 +46,13 @@ spec:
             - name: root
               mountPath: /host/root
               readOnly: true
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
       volumes:
         - name: proc
           hostPath:

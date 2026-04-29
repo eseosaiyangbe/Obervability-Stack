@@ -16,6 +16,9 @@ images:
   - name: devops-monitor-ui:dev
     newName: devops-monitor-ui
     newTag: dev
+  - name: devops-monitor-db-init:dev
+    newName: devops-monitor-db-init
+    newTag: dev
 
 labels:
   - pairs:

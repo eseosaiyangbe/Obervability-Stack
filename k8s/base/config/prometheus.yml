@@ -93,32 +93,32 @@ scrape_configs:
           app: swiftpay
           component: frontend
         targets:
-          - http://swiftpay-frontend.swiftpay-dev.svc.cluster.local/
+          - http://frontend.swiftpay-dev.svc.cluster.local/
       - labels:
           app: swiftpay
           component: api-gateway
         targets:
-          - http://swiftpay-api-gateway.swiftpay-dev.svc.cluster.local:3000/health
+          - http://api-gateway.swiftpay-dev.svc.cluster.local/health
       - labels:
           app: swiftpay
           component: auth-service
         targets:
-          - http://swiftpay-auth-service.swiftpay-dev.svc.cluster.local:3004/health
+          - http://auth-service.swiftpay-dev.svc.cluster.local:3004/health
       - labels:
           app: swiftpay
           component: wallet-service
         targets:
-          - http://swiftpay-wallet-service.swiftpay-dev.svc.cluster.local:3001/health
+          - http://wallet-service.swiftpay-dev.svc.cluster.local:3001/health
       - labels:
           app: swiftpay
           component: transaction-service
         targets:
-          - http://swiftpay-transaction-service.swiftpay-dev.svc.cluster.local:3002/health
+          - http://transaction-service.swiftpay-dev.svc.cluster.local:3002/health
       - labels:
           app: swiftpay
           component: notification-service
         targets:
-          - http://swiftpay-notification-service.swiftpay-dev.svc.cluster.local:3003/health
+          - http://notification-service.swiftpay-dev.svc.cluster.local:3003/health
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -146,7 +146,7 @@ scrape_configs:
   - job_name: swiftpay-api-gateway
     static_configs:
       - targets:
-          - swiftpay-api-gateway.swiftpay-dev.svc.cluster.local:3000
+          - api-gateway.swiftpay-dev.svc.cluster.local:80
         labels:
           app: swiftpay
           component: api-gateway
@@ -154,7 +154,7 @@ scrape_configs:
   - job_name: swiftpay-auth-service
     static_configs:
       - targets:
-          - swiftpay-auth-service.swiftpay-dev.svc.cluster.local:3004
+          - auth-service.swiftpay-dev.svc.cluster.local:3004
         labels:
           app: swiftpay
           component: auth-service
@@ -162,7 +162,7 @@ scrape_configs:
   - job_name: swiftpay-wallet-service
     static_configs:
       - targets:
-          - swiftpay-wallet-service.swiftpay-dev.svc.cluster.local:3001
+          - wallet-service.swiftpay-dev.svc.cluster.local:3001
         labels:
           app: swiftpay
           component: wallet-service
@@ -170,7 +170,7 @@ scrape_configs:
   - job_name: swiftpay-transaction-service
     static_configs:
       - targets:
-          - swiftpay-transaction-service.swiftpay-dev.svc.cluster.local:3002
+          - transaction-service.swiftpay-dev.svc.cluster.local:3002
         labels:
           app: swiftpay
           component: transaction-service
@@ -178,7 +178,7 @@ scrape_configs:
   - job_name: swiftpay-notification-service
     static_configs:
       - targets:
-          - swiftpay-notification-service.swiftpay-dev.svc.cluster.local:3003
+          - notification-service.swiftpay-dev.svc.cluster.local:3003
         labels:
           app: swiftpay
           component: notification-service

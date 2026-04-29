@@ -41,19 +41,20 @@ The control-plane Kubernetes scope includes:
 
 ## Current Status
 
-This directory is the first owned control-plane scaffold.
+This directory is now the live owned control-plane path for the `k3s` `dev` slice.
 
 What is already true:
 
 - manifests are organized as `base` plus `dev` and `prod` overlays
 - Vault-backed secret delivery is modeled for both environments
 - ArgoCD application manifests exist for `dev` and `prod`
-- operator scripts exist for local validation
+- the `dev` slice has been deployed live on local `k3s`
+- PostgreSQL, Prometheus, Alertmanager, Grafana, Loki, Promtail, node-exporter, cAdvisor, blackbox-exporter, and `devops-monitor-ui` were verified in-cluster
+- Prometheus now sees the cross-workload app metrics targets for `MemFlip`, `SwiftPay`, and `FoodPulse` as `up`
 
 What is still intentionally staged:
 
-- this first pass prioritizes render-valid, reviewable manifests
-- live cluster rollout and parity verification should happen as the next control-plane implementation step
+- `prod` remains a stricter contract, not a live local rollout claim
 - `OpenSIS` continuity remains a later bridge concern because it still runs outside the cluster today
 
 ## Operator Commands
