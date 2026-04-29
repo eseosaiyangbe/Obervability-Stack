@@ -1,0 +1,82 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: platform-observability-prod
+
+resources:
+  - namespace.yaml
+  - vault-serviceaccount.yaml
+  - vault-secret-store.yaml
+  - vault-postgres-external-secret.yaml
+  - vault-ui-external-secret.yaml
+  - vault-grafana-external-secret.yaml
+  - ../../base
+
+labels:
+  - pairs:
+      cluster: k3s
+      environment: prod
+      secret-source: vault
+    includeSelectors: false
+
+patches:
+  - target:
+      kind: ConfigMap
+      name: observability-ui-config
+    patch: |-
+      - op: replace
+        path: /data/SITE_URL
+        value: https://controlplane.prod.example.com
+      - op: replace
+        path: /data/NEXT_PUBLIC_API_URL
+        value: https://controlplane.prod.example.com/api
+      - op: replace
+        path: /data/NEXT_PUBLIC_GRAFANA_BROWSER_URL
+        value: https://grafana.prod.example.com
+      - op: replace
+        path: /data/ENABLE_DEMO_LOGIN
+        value: "false"
+      - op: replace
+        path: /data/NEXT_PUBLIC_ENABLE_DEMO_LOGIN
+        value: "false"
+  - target:
+      kind: Cluster
+      name: observability-postgres
+    patch: |-
+      - op: replace
+        path: /spec/instances
+        value: 3
+      - op: replace
+        path: /spec/bootstrap/initdb/database
+        value: observability_prod
+      - op: replace
+        path: /spec/storage/size
+        value: 20Gi
+  - target:
+      kind: StatefulSet
+      name: prometheus
+    patch: |-
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: 25Gi
+  - target:
+      kind: StatefulSet
+      name: loki
+    patch: |-
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: 25Gi
+  - target:
+      kind: Ingress
+      name: devops-monitor-ui
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: controlplane.prod.example.com
+  - target:
+      kind: Ingress
+      name: grafana
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: grafana.prod.example.com

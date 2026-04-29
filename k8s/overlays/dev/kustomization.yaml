@@ -1,0 +1,50 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: platform-observability-dev
+
+resources:
+  - namespace.yaml
+  - vault-serviceaccount.yaml
+  - vault-secret-store.yaml
+  - vault-postgres-external-secret.yaml
+  - vault-ui-external-secret.yaml
+  - vault-grafana-external-secret.yaml
+  - ../../base
+
+images:
+  - name: devops-monitor-ui:dev
+    newName: devops-monitor-ui
+    newTag: dev
+
+labels:
+  - pairs:
+      cluster: k3s
+      environment: dev
+      secret-source: vault
+    includeSelectors: false
+
+patches:
+  - target:
+      kind: ConfigMap
+      name: observability-ui-config
+    patch: |-
+      - op: replace
+        path: /data/SITE_URL
+        value: http://controlplane.devops.local
+      - op: replace
+        path: /data/NEXT_PUBLIC_API_URL
+        value: http://controlplane.devops.local/api
+      - op: replace
+        path: /data/NEXT_PUBLIC_GRAFANA_BROWSER_URL
+        value: http://grafana.devops.local
+  - target:
+      kind: Cluster
+      name: observability-postgres
+    patch: |-
+      - op: replace
+        path: /spec/bootstrap/initdb/database
+        value: observability_dev
+      - op: replace
+        path: /spec/bootstrap/initdb/owner
+        value: observability_app

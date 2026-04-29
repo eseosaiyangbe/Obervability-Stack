@@ -177,9 +177,11 @@ railway up
 
 #### **Kubernetes**
 ```bash
-# Apply Kubernetes manifests
-kubectl apply -f k8s/
-kubectl get pods -n monitoring
+# Current owned path
+./scripts/k8s-dev-deploy.sh --skip-apply
+
+# Review the Kubernetes path
+sed -n '1,160p' k8s/README.md
 ```
 
 #### **Traditional VPS/Server**
@@ -341,7 +343,7 @@ For detailed configuration options, environment variables, and deployment settin
 ## 🔧 Next Steps (for contributors)
 
 * Add more exporters (MySQL, Redis, Nginx, etc.)
-* Add Kubernetes manifests for K8s-based deployment
+* Deepen and validate the owned `k8s/` control-plane deployment path
 * Add Terraform/Ansible automation for cloud deployment
 
 ## 🚀 Getting Started

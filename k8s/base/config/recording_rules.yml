@@ -1,0 +1,280 @@
+groups:
+  - name: system_recording_rules
+    rules:
+      # CPU usage percentage
+      - record: node_cpu_usage_percent
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+
+      # Memory usage percentage
+      - record: node_memory_usage_percent
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100
+
+      # Disk usage percentage
+      - record: node_disk_usage_percent
+        expr: (node_filesystem_size_bytes - node_filesystem_avail_bytes) / node_filesystem_size_bytes * 100
+
+      # Network traffic rate
+      - record: node_network_traffic_rate
+        expr: rate(node_network_receive_bytes_total[5m]) + rate(node_network_transmit_bytes_total[5m])
+
+      # System load average
+      - record: node_load_average
+        expr: node_load1
+
+  - name: container_recording_rules
+    rules:
+      # Container CPU usage percentage
+      - record: container_cpu_usage_percent
+        expr: rate(container_cpu_usage_seconds_total[5m]) * 100
+
+      # Container memory usage percentage
+      - record: container_memory_usage_percent
+        expr: (container_memory_working_set_bytes{job="cadvisor",id!="/",image!=""} / container_spec_memory_limit_bytes{job="cadvisor",id!="/",image!=""}) * 100
+
+      # Container restart count
+      - record: container_restart_count
+        expr: increase(container_start_time_seconds[1h])
+
+  - name: application_recording_rules
+    rules:
+      # HTTP request rate
+      - record: http_request_rate
+        expr: rate(http_requests_total[5m])
+
+      # HTTP error rate percentage
+      - record: http_error_rate_percent
+        expr: (rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m])) * 100
+
+      # HTTP response time 95th percentile
+      - record: http_response_time_95th
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))
+
+      # HTTP response time 99th percentile
+      - record: http_response_time_99th
+        expr: histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))
+
+  - name: swiftpay_recording_rules
+    rules:
+      # Current pending transactions. This should normally be zero on a healthy local stack.
+      - record: swiftpay:pending_transactions
+        expr: max(swiftpay_pending_transactions_total{job="swiftpay-transaction-service"} or vector(0))
+
+      # Current dollar amount stuck in pending transactions.
+      - record: swiftpay:pending_amount
+        expr: max(swiftpay_pending_transaction_amount_total{job="swiftpay-transaction-service"} or vector(0))
+
+      # RabbitMQ transaction queue depth as seen by transaction-service.
+      - record: swiftpay:transaction_queue_depth
+        expr: max(queue_depth{job="swiftpay-transaction-service",queue_name="transactions"} or vector(0))
+
+      # Successful transfer count since transaction-service last started.
+      - record: swiftpay:completed_transfers_total
+        expr: max(transactions_total{job="swiftpay-transaction-service",service="transaction-service",status="completed",type="transfer"} or vector(0))
+
+      # Transaction business failure rate from transaction-service.
+      - record: swiftpay:transaction_failure_rate_5m
+        expr: sum(rate(transactions_total{job="swiftpay-transaction-service",service="transaction-service",status="failed"}[5m]))
+
+      # Wallet transfer infrastructure or business failure rate from wallet-service.
+      - record: swiftpay:wallet_failed_transfer_rate_5m
+        expr: sum(rate(failed_transfers_total{job="swiftpay-wallet-service",service="wallet-service"}[5m]))
+
+      # Circuit breaker state. 0=closed, 0.5=half-open, 1=open.
+      - record: swiftpay:wallet_circuit_breaker_state
+        expr: max(swiftpay_circuit_breaker_state{job="swiftpay-transaction-service"} or vector(0))
+
+  - name: managed_app_probe_recording_rules
+    rules:
+      # Per-endpoint blackbox availability for the managed app estate.
+      - record: app:probe_availability_5m
+        expr: avg_over_time(probe_success{job="blackbox-http"}[5m])
+
+      # Per-endpoint blackbox latency for the managed app estate.
+      - record: app:probe_p95_latency_seconds_5m
+        expr: quantile_over_time(0.95, probe_duration_seconds{job="blackbox-http"}[5m])
+
+  - name: memflip_recording_rules
+    rules:
+      # Backend request throughput.
+      - record: memflip:http_request_rate_5m
+        expr: sum(rate(http_requests_total{job="memflip-backend"}[5m]))
+
+      # Backend error throughput across client and server failures.
+      - record: memflip:http_error_rate_5m
+        expr: sum(rate(http_errors_total{job="memflip-backend"}[5m]))
+
+      # Backend error ratio with divide-by-zero protection for quiet demo periods.
+      - record: memflip:http_error_ratio_5m
+        expr: sum(rate(http_errors_total{job="memflip-backend"}[5m])) / clamp_min(sum(rate(http_requests_total{job="memflip-backend"}[5m])), 1)
+
+      # Backend p95 request latency.
+      - record: memflip:http_p95_latency_seconds
+        expr: histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{job="memflip-backend"}[5m])))
+
+      # Completed game submissions.
+      - record: memflip:games_completed_rate_5m
+        expr: sum(rate(game_scores_total{job="memflip-backend"}[5m]))
+
+      # Current active games.
+      - record: memflip:active_games
+        expr: sum(active_games_current{job="memflip-backend"} or vector(0))
+
+      # Application-reported backend health.
+      - record: memflip:app_health
+        expr: min(app_health_status{job="memflip-backend"}) or vector(0)
+
+  - name: foodpulse_recording_rules
+    rules:
+      # FoodPulse API scrape health.
+      - record: foodpulse:api_up
+        expr: max(up{job="foodpulse-api"} or vector(0))
+
+      # API request throughput, excluding metrics scrapes.
+      - record: foodpulse:http_request_rate_5m
+        expr: sum(rate(foodpulse_http_requests_total{job="foodpulse-api",route!="/metrics"}[5m]))
+
+      # API error throughput, excluding metrics scrapes.
+      - record: foodpulse:http_error_rate_5m
+        expr: sum(rate(foodpulse_http_errors_total{job="foodpulse-api",route!="/metrics"}[5m]))
+
+      # API error ratio with divide-by-zero protection for quiet demo periods.
+      - record: foodpulse:http_error_ratio_5m
+        expr: sum(rate(foodpulse_http_errors_total{job="foodpulse-api",route!="/metrics"}[5m])) / clamp_min(sum(rate(foodpulse_http_requests_total{job="foodpulse-api",route!="/metrics"}[5m])), 1)
+
+      # API p95 request latency, excluding metrics scrapes.
+      - record: foodpulse:http_p95_latency_seconds
+        expr: histogram_quantile(0.95, sum by (le) (rate(foodpulse_http_request_duration_seconds_bucket{job="foodpulse-api",route!="/metrics"}[5m])))
+
+      # User voting activity.
+      - record: foodpulse:votes_rate_5m
+        expr: sum(rate(foodpulse_votes_total{job="foodpulse-api"}[5m]))
+
+      # Current pageview counter exported by the API.
+      - record: foodpulse:pageviews
+        expr: max(foodpulse_pageviews{job="foodpulse-api"} or vector(0))
+
+      # Current leading venue vote count.
+      - record: foodpulse:leading_venue_votes
+        expr: max(foodpulse_leading_venue_votes{job="foodpulse-api"} or vector(0))
+
+      # API process memory from prom-client default metrics.
+      - record: foodpulse:api_process_resident_memory_bytes
+        expr: max(foodpulse_api_process_resident_memory_bytes{job="foodpulse-api"} or vector(0))
+
+  - name: opensis_recording_rules
+    rules:
+      # MariaDB exporter scrape and database connection health.
+      - record: opensis:mariadb_up
+        expr: max(mysql_up{job="opensis-mariadb"} or vector(0))
+
+      # Active MariaDB connection count.
+      - record: opensis:mariadb_threads_connected
+        expr: max(mysql_global_status_threads_connected{job="opensis-mariadb"} or vector(0))
+
+      # MariaDB connection utilization as a percentage of configured max connections.
+      - record: opensis:mariadb_connection_usage_percent
+        expr: max((mysql_global_status_threads_connected{job="opensis-mariadb"} / mysql_global_variables_max_connections{job="opensis-mariadb"}) * 100)
+
+      # Slow query rate for legacy database follow-up.
+      - record: opensis:mariadb_slow_queries_rate_5m
+        expr: sum(rate(mysql_global_status_slow_queries{job="opensis-mariadb"}[5m]))
+
+      # Vault is reachable, initialized, and unsealed.
+      - record: opensis:vault_health
+        expr: max(opensis_vault_health_status{job="opensis-vault"} or vector(0))
+
+      # Per-secret AppRole read result for required OpenSIS secret paths.
+      - record: opensis:vault_secret_read_success
+        expr: opensis_vault_secret_read_success{job="opensis-vault"}
+
+      # All required OpenSIS Vault secret paths are readable.
+      - record: opensis:vault_all_required_secrets_readable
+        expr: min(opensis_vault_secret_read_success{job="opensis-vault"}) or vector(0)
+
+      # Apache exporter scrape and mod_status health.
+      - record: opensis:apache_up
+        expr: max(apache_up{job="opensis-apache"} or vector(0))
+
+      # Apache request throughput from mod_status.
+      - record: opensis:apache_request_rate_5m
+        expr: sum(rate(apache_accesses_total{job="opensis-apache"}[5m]))
+
+      # Apache traffic throughput in KiB/s from mod_status.
+      - record: opensis:apache_sent_kilobytes_rate_5m
+        expr: sum(rate(apache_sent_kilobytes_total{job="opensis-apache"}[5m]))
+
+      # Busy Apache workers.
+      - record: opensis:apache_busy_workers
+        expr: max(apache_workers{job="opensis-apache",state="busy"} or vector(0))
+
+      # Idle Apache workers.
+      - record: opensis:apache_idle_workers
+        expr: max(apache_workers{job="opensis-apache",state="idle"} or vector(0))
+
+  - name: infrastructure_recording_rules
+    rules:
+      # Prometheus uptime
+      - record: prometheus_uptime
+        expr: up{job="prometheus"}
+
+      # Grafana uptime
+      - record: grafana_uptime
+        expr: up{job="grafana"}
+
+      # Loki uptime
+      - record: loki_uptime
+        expr: up{job="loki"}
+
+      # Alertmanager uptime
+      - record: alertmanager_uptime
+        expr: up{job="alertmanager"}
+
+      # Node exporter uptime
+      - record: node_exporter_uptime
+        expr: up{job="node-exporter"}
+
+      # cAdvisor uptime
+      - record: cadvisor_uptime
+        expr: up{job="cadvisor"}
+
+  - name: database_recording_rules
+    rules:
+      # Database uptime
+      - record: database_uptime
+        expr: up{job=~"postgres|mysql|redis"}
+
+      # Database connections
+      - record: database_connections
+        expr: pg_stat_database_numbackends
+
+      # Database query rate
+      - record: database_query_rate
+        expr: rate(pg_stat_database_tup_returned[5m])
+
+  - name: alerting_recording_rules
+    rules:
+      # Alert firing rate
+      - record: alert_firing_rate
+        expr: rate(alertmanager_alerts[5m])
+
+      # Alert resolution rate
+      - record: alert_resolution_rate
+        expr: rate(alertmanager_alerts{state="resolved"}[5m])
+
+      # Notification success rate
+      - record: notification_success_rate
+        expr: rate(alertmanager_notifications_total{status="success"}[5m])
+
+  - name: logging_recording_rules
+    rules:
+      # Log ingestion rate
+      - record: log_ingestion_rate
+        expr: rate(loki_distributor_received_bytes_total[5m])
+
+      # Log query rate
+      - record: log_query_rate
+        expr: rate(loki_query_frontend_queries_total[5m])
+
+      # Log error rate
+      - record: log_error_rate
+        expr: rate(loki_distributor_errors_total[5m])
