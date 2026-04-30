@@ -64,11 +64,11 @@ export const monitoredApps: MonitoredApp[] = [
   {
     id: 'opensis',
     name: 'OpenSIS',
-    description: 'Student information system and the first app we will fully manage.',
+    description: 'Student information system with a live k3s dev slice and a Vault-first Kubernetes contract.',
     ownership: 'owned',
     status: 'active',
     priority: 1,
-    environment: 'local',
+    environment: 'hybrid',
     category: 'student-information-system',
     docker: {
       composeProject: 'opensis',
@@ -80,7 +80,7 @@ export const monitoredApps: MonitoredApp[] = [
       },
     },
     kubernetes: {
-      namespace: 'opensis',
+      namespace: 'opensis-dev',
       recommendedServiceLabels: {
         'app.kubernetes.io/name': 'opensis',
         'app.kubernetes.io/part-of': 'student-information-system',
@@ -103,7 +103,7 @@ export const monitoredApps: MonitoredApp[] = [
           },
           kubernetes: {
             serviceName: 'opensis-ui',
-            namespace: 'opensis',
+            namespace: 'opensis-dev',
             portName: 'http',
             path: '/',
           },
@@ -116,9 +116,11 @@ export const monitoredApps: MonitoredApp[] = [
     },
     runbooks: {
       localStart: 'cd OpenSIS && ./scripts/compose-start.sh',
+      kubernetesDeploy: 'cd OpenSIS && ./scripts/k8s-dev-deploy.sh',
+      kubernetesVerify: 'cd OpenSIS && ./scripts/k8s-dev-verify.sh',
       healthCheck: 'curl -I http://localhost:8088',
     },
-    tags: ['first-managed-app', 'php', 'mariadb'],
+    tags: ['first-managed-app', 'php', 'mariadb', 'k3s-vault-first-slice'],
   },
   {
     id: 'swiftpay',
