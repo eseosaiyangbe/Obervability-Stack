@@ -51,6 +51,7 @@ What is already true:
 - the `dev` slice has been deployed live on local `k3s`
 - PostgreSQL, Prometheus, Alertmanager, Grafana, Loki, Promtail, node-exporter, cAdvisor, blackbox-exporter, and `devops-monitor-ui` were verified in-cluster
 - Prometheus now sees the cross-workload app metrics targets for `MemFlip`, `SwiftPay`, and `FoodPulse` as `up`
+- Vault UI is exposed through Traefik at `http://vault.devops.local` so cluster secret operations can be tested from the same browser path as the app slices
 
 What is still intentionally staged:
 
@@ -68,6 +69,18 @@ From the `Obervability-Stack` repo root:
 ```
 
 Use `--skip-apply` while reviewing manifest generation only.
+
+## Browser Access
+
+Once Traefik is healthy and your local `/etc/hosts` maps the ingress address, the main browser entrypoints are:
+
+```bash
+./scripts/setup-devops-local-hosts.sh
+```
+
+- `http://controlplane.devops.local`
+- `http://grafana.devops.local`
+- `http://vault.devops.local`
 
 ## Related Documents
 
