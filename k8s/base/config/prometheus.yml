@@ -119,6 +119,11 @@ scrape_configs:
           component: notification-service
         targets:
           - http://notification-service.swiftpay-dev.svc.cluster.local:3003/health
+      - labels:
+          app: opensis
+          component: frontend
+        targets:
+          - http://opensis-ui.opensis-dev.svc.cluster.local/
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -182,3 +187,27 @@ scrape_configs:
         labels:
           app: swiftpay
           component: notification-service
+
+  - job_name: opensis-mariadb
+    static_configs:
+      - targets:
+          - opensis-mariadb.opensis-dev.svc.cluster.local:9104
+        labels:
+          app: opensis
+          component: mariadb
+
+  - job_name: opensis-apache
+    static_configs:
+      - targets:
+          - opensis-apache.opensis-dev.svc.cluster.local:9117
+        labels:
+          app: opensis
+          component: apache
+
+  - job_name: opensis-vault
+    static_configs:
+      - targets:
+          - opensis-vault.opensis-dev.svc.cluster.local:9105
+        labels:
+          app: opensis
+          component: vault
