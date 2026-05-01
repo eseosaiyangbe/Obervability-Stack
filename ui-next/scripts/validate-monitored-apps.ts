@@ -53,6 +53,10 @@ function extractHostname(target: string) {
   }
 }
 
+function isExpectedKubernetesNamespace(appId: string, namespace: string) {
+  return new RegExp(`^${appId}(?:-(dev|prod))?$`).test(namespace);
+}
+
 const appIds = monitoredApps.map((app) => app.id);
 ensureUnique(appIds, "app id");
 ensureUnique(monitoredApps.map((app) => String(app.priority)), "priority");
@@ -64,8 +68,10 @@ for (const app of monitoredApps) {
     error(`App ${app.id} is missing a display name`);
   }
 
-  if (app.kubernetes.namespace !== app.id) {
-    error(`App ${app.id} namespace mismatch: expected ${app.id}, found ${app.kubernetes.namespace}`);
+  if (!isExpectedKubernetesNamespace(app.id, app.kubernetes.namespace)) {
+    error(
+      `App ${app.id} namespace mismatch: expected ${app.id}, ${app.id}-dev, or ${app.id}-prod, found ${app.kubernetes.namespace}`
+    );
   }
 
   if (app.kubernetes.recommendedServiceLabels["observability.dev/app"] !== app.id) {
