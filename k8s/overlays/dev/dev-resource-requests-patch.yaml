@@ -1,0 +1,148 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager
+spec:
+  template:
+    spec:
+      containers:
+        - name: alertmanager
+          resources:
+            requests:
+              cpu: "25m"
+              memory: "48Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blackbox-exporter
+spec:
+  template:
+    spec:
+      containers:
+        - name: blackbox-exporter
+          resources:
+            requests:
+              cpu: "15m"
+              memory: "32Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devops-monitor-ui
+spec:
+  template:
+    spec:
+      containers:
+        - name: ui
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "160Mi"
+            limits:
+              cpu: "500m"
+              memory: "768Mi"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+spec:
+  template:
+    spec:
+      containers:
+        - name: grafana
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "192Mi"
+            limits:
+              cpu: "500m"
+              memory: "768Mi"
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: loki
+spec:
+  template:
+    spec:
+      containers:
+        - name: loki
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "192Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: prometheus
+spec:
+  template:
+    spec:
+      containers:
+        - name: prometheus
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "384Mi"
+            limits:
+              cpu: "1"
+              memory: "2Gi"
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+spec:
+  template:
+    spec:
+      containers:
+        - name: node-exporter
+          resources:
+            requests:
+              cpu: "15m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: promtail
+spec:
+  template:
+    spec:
+      containers:
+        - name: promtail
+          resources:
+            requests:
+              cpu: "15m"
+              memory: "96Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: observability-postgres
+spec:
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "192Mi"
+    limits:
+      cpu: "500m"
+      memory: "768Mi"
