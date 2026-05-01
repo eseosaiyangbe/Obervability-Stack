@@ -81,6 +81,7 @@ Once Traefik is healthy and your local `/etc/hosts` maps the ingress address, th
 - `http://controlplane.devops.local`
 - `http://grafana.devops.local`
 - `http://vault.devops.local`
+- `http://opensis.devops.local`
 
 ## Related Documents
 
