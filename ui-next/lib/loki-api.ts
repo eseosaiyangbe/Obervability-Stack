@@ -206,18 +206,26 @@ export class LokiAPI {
     // Add label filters
     if (filters.job && filters.job !== 'all') {
       const job = this.escapeLogQLValue(filters.job);
-      labelFilters.push(`compose_service=~"${job}|.*${job}.*"`);
+      if (this.looksLikeKubernetesLabel(job)) {
+        labelFilters.push(`container=~"${job}|.*${job}.*"`);
+      } else {
+        labelFilters.push(`compose_service=~"${job}|.*${job}.*"`);
+      }
     }
     
     if (filters.namespace && filters.namespace !== 'all') {
       const namespace = this.escapeLogQLValue(filters.namespace);
-      labelFilters.push(`container=~".*${namespace}.*"`);
+      if (this.looksLikeKubernetesNamespace(namespace)) {
+        labelFilters.push(`namespace="${namespace}"`);
+      } else {
+        labelFilters.push(`container=~".*${namespace}.*"`);
+      }
     }
     
     if (labelFilters.length > 0) {
       query += labelFilters.join(', ');
     } else {
-      query += 'container=~".+"'; // Match Docker logs collected by Promtail.
+      query += 'filename=~".+"';
     }
 
     query += '}';
@@ -232,6 +240,14 @@ export class LokiAPI {
 
   private escapeLogQLValue(value: string): string {
     return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  }
+
+  private looksLikeKubernetesNamespace(value: string): boolean {
+    return /(^platform-observability-(dev|prod)$)|(^[a-z0-9-]+-(dev|prod)$)/.test(value);
+  }
+
+  private looksLikeKubernetesLabel(value: string): boolean {
+    return /^[a-z0-9-]+$/.test(value);
   }
 
   /**

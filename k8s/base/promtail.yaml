@@ -41,6 +41,9 @@ spec:
             - name: pods
               mountPath: /var/log/pods
               readOnly: true
+            - name: docker-containers
+              mountPath: /var/lib/docker/containers
+              readOnly: true
           resources:
             requests:
               cpu: 25m
@@ -57,3 +60,6 @@ spec:
         - name: pods
           hostPath:
             path: /var/log/pods
+        - name: docker-containers
+          hostPath:
+            path: /var/lib/docker/containers
