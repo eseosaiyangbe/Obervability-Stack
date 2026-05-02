@@ -114,6 +114,12 @@ for _ in {1..20}; do
   sleep 1
 done
 
+echo
+echo "Obervability-Stack Validation — environment: dev"
+echo "Base URL: http://127.0.0.1:${PROMETHEUS_FORWARD_PORT}"
+echo "─────────────────────────────────────────"
+echo
+
 curl -fsS "http://127.0.0.1:${PROMETHEUS_FORWARD_PORT}/-/healthy" >/dev/null
 target_report="$(curl -fsS "http://127.0.0.1:${PROMETHEUS_FORWARD_PORT}/api/v1/targets" \
   | jq -r '.data.activeTargets[] | select(.labels.job=="alertmanager" or .labels.job=="blackbox-exporter" or .labels.job=="cadvisor" or .labels.job=="foodpulse-api" or .labels.job=="grafana" or .labels.job=="loki" or .labels.job=="memflip-backend" or .labels.job=="node-exporter" or .labels.job=="opensis-apache" or .labels.job=="opensis-mariadb" or .labels.job=="opensis-vault" or .labels.job=="prometheus" or .labels.job=="promtail" or .labels.job=="swiftpay-api-gateway" or .labels.job=="swiftpay-auth-service" or .labels.job=="swiftpay-notification-service" or .labels.job=="swiftpay-transaction-service" or .labels.job=="swiftpay-wallet-service") | [.labels.job, .health, (.lastError // "")] | @tsv')"
