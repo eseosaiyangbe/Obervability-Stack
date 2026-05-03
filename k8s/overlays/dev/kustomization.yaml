@@ -37,13 +37,47 @@ patches:
     patch: |-
       - op: replace
         path: /data/SITE_URL
-        value: http://controlplane.devops.local
+        value: https://portfolio.eseosadevbox.com
       - op: replace
         path: /data/NEXT_PUBLIC_API_URL
-        value: http://controlplane.devops.local/api
+        value: https://portfolio.eseosadevbox.com/api
       - op: replace
         path: /data/NEXT_PUBLIC_GRAFANA_BROWSER_URL
-        value: http://grafana.devops.local
+        value: https://grafana.eseosadevbox.com
+  - target:
+      kind: Ingress
+      name: devops-monitor-ui
+    patch: |-
+      - op: add
+        path: /spec/rules/-
+        value:
+          host: portfolio.eseosadevbox.com
+          http:
+            paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                    name: devops-monitor-ui
+                    port:
+                      number: 3000
+  - target:
+      kind: Ingress
+      name: grafana
+    patch: |-
+      - op: add
+        path: /spec/rules/-
+        value:
+          host: grafana.eseosadevbox.com
+          http:
+            paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                    name: grafana
+                    port:
+                      number: 3000
   - target:
       kind: Cluster
       name: observability-postgres
