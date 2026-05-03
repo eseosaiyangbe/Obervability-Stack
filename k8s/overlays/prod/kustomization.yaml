@@ -10,6 +10,8 @@ resources:
   - vault-postgres-external-secret.yaml
   - vault-ui-external-secret.yaml
   - vault-grafana-external-secret.yaml
+  - prod-hpa.yaml
+  - prod-pdb.yaml
   - ../../base
 
 labels:
@@ -67,16 +69,48 @@ patches:
         path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
         value: 25Gi
   - target:
+      kind: Deployment
+      name: devops-monitor-ui
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+  - target:
+      kind: Deployment
+      name: grafana
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+  - target:
       kind: Ingress
       name: devops-monitor-ui
     patch: |-
       - op: replace
+        path: /metadata/annotations/traefik.ingress.kubernetes.io~1router.entrypoints
+        value: web,websecure
+      - op: replace
         path: /spec/rules/0/host
         value: controlplane.prod.example.com
+      - op: add
+        path: /spec/tls
+        value:
+          - hosts:
+              - controlplane.prod.example.com
+            secretName: controlplane-prod-tls
   - target:
       kind: Ingress
       name: grafana
     patch: |-
       - op: replace
+        path: /metadata/annotations/traefik.ingress.kubernetes.io~1router.entrypoints
+        value: web,websecure
+      - op: replace
         path: /spec/rules/0/host
         value: grafana.prod.example.com
+      - op: add
+        path: /spec/tls
+        value:
+          - hosts:
+              - grafana.prod.example.com
+            secretName: grafana-prod-tls
