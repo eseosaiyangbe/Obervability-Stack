@@ -302,7 +302,7 @@ The Configuration System (Phase 6) is a major feature that transforms the monito
       "enabled": true
     },
     "grafana": {
-      "url": "https://grafana.prod.example.com",
+      "url": "https://grafana.eseosadevbox.com",
       "enabled": true
     }
   }
