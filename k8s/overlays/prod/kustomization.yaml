@@ -22,6 +22,7 @@ labels:
     includeSelectors: false
 
 patches:
+  - path: prod-placement-patch.yaml
   - target:
       kind: ConfigMap
       name: observability-ui-config
