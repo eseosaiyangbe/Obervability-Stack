@@ -94,7 +94,7 @@ export const monitoredApps: MonitoredApp[] = [
           name: 'OpenSIS UI',
           kind: 'frontend',
           dockerTarget: 'http://opensis-ui/',
-          browserUrl: 'http://localhost:8088',
+          browserUrl: 'https://opensis.eseosadevbox.com',
           prometheusLabels: {
             job: 'blackbox-http',
             app: 'opensis',
@@ -171,8 +171,8 @@ export const monitoredApps: MonitoredApp[] = [
     },
     observability: {
       endpoints: [
-        endpoint('swiftpay-frontend', 'SwiftPay Frontend', 'frontend', 'http://swiftpay-frontend/', 'http://localhost:8081', 'swiftpay', 'frontend', '/', 'swiftpay-dev'),
-        endpoint('swiftpay-api-gateway', 'SwiftPay API Gateway', 'api', 'http://swiftpay-api-gateway:3000/health', 'http://localhost:3007/health', 'swiftpay', 'api-gateway', '/health', 'swiftpay-dev'),
+        endpoint('swiftpay-frontend', 'SwiftPay Frontend', 'frontend', 'http://swiftpay-frontend/', 'https://swiftpay.eseosadevbox.com', 'swiftpay', 'frontend', '/', 'swiftpay-dev'),
+        endpoint('swiftpay-api-gateway', 'SwiftPay API Gateway', 'api', 'http://swiftpay-api-gateway:3000/health', 'https://swiftpay-api.eseosadevbox.com/health', 'swiftpay', 'api-gateway', '/health', 'swiftpay-dev'),
         endpoint('swiftpay-auth-service', 'SwiftPay Auth Service', 'service', 'http://swiftpay-auth-service:3004/health', undefined, 'swiftpay', 'auth-service', '/health', 'swiftpay-dev'),
         endpoint('swiftpay-wallet-service', 'SwiftPay Wallet Service', 'service', 'http://swiftpay-wallet-service:3001/health', undefined, 'swiftpay', 'wallet-service', '/health', 'swiftpay-dev'),
         endpoint('swiftpay-transaction-service', 'SwiftPay Transaction Service', 'service', 'http://swiftpay-transaction-service:3002/health', undefined, 'swiftpay', 'transaction-service', '/health', 'swiftpay-dev'),
@@ -219,7 +219,7 @@ export const monitoredApps: MonitoredApp[] = [
     },
     observability: {
       endpoints: [
-        endpoint('memflip-frontend', 'MemFlip Frontend', 'frontend', 'http://memflip-frontend/api/health', 'http://localhost:8080', 'memflip', 'frontend', '/api/health', 'memflip-dev'),
+        endpoint('memflip-frontend', 'MemFlip Frontend', 'frontend', 'http://memflip-frontend/api/health', 'https://memflip.eseosadevbox.com', 'memflip', 'frontend', '/api/health', 'memflip-dev'),
         endpoint('memflip-backend', 'MemFlip Backend', 'api', 'http://memflip-backend:3001/health', undefined, 'memflip', 'backend', '/health', 'memflip-dev'),
       ],
       primaryHealthEndpointId: 'memflip-frontend',
@@ -263,7 +263,7 @@ export const monitoredApps: MonitoredApp[] = [
     },
     observability: {
       endpoints: [
-        endpoint('foodpulse-ui', 'FoodPulse UI', 'frontend', 'http://foodpulse-ui/', 'http://localhost:8090', 'foodpulse', 'frontend', '/', 'foodpulse-dev'),
+        endpoint('foodpulse-ui', 'FoodPulse UI', 'frontend', 'http://foodpulse-ui/', 'https://foodpulse.eseosadevbox.com', 'foodpulse', 'frontend', '/', 'foodpulse-dev'),
         endpoint('foodpulse-api', 'FoodPulse API', 'api', 'http://foodpulse-api:4567/health', undefined, 'foodpulse', 'api', '/health', 'foodpulse-dev'),
       ],
       primaryHealthEndpointId: 'foodpulse-ui',

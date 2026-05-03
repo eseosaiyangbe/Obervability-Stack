@@ -112,6 +112,9 @@ echo "[observability-k8s] Applying dev overlay"
 kubectl delete job devops-monitor-db-init -n platform-observability-dev --ignore-not-found --wait=true >/dev/null 2>&1 || true
 kubectl apply -k k8s/overlays/dev
 
+echo "[observability-k8s] Restarting UI deployment to pick up the refreshed local image"
+kubectl rollout restart deployment/devops-monitor-ui -n platform-observability-dev >/dev/null
+
 echo "[observability-k8s] Waiting for PostgreSQL cluster"
 kubectl wait --for=condition=Ready cluster/observability-postgres -n platform-observability-dev --timeout=420s
 
