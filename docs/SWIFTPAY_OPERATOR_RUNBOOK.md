@@ -43,7 +43,7 @@ docker compose up -d
 Then return to the observability stack:
 
 ```bash
-cd ../Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh operator
 ```
 
@@ -52,7 +52,7 @@ cd ../Obervability-Stack
 Start with the standard platform workflow:
 
 ```bash
-cd Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh operator
 ```
 
@@ -277,7 +277,7 @@ Symptom:
 First checks:
 
 ```bash
-cd Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh swiftpay-live
 curl -fsS --get http://localhost:9090/api/v1/query --data-urlencode 'query=swiftpay:completed_transfers_total' | jq .
 ```

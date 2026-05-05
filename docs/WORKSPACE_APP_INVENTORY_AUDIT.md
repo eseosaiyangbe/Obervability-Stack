@@ -6,8 +6,8 @@ This document is the Phase 3 control-plane checkpoint for monitored app inventor
 
 It verifies that the app metadata in:
 
-- [`ui-next/lib/monitored-apps.ts`](/Users/raymond/Documents/DevOps-Easy-Learning/Obervability-Stack/ui-next/lib/monitored-apps.ts)
-- [`prometheus/prometheus.yml`](/Users/raymond/Documents/DevOps-Easy-Learning/Obervability-Stack/prometheus/prometheus.yml)
+- [`ui-next/lib/monitored-apps.ts`](/Users/raymond/Documents/observability-stack/ui-next/lib/monitored-apps.ts)
+- [`prometheus/prometheus.yml`](/Users/raymond/Documents/observability-stack/prometheus/prometheus.yml)
 
 still matches the actual workspace contracts after Phase 2 normalization.
 

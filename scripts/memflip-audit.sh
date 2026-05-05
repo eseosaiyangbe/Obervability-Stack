@@ -93,7 +93,7 @@ assert_contains "$MEMFLIP_ENV" 'BACKEND_HOST_PORT=3101' "MemFlip env contract do
 assert_contains "$MEMFLIP_ENV" 'FRONTEND_HOST_PORT=8080' "MemFlip env contract documents frontend host port 8080"
 assert_contains "$MONITORED_APPS_FILE" "http://localhost:8080" "MemFlip inventory browser URL uses localhost:8080"
 assert_contains "$MONITORED_APPS_FILE" "curl -fsS http://localhost:8080/api/health" "MemFlip inventory health check uses the proxied frontend path"
-assert_contains "$MONITORED_APPS_FILE" "cd MemFlip && docker compose up -d" "MemFlip inventory localStart points to repo compose startup"
+assert_contains "$MONITORED_APPS_FILE" "cd ../memflip && docker compose up -d" "MemFlip inventory localStart points to repo compose startup"
 assert_contains "$MEMFLIP_README" "curl http://localhost:8080/api/health" "MemFlip README uses the proxied local health path"
 
 echo

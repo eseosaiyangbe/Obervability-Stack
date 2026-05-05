@@ -42,7 +42,7 @@ docker compose up -d
 Then return to the observability stack:
 
 ```bash
-cd ../Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh operator
 ```
 
@@ -51,7 +51,7 @@ cd ../Obervability-Stack
 Start with the standard platform workflow:
 
 ```bash
-cd Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh operator
 ```
 
@@ -246,7 +246,7 @@ Symptom:
 First checks:
 
 ```bash
-cd Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh memflip-live
 
 cd ../MemFlip
@@ -283,7 +283,7 @@ First checks:
 ```bash
 curl -fsS http://localhost:3101/metrics | head
 curl -fsS http://localhost:3101/metrics | rg 'app_health_status|http_requests_total|game_scores_total'
-cd Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh memflip
 ```
 

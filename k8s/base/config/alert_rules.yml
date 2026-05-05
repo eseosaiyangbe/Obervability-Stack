@@ -488,7 +488,7 @@ groups:
         annotations:
           summary: "OpenSIS MariaDB metrics exporter is down"
           description: "Prometheus cannot scrape OpenSIS MariaDB metrics from {{ $labels.instance }} for more than 2 minutes."
-          runbook_url: "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main/Obervability-Stack/docs/OPENSIS_OPERATOR_RUNBOOK.md"
+          runbook_url: "https://github.com/eseosaiyangbe/Obervability-Stack/blob/main/docs/OPENSIS_OPERATOR_RUNBOOK.md"
 
       # OpenSIS MariaDB unavailable
       - alert: OpenSISMariaDBDown
@@ -502,7 +502,7 @@ groups:
         annotations:
           summary: "OpenSIS MariaDB is down"
           description: "The OpenSIS MariaDB exporter reports that the database is unavailable for more than 2 minutes."
-          runbook_url: "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main/Obervability-Stack/docs/OPENSIS_OPERATOR_RUNBOOK.md"
+          runbook_url: "https://github.com/eseosaiyangbe/Obervability-Stack/blob/main/docs/OPENSIS_OPERATOR_RUNBOOK.md"
 
       # OpenSIS MariaDB connection pressure
       - alert: OpenSISMariaDBConnectionUsageHigh
@@ -516,7 +516,7 @@ groups:
         annotations:
           summary: "OpenSIS MariaDB connection usage is high"
           description: "OpenSIS MariaDB connection usage is above 80% for more than 5 minutes."
-          runbook_url: "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main/Obervability-Stack/docs/OPENSIS_OPERATOR_RUNBOOK.md"
+          runbook_url: "https://github.com/eseosaiyangbe/Obervability-Stack/blob/main/docs/OPENSIS_OPERATOR_RUNBOOK.md"
 
       # OpenSIS MariaDB slow-query pressure
       - alert: OpenSISMariaDBSlowQueriesDetected
@@ -530,7 +530,7 @@ groups:
         annotations:
           summary: "OpenSIS MariaDB slow queries detected"
           description: "OpenSIS MariaDB slow-query rate has stayed above 0.01 queries per second for more than 10 minutes."
-          runbook_url: "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main/Obervability-Stack/docs/OPENSIS_OPERATOR_RUNBOOK.md"
+          runbook_url: "https://github.com/eseosaiyangbe/Obervability-Stack/blob/main/docs/OPENSIS_OPERATOR_RUNBOOK.md"
 
       # OpenSIS Vault synthetic exporter down
       - alert: OpenSISVaultSyntheticExporterDown
@@ -544,7 +544,7 @@ groups:
         annotations:
           summary: "OpenSIS Vault synthetic exporter is down"
           description: "Prometheus cannot scrape the OpenSIS Vault synthetic exporter from {{ $labels.instance }} for more than 2 minutes."
-          runbook_url: "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main/Obervability-Stack/docs/OPENSIS_OPERATOR_RUNBOOK.md"
+          runbook_url: "https://github.com/eseosaiyangbe/Obervability-Stack/blob/main/docs/OPENSIS_OPERATOR_RUNBOOK.md"
 
       # OpenSIS Vault unhealthy
       - alert: OpenSISVaultUnhealthy
@@ -558,7 +558,7 @@ groups:
         annotations:
           summary: "OpenSIS Vault is unhealthy"
           description: "The OpenSIS Vault health signal is unhealthy for more than 1 minute. Secret delivery may be unavailable."
-          runbook_url: "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main/Obervability-Stack/docs/OPENSIS_OPERATOR_RUNBOOK.md"
+          runbook_url: "https://github.com/eseosaiyangbe/Obervability-Stack/blob/main/docs/OPENSIS_OPERATOR_RUNBOOK.md"
 
       # OpenSIS required Vault secret read failed
       - alert: OpenSISVaultRequiredSecretReadFailed
@@ -572,7 +572,7 @@ groups:
         annotations:
           summary: "OpenSIS required Vault secret read failed"
           description: "One or more required OpenSIS Vault secrets cannot be read by the synthetic check for more than 1 minute."
-          runbook_url: "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main/Obervability-Stack/docs/OPENSIS_OPERATOR_RUNBOOK.md"
+          runbook_url: "https://github.com/eseosaiyangbe/Obervability-Stack/blob/main/docs/OPENSIS_OPERATOR_RUNBOOK.md"
 
       # OpenSIS Apache exporter down
       - alert: OpenSISApacheExporterDown
@@ -586,7 +586,7 @@ groups:
         annotations:
           summary: "OpenSIS Apache exporter is down"
           description: "Prometheus cannot scrape OpenSIS Apache runtime metrics from {{ $labels.instance }} for more than 2 minutes."
-          runbook_url: "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main/Obervability-Stack/docs/OPENSIS_OPERATOR_RUNBOOK.md"
+          runbook_url: "https://github.com/eseosaiyangbe/Obervability-Stack/blob/main/docs/OPENSIS_OPERATOR_RUNBOOK.md"
 
       # OpenSIS Apache runtime unavailable
       - alert: OpenSISApacheRuntimeDown
@@ -600,7 +600,7 @@ groups:
         annotations:
           summary: "OpenSIS Apache runtime is down"
           description: "The OpenSIS Apache exporter reports the Apache runtime as unavailable for more than 2 minutes."
-          runbook_url: "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main/Obervability-Stack/docs/OPENSIS_OPERATOR_RUNBOOK.md"
+          runbook_url: "https://github.com/eseosaiyangbe/Obervability-Stack/blob/main/docs/OPENSIS_OPERATOR_RUNBOOK.md"
 
       # OpenSIS Apache worker exhaustion
       - alert: OpenSISApacheNoIdleWorkers
@@ -614,7 +614,7 @@ groups:
         annotations:
           summary: "OpenSIS Apache has no idle workers"
           description: "OpenSIS Apache has reported zero idle workers for more than 3 minutes. The PHP/Apache tier may be saturated."
-          runbook_url: "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main/Obervability-Stack/docs/OPENSIS_OPERATOR_RUNBOOK.md"
+          runbook_url: "https://github.com/eseosaiyangbe/Obervability-Stack/blob/main/docs/OPENSIS_OPERATOR_RUNBOOK.md"
 
       # MemFlip backend metrics down
       - alert: MemFlipBackendMetricsDown
@@ -628,7 +628,7 @@ groups:
         annotations:
           summary: "MemFlip backend metrics are down"
           description: "Prometheus cannot scrape MemFlip backend metrics from {{ $labels.instance }} for more than 2 minutes."
-          runbook_url: "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main/Obervability-Stack/docs/MEMFLIP_OPERATOR_RUNBOOK.md"
+          runbook_url: "https://github.com/eseosaiyangbe/Obervability-Stack/blob/main/docs/MEMFLIP_OPERATOR_RUNBOOK.md"
 
       # MemFlip health check failing
       - alert: MemFlipAppHealthDown
@@ -642,7 +642,7 @@ groups:
         annotations:
           summary: "MemFlip application health is down"
           description: "MemFlip health signals have been unhealthy for more than 1 minute."
-          runbook_url: "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main/Obervability-Stack/docs/MEMFLIP_OPERATOR_RUNBOOK.md"
+          runbook_url: "https://github.com/eseosaiyangbe/Obervability-Stack/blob/main/docs/MEMFLIP_OPERATOR_RUNBOOK.md"
 
       # MemFlip high API error ratio
       - alert: MemFlipHighAPIErrorRatio
@@ -656,7 +656,7 @@ groups:
         annotations:
           summary: "MemFlip API error ratio is high"
           description: "MemFlip API error ratio has stayed above 5% for more than 5 minutes."
-          runbook_url: "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main/Obervability-Stack/docs/MEMFLIP_OPERATOR_RUNBOOK.md"
+          runbook_url: "https://github.com/eseosaiyangbe/Obervability-Stack/blob/main/docs/MEMFLIP_OPERATOR_RUNBOOK.md"
 
       # MemFlip high API latency
       - alert: MemFlipHighAPILatency
@@ -670,7 +670,7 @@ groups:
         annotations:
           summary: "MemFlip API latency is high"
           description: "MemFlip API p95 latency has stayed above 1 second for more than 5 minutes."
-          runbook_url: "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main/Obervability-Stack/docs/MEMFLIP_OPERATOR_RUNBOOK.md"
+          runbook_url: "https://github.com/eseosaiyangbe/Obervability-Stack/blob/main/docs/MEMFLIP_OPERATOR_RUNBOOK.md"
 
       # FoodPulse API metrics down
       - alert: FoodPulseAPIMetricsDown
@@ -684,7 +684,7 @@ groups:
         annotations:
           summary: "FoodPulse API metrics are down"
           description: "Prometheus cannot scrape FoodPulse API metrics for more than 1 minute."
-          runbook_url: "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main/Obervability-Stack/docs/FOODPULSE_OPERATOR_RUNBOOK.md"
+          runbook_url: "https://github.com/eseosaiyangbe/Obervability-Stack/blob/main/docs/FOODPULSE_OPERATOR_RUNBOOK.md"
 
       # FoodPulse high API error ratio
       - alert: FoodPulseHighAPIErrorRatio
@@ -698,7 +698,7 @@ groups:
         annotations:
           summary: "FoodPulse API error ratio is high"
           description: "FoodPulse API error ratio has stayed above 5% for more than 5 minutes."
-          runbook_url: "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main/Obervability-Stack/docs/FOODPULSE_OPERATOR_RUNBOOK.md"
+          runbook_url: "https://github.com/eseosaiyangbe/Obervability-Stack/blob/main/docs/FOODPULSE_OPERATOR_RUNBOOK.md"
 
       # FoodPulse high API latency
       - alert: FoodPulseHighAPILatency
@@ -712,7 +712,7 @@ groups:
         annotations:
           summary: "FoodPulse API latency is high"
           description: "FoodPulse API p95 latency has stayed above 1 second for more than 5 minutes."
-          runbook_url: "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main/Obervability-Stack/docs/FOODPULSE_OPERATOR_RUNBOOK.md"
+          runbook_url: "https://github.com/eseosaiyangbe/Obervability-Stack/blob/main/docs/FOODPULSE_OPERATOR_RUNBOOK.md"
 
   - name: infrastructure_alerts
     rules:

@@ -94,7 +94,7 @@ done
 
 assert_contains "$MONITORED_APPS_FILE" "http://localhost:8081" "SwiftPay inventory browser URL uses localhost:8081"
 assert_contains "$MONITORED_APPS_FILE" "http://localhost:3007/health" "SwiftPay inventory gateway health URL uses localhost:3007/health"
-assert_contains "$MONITORED_APPS_FILE" "cd SwiftPay && docker compose up -d" "SwiftPay inventory localStart points to repo compose startup"
+assert_contains "$MONITORED_APPS_FILE" "cd ../swiftpay && docker compose up -d" "SwiftPay inventory localStart points to repo compose startup"
 
 echo
 header "Prometheus Scrape Contract"

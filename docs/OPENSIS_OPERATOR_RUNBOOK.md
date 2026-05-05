@@ -55,7 +55,7 @@ cd OpenSIS
 Then return to the observability stack:
 
 ```bash
-cd ../Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh operator
 ```
 
@@ -73,7 +73,7 @@ Use the edge profile only when you are intentionally testing Traefik or Cloudfla
 Start with the standard platform workflow:
 
 ```bash
-cd Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh operator
 ```
 
@@ -305,7 +305,7 @@ First checks:
 ```bash
 curl -fsSI http://localhost:8088
 curl -fsS --get http://localhost:9090/api/v1/query --data-urlencode 'query=probe_success{job="blackbox-http",app="opensis"}' | jq .
-cd Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh opensis
 ```
 

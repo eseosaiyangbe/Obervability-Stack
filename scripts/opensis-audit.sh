@@ -90,7 +90,7 @@ assert_contains "$OPENSIS_BUILDLOCAL_COMPOSE" "dockerfile: Dockerfile" "OpenSIS 
 assert_contains "$OPENSIS_START_SCRIPT" "--build-local" "OpenSIS startup helper supports the build-local path"
 assert_contains "$OPENSIS_START_SCRIPT" "docker-compose.buildlocal.yaml" "OpenSIS startup helper wires the build-local override file"
 assert_contains "$MONITORED_APPS_FILE" "http://localhost:8088" "Control plane inventory uses the OpenSIS browser URL"
-assert_contains "$MONITORED_APPS_FILE" "cd OpenSIS && ./scripts/compose-start.sh" "Control plane inventory points to the OpenSIS startup helper"
+assert_contains "$MONITORED_APPS_FILE" "cd ../opensis && ./scripts/compose-start.sh" "Control plane inventory points to the OpenSIS startup helper"
 assert_contains "$MONITORED_APPS_FILE" "curl -I http://localhost:8088" "Control plane inventory uses the OpenSIS health check"
 assert_contains "$OPENSIS_README" "http://localhost:8088" "OpenSIS README documents the local browser URL"
 assert_contains "$OPENSIS_README" "build-local" "OpenSIS README documents the build-local startup path"

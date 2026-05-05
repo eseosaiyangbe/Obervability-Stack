@@ -52,7 +52,7 @@ cp .env.example .env
 Then return to the observability stack:
 
 ```bash
-cd ../Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh operator
 ```
 
@@ -72,7 +72,7 @@ Only use the volume reset when you intentionally want a clean local lab state.
 Start with the standard platform workflow:
 
 ```bash
-cd Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh operator
 ```
 
@@ -341,7 +341,7 @@ First checks:
 ```bash
 curl -fsSI http://localhost:8090
 curl -fsS --get http://localhost:9090/api/v1/query --data-urlencode 'query=probe_success{job="blackbox-http",app="foodpulse"}' | jq .
-cd Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh foodpulse
 ```
 

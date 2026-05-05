@@ -28,7 +28,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useAppHealth } from "@/lib/hooks/use-app-health"
 import { useMonitoredApps } from "@/lib/hooks/use-monitored-apps"
 
-const repositoryUrl = "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main"
+const repositoryUrl = "https://github.com/eseosaiyangbe/Obervability-Stack/blob/main"
 
 const checklist = [
   {
@@ -38,12 +38,12 @@ const checklist = [
   },
   {
     title: "Operator first check",
-    command: "./Obervability-Stack/scripts/devops-monitor.sh operator",
+    command: "./scripts/devops-monitor.sh operator",
     expected: "Checks passed, inventory validation passed, and all managed apps healthy.",
   },
   {
     title: "If baseline fails",
-    command: "./Obervability-Stack/scripts/devops-monitor.sh health && ./Obervability-Stack/scripts/devops-monitor.sh inventory",
+    command: "./scripts/devops-monitor.sh health && ./scripts/devops-monitor.sh inventory",
     expected: "Use the health and inventory outputs before starting the walkthrough.",
   },
 ]
@@ -69,7 +69,7 @@ const demoSteps = [
     title: "Show SwiftPay",
     label: "Microservices",
     href: "/services/swiftpay",
-    command: "./Obervability-Stack/scripts/devops-monitor.sh swiftpay-live",
+    command: "./scripts/devops-monitor.sh swiftpay-live",
     talkingPoint: "Use SwiftPay to explain money movement, service health, async workers, business telemetry, and the second real k3s migration slice.",
     icon: Network,
   },
@@ -77,7 +77,7 @@ const demoSteps = [
     title: "Show OpenSIS",
     label: "Legacy modernization",
     href: "/services/opensis",
-    command: "./Obervability-Stack/scripts/devops-monitor.sh opensis-live",
+    command: "./scripts/devops-monitor.sh opensis-live",
     talkingPoint: "Use OpenSIS to explain wrapping a legacy PHP app with Vault, database checks, and Kubernetes thinking.",
     icon: ShieldCheck,
   },
@@ -85,7 +85,7 @@ const demoSteps = [
     title: "Show FoodPulse",
     label: "Resilience lab",
     href: "/services/foodpulse",
-    command: "./Obervability-Stack/scripts/devops-monitor.sh foodpulse-live",
+    command: "./scripts/devops-monitor.sh foodpulse-live",
     talkingPoint: "Use FoodPulse to explain the Compose HAProxy lab, the k3s CloudNativePG plus Redis Sentinel path, and how resilience changes across environments.",
     icon: Activity,
   },
@@ -93,16 +93,16 @@ const demoSteps = [
     title: "Show MemFlip",
     label: "Onboarding pattern",
     href: "/services/memflip",
-    command: "./Obervability-Stack/scripts/devops-monitor.sh memflip-live",
+    command: "./scripts/devops-monitor.sh memflip-live",
     talkingPoint: "Use MemFlip to show the smallest repeatable integration pattern and the first real k3s migration slice in the workspace.",
     icon: Gauge,
   },
   {
     title: "Open Incident Drills",
     label: "Operational proof",
-    href: `${repositoryUrl}/Obervability-Stack/docs/INCIDENT_DRILLS.md`,
+    href: `${repositoryUrl}/docs/INCIDENT_DRILLS.md`,
     external: true,
-    command: "Open Obervability-Stack/docs/INCIDENT_DRILLS.md",
+    command: "Open docs/INCIDENT_DRILLS.md",
     talkingPoint: "These incidents were executed and documented, not invented after the fact.",
     icon: AlertTriangle,
   },
@@ -417,7 +417,7 @@ export default function DemoCenterPage() {
             {[
               ["Demo Walkthrough", `${repositoryUrl}/DEMO-WALKTHROUGH.md`],
               ["Journey Runbook", `${repositoryUrl}/JOURNEY-RUNBOOK.md`],
-              ["Incident Drills", `${repositoryUrl}/Obervability-Stack/docs/INCIDENT_DRILLS.md`],
+              ["Incident Drills", `${repositoryUrl}/docs/INCIDENT_DRILLS.md`],
               ["Architecture", `${repositoryUrl}/WORKSPACE-ARCHITECTURE.md`],
             ].map(([label, href]) => (
               <Button key={label} asChild variant="outline" className="justify-between gap-2 bg-white dark:bg-gray-950">

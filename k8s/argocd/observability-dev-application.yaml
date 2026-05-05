@@ -6,9 +6,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/eseosaiyangbe/DevOps-Easy-Learning.git
+    repoURL: https://github.com/eseosaiyangbe/Obervability-Stack.git
     targetRevision: main
-    path: Obervability-Stack/k8s/overlays/dev
+    path: k8s/overlays/dev
   destination:
     server: https://kubernetes.default.svc
     namespace: platform-observability-dev

@@ -30,7 +30,7 @@
       "title": "MemFlip Operator Runbook",
       "tooltip": "Open the platform-facing MemFlip operator runbook",
       "type": "link",
-      "url": "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main/Obervability-Stack/docs/MEMFLIP_OPERATOR_RUNBOOK.md"
+      "url": "https://github.com/eseosaiyangbe/Obervability-Stack/blob/main/docs/MEMFLIP_OPERATOR_RUNBOOK.md"
     }
   ],
   "liveNow": false,

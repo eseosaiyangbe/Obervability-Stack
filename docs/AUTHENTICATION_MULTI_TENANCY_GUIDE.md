@@ -8,9 +8,9 @@ This document mixes implemented pieces with longer-horizon architecture notes.
 
 For the current runtime source of truth, use:
 
-- [`AUTH_ACCESS_MODEL.md`](/Users/raymond/Documents/DevOps-Easy-Learning/Obervability-Stack/docs/AUTH_ACCESS_MODEL.md)
-- [`ui-next/lib/auth.ts`](/Users/raymond/Documents/DevOps-Easy-Learning/Obervability-Stack/ui-next/lib/auth.ts)
-- [`ui-next/prisma/schema.prisma`](/Users/raymond/Documents/DevOps-Easy-Learning/Obervability-Stack/ui-next/prisma/schema.prisma)
+- [`AUTH_ACCESS_MODEL.md`](/Users/raymond/Documents/observability-stack/docs/AUTH_ACCESS_MODEL.md)
+- [`ui-next/lib/auth.ts`](/Users/raymond/Documents/observability-stack/ui-next/lib/auth.ts)
+- [`ui-next/prisma/schema.prisma`](/Users/raymond/Documents/observability-stack/ui-next/prisma/schema.prisma)
 
 Current runtime summary:
 

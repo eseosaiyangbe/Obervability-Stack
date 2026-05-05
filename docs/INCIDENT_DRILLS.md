@@ -90,7 +90,7 @@ What this tests:
 Baseline:
 
 ```bash
-cd Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh swiftpay-live
 ```
 
@@ -110,7 +110,7 @@ Expected detection:
 First checks:
 
 ```bash
-cd ../Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh swiftpay-live
 curl -fsS http://localhost:4000/api/apps/swiftpay/business | jq .
 
@@ -125,7 +125,7 @@ Recovery:
 cd SwiftPay
 docker compose start transaction-service
 
-cd ../Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh swiftpay-live
 ```
 
@@ -150,7 +150,7 @@ What this tests:
 Baseline:
 
 ```bash
-cd Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh swiftpay-live
 ```
 
@@ -174,7 +174,7 @@ cd ../SwiftPay
 docker compose logs --tail=120 wallet-service
 docker compose logs --tail=120 transaction-service
 
-cd ../Obervability-Stack
+cd ../observability-stack
 curl -fsS http://localhost:4000/api/apps/swiftpay/business | jq .
 ```
 
@@ -184,7 +184,7 @@ Recovery:
 cd SwiftPay
 docker compose start wallet-service
 
-cd ../Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh swiftpay-live
 ```
 
@@ -209,7 +209,7 @@ What this tests:
 Baseline:
 
 ```bash
-cd Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh swiftpay-live
 ```
 
@@ -242,7 +242,7 @@ cd SwiftPay
 docker compose start rabbitmq
 docker compose restart transaction-service
 
-cd ../Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh swiftpay-live
 ```
 
@@ -269,7 +269,7 @@ What this tests:
 Baseline:
 
 ```bash
-cd Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh memflip-live
 ```
 
@@ -301,7 +301,7 @@ Recovery:
 cd MemFlip
 docker compose start backend
 
-cd ../Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh memflip-live
 ```
 
@@ -326,7 +326,7 @@ What this tests:
 Baseline:
 
 ```bash
-cd Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh memflip-live
 ```
 
@@ -355,7 +355,7 @@ Recovery:
 cd MemFlip
 docker compose start backend
 
-cd ../Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh memflip-live
 ```
 
@@ -381,7 +381,7 @@ What this tests:
 Baseline:
 
 ```bash
-cd Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh opensis-live
 ```
 
@@ -414,7 +414,7 @@ cd OpenSIS
 docker compose start vault
 docker compose restart vault-agent-app vault-agent-db
 
-cd ../Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh opensis-live
 ```
 
@@ -439,7 +439,7 @@ What this tests:
 Baseline:
 
 ```bash
-cd Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh opensis-live
 ```
 
@@ -473,7 +473,7 @@ cd OpenSIS
 docker compose start opensis-db
 docker compose restart opensis-ui
 
-cd ../Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh opensis-live
 ```
 
@@ -499,7 +499,7 @@ Baseline:
 
 ```bash
 curl -fsSI http://localhost:8088
-cd Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh opensis-live
 ```
 
@@ -710,7 +710,7 @@ What this tests:
 Baseline:
 
 ```bash
-cd Obervability-Stack
+cd ../observability-stack
 ./scripts/devops-monitor.sh operator
 ```
 

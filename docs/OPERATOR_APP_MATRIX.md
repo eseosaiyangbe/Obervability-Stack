@@ -16,10 +16,10 @@ It answers:
 
 | App | Platform Story | Primary Local Start | Main Browser URL | Primary Health Check | Control-Plane Audit | Live Audit | Operational Focus |
 |---|---|---|---|---|---|---|---|
-| `SwiftPay` | Flagship microservices integration | `cd SwiftPay && docker compose up -d` | `http://localhost:8081` | `curl -fsS http://localhost:3007/health` | `./scripts/devops-monitor.sh swiftpay` | `./scripts/devops-monitor.sh swiftpay-live` | service health, business metrics, async money flow |
-| `OpenSIS` | Legacy app wrapped in stronger platform practices | `cd OpenSIS && ./scripts/compose-start.sh --build-local` on Apple Silicon, otherwise `./scripts/compose-start.sh` | `http://localhost:8088` | `curl -I http://localhost:8088` | `./scripts/devops-monitor.sh opensis` | `./scripts/devops-monitor.sh opensis-live` | edge reachability, Vault, DB-backed app availability |
-| `FoodPulse` | Resilience and failover lab | `cd FoodPulse && cp .env.example .env && ./scripts/start.sh` | `http://localhost:8090` | `curl -I http://localhost:8090` | `./scripts/devops-monitor.sh foodpulse` | `./scripts/devops-monitor.sh foodpulse-live` | Redis failover, Postgres failover, HAProxy behavior |
-| `MemFlip` | Reference onboarding app | `cd MemFlip && cp .env.example .env && docker compose up -d` | `http://localhost:8080` | `curl -fsS http://localhost:8080/api/health` | `./scripts/devops-monitor.sh memflip` | `./scripts/devops-monitor.sh memflip-live` | simplest browser-first onboarding story |
+| `SwiftPay` | Flagship microservices integration | `cd ../swiftpay && docker compose up -d` | `http://localhost:8081` | `curl -fsS http://localhost:3007/health` | `./scripts/devops-monitor.sh swiftpay` | `./scripts/devops-monitor.sh swiftpay-live` | service health, business metrics, async money flow |
+| `OpenSIS` | Legacy app wrapped in stronger platform practices | `cd ../opensis && ./scripts/compose-start.sh --build-local` on Apple Silicon, otherwise `./scripts/compose-start.sh` | `http://localhost:8088` | `curl -I http://localhost:8088` | `./scripts/devops-monitor.sh opensis` | `./scripts/devops-monitor.sh opensis-live` | edge reachability, Vault, DB-backed app availability |
+| `FoodPulse` | Resilience and failover lab | `cd ../foodpulse && cp .env.example .env && ./scripts/start.sh` | `http://localhost:8090` | `curl -I http://localhost:8090` | `./scripts/devops-monitor.sh foodpulse` | `./scripts/devops-monitor.sh foodpulse-live` | Redis failover, Postgres failover, HAProxy behavior |
+| `MemFlip` | Reference onboarding app | `cd ../memflip && cp .env.example .env && docker compose up -d` | `http://localhost:8080` | `curl -fsS http://localhost:8080/api/health` | `./scripts/devops-monitor.sh memflip` | `./scripts/devops-monitor.sh memflip-live` | simplest browser-first onboarding story |
 
 ## Recommended Operator Flow
 

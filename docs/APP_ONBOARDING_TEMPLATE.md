@@ -107,7 +107,7 @@ Treat Docker aliases as the local equivalent of future Kubernetes Services.
 
 The app must have a valid entry in:
 
-- [monitored-apps.ts](/Users/raymond/Documents/DevOps-Easy-Learning/Obervability-Stack/ui-next/lib/monitored-apps.ts)
+- [monitored-apps.ts](/Users/raymond/Documents/observability-stack/ui-next/lib/monitored-apps.ts)
 
 At minimum, that entry must define:
 
@@ -181,9 +181,9 @@ Use this checklist before calling an app onboarded.
 Run these after wiring a new app:
 
 ```bash
-./Obervability-Stack/scripts/devops-monitor.sh inventory
-./Obervability-Stack/scripts/devops-monitor.sh <app-id>
-./Obervability-Stack/scripts/devops-monitor.sh <app-id>-live
+./scripts/devops-monitor.sh inventory
+./scripts/devops-monitor.sh <app-id>
+./scripts/devops-monitor.sh <app-id>-live
 ```
 
 ## Current Reference Patterns

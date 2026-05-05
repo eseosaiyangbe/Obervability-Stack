@@ -32,56 +32,56 @@ type OperatorGuide = {
   runbookUrl: string
 }
 
-const repositoryUrl = "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main"
-const incidentDrillUrl = `${repositoryUrl}/Obervability-Stack/docs/INCIDENT_DRILLS.md`
+const repositoryUrl = "https://github.com/eseosaiyangbe/Obervability-Stack/blob/main"
+const incidentDrillUrl = `${repositoryUrl}/docs/INCIDENT_DRILLS.md`
 
 const operatorGuides: Record<string, OperatorGuide> = {
   opensis: {
     story: "Legacy PHP app wrapped with modern platform practices, Vault dependency checks, and database-backed reachability.",
     firstChecks: [
-      "./Obervability-Stack/scripts/devops-monitor.sh opensis-live",
-      "cd OpenSIS && docker compose ps vault vault-agent-app vault-agent-db opensis-ui opensis-db",
+      "./scripts/devops-monitor.sh opensis-live",
+      "cd ../opensis && docker compose ps vault vault-agent-app vault-agent-db opensis-ui opensis-db",
       "curl -fsS http://localhost:8200/v1/sys/health | jq .",
     ],
     drill: "OpenSIS Vault unavailable",
-    runbook: "Obervability-Stack/docs/OPENSIS_OPERATOR_RUNBOOK.md",
-    runbookUrl: `${repositoryUrl}/Obervability-Stack/docs/OPENSIS_OPERATOR_RUNBOOK.md`,
+    runbook: "docs/OPENSIS_OPERATOR_RUNBOOK.md",
+    runbookUrl: `${repositoryUrl}/docs/OPENSIS_OPERATOR_RUNBOOK.md`,
   },
   swiftpay: {
     story: "Microservices money-flow app for gateway health, wallet dependencies, async transaction processing, business metrics, and the second real k3s migration slice.",
     firstChecks: [
-      "./Obervability-Stack/scripts/devops-monitor.sh swiftpay-live",
-      "cd SwiftPay && ./scripts/k8s-dev-verify.sh",
+      "./scripts/devops-monitor.sh swiftpay-live",
+      "cd ../swiftpay && ./scripts/k8s-dev-verify.sh",
       "curl -fsS http://localhost:4000/api/apps/swiftpay/business | jq .",
       "kubectl get pods,svc,ingress -n swiftpay-dev",
     ],
     drill: "SwiftPay transaction worker down",
-    runbook: "Obervability-Stack/docs/SWIFTPAY_OPERATOR_RUNBOOK.md",
-    runbookUrl: `${repositoryUrl}/Obervability-Stack/docs/SWIFTPAY_OPERATOR_RUNBOOK.md`,
+    runbook: "docs/SWIFTPAY_OPERATOR_RUNBOOK.md",
+    runbookUrl: `${repositoryUrl}/docs/SWIFTPAY_OPERATOR_RUNBOOK.md`,
   },
   foodpulse: {
     story: "Resilience lab that now spans both worlds: Compose keeps the HAProxy teaching path, while k3s uses CloudNativePG and Sentinel-aware Redis failover.",
     firstChecks: [
-      "./Obervability-Stack/scripts/devops-monitor.sh foodpulse-live",
-      "cd FoodPulse && ./scripts/k8s-dev-verify.sh",
-      "cd FoodPulse && ./scripts/cluster-status.sh",
+      "./scripts/devops-monitor.sh foodpulse-live",
+      "cd ../foodpulse && ./scripts/k8s-dev-verify.sh",
+      "cd ../foodpulse && ./scripts/cluster-status.sh",
       "kubectl get pods,svc,ingress -n foodpulse-dev",
     ],
     drill: "FoodPulse Redis failover",
-    runbook: "Obervability-Stack/docs/FOODPULSE_OPERATOR_RUNBOOK.md",
-    runbookUrl: `${repositoryUrl}/Obervability-Stack/docs/FOODPULSE_OPERATOR_RUNBOOK.md`,
+    runbook: "docs/FOODPULSE_OPERATOR_RUNBOOK.md",
+    runbookUrl: `${repositoryUrl}/docs/FOODPULSE_OPERATOR_RUNBOOK.md`,
   },
   memflip: {
     story: "Lightweight onboarding app that now serves as the first real k3s migration slice and the repeatable frontend/backend template for the workspace.",
     firstChecks: [
-      "./Obervability-Stack/scripts/devops-monitor.sh memflip-live",
-      "cd MemFlip && ./scripts/k8s-dev-verify.sh",
+      "./scripts/devops-monitor.sh memflip-live",
+      "cd ../memflip && ./scripts/k8s-dev-verify.sh",
       "curl -fsS http://localhost:8080/api/health | jq .",
       "kubectl get pods,svc,ingress -n memflip-dev",
     ],
     drill: "MemFlip backend down",
-    runbook: "Obervability-Stack/docs/MEMFLIP_OPERATOR_RUNBOOK.md",
-    runbookUrl: `${repositoryUrl}/Obervability-Stack/docs/MEMFLIP_OPERATOR_RUNBOOK.md`,
+    runbook: "docs/MEMFLIP_OPERATOR_RUNBOOK.md",
+    runbookUrl: `${repositoryUrl}/docs/MEMFLIP_OPERATOR_RUNBOOK.md`,
   },
 }
 
@@ -408,7 +408,7 @@ export default function ManagedAppDetailPage() {
               <div>
                 <p className="mb-2 text-sm font-semibold text-gray-950 dark:text-white">First commands</p>
                 <div className="space-y-2">
-                  {(guide?.firstChecks || [app.runbooks.healthCheck || "./Obervability-Stack/scripts/devops-monitor.sh operator"]).map((command) => (
+                  {(guide?.firstChecks || [app.runbooks.healthCheck || "./scripts/devops-monitor.sh operator"]).map((command) => (
                     <code key={command} className="block rounded-xl bg-gray-950 p-3 text-xs text-gray-100">
                       {command}
                     </code>
