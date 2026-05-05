@@ -417,7 +417,7 @@ export const Sidebar = memo(() => {
                       <Activity className="h-7 w-7" />
                     </div>
                     <div>
-                      <h1 className="text-xl font-bold text-gray-900 dark:text-white">DevOps Easy Learning</h1>
+                      <h1 className="text-xl font-bold text-gray-900 dark:text-white">Internal Developer Platform</h1>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Control Plane</p>
                     </div>
                   </div>

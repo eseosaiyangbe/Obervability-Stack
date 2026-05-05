@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
-const repositoryUrl = "https://github.com/eseosaiyangbe/DevOps-Easy-Learning/blob/main"
+const repositoryUrl = "https://github.com/eseosaiyangbe/internal-developer-platform/blob/main"
 
 function authRedirect(path: string) {
   return `/auth/signin?from=${encodeURIComponent(path)}`
@@ -89,7 +89,7 @@ export function LandingPage() {
               <div className="max-w-3xl">
                 <Badge className="mb-4 border-white/20 bg-white/10 text-white">
                   <ShieldCheck className="mr-1 h-3 w-3" />
-                  DevOps Easy Learning
+                  Internal Developer Platform
                 </Badge>
                 <h1 className="text-2xl font-black tracking-tight sm:text-4xl lg:text-5xl">
                   One control plane for four different workload stories

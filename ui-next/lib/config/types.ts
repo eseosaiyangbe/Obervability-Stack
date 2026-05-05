@@ -223,7 +223,7 @@ export interface ConfigUpdate {
 export const DEFAULT_CONFIG: MonitoringConfig = {
   dashboard: {
     refresh_interval: '15s',
-    title: 'DevOps Easy Learning Control Plane',
+    title: 'Internal Developer Platform Control Plane',
     description: 'Control plane for the managed application portfolio',
     theme: 'system',
   },
@@ -325,18 +325,18 @@ export const DEFAULT_CONFIG: MonitoringConfig = {
         enabled: false,
         webhook_url: '',
         default_channel: '#alerts',
-        username: 'DevOps Easy Learning',
+        username: 'Internal Developer Platform',
         icon_emoji: ':bell:',
       },
       teams: {
         enabled: false,
         webhook_url: '',
-        title: 'DevOps Easy Learning Alert',
+        title: 'Internal Developer Platform Alert',
       },
       discord: {
         enabled: false,
         webhook_url: '',
-        username: 'DevOps Easy Learning',
+        username: 'Internal Developer Platform',
         avatar_url: '',
       },
       email: {

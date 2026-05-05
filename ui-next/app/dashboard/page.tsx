@@ -51,10 +51,10 @@ const statToneStyles: Record<StatTone, string> = {
 }
 
 function normalizeDashboardTitle(title?: string | null) {
-  if (!title) return "DevOps Easy Learning Control Plane"
+  if (!title) return "Internal Developer Platform Control Plane"
   const trimmed = title.trim()
   if (trimmed === "DevOps Monitor" || trimmed === "Monitoring in a Box") {
-    return "DevOps Easy Learning Control Plane"
+    return "Internal Developer Platform Control Plane"
   }
   return trimmed
 }

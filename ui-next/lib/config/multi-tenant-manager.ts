@@ -186,7 +186,7 @@ export class MultiTenantConfigManager {
       created_at: config.created_at || new Date().toISOString(),
       updated_at: config.updated_at || new Date().toISOString(),
       dashboard: {
-        title: config.dashboard?.title || 'DevOps Easy Learning Control Plane',
+        title: config.dashboard?.title || 'Internal Developer Platform Control Plane',
         refresh_interval: config.dashboard?.refresh_interval || '15s'
       },
       metrics: {

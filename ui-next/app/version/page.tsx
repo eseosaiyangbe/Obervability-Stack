@@ -19,7 +19,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { usePlatformServices } from "@/lib/hooks/use-platform-services"
 import type { PlatformServiceSnapshot } from "@/lib/platform-services"
 
-const repositoryUrl = "https://github.com/eseosaiyangbe/DevOps-Easy-Learning"
+const repositoryUrl = "https://github.com/eseosaiyangbe/internal-developer-platform"
 
 function statusClass(service: PlatformServiceSnapshot) {
   if (service.status === "down") {

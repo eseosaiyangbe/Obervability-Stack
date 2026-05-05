@@ -85,8 +85,9 @@ scrape_configs:
     metrics_path: /metrics
     honor_labels: true
 
-  # Blackbox Exporter - HTTP uptime monitoring for local learning apps.
-  # App containers join the shared observability-net Docker network with stable aliases.
+  # Blackbox Exporter - HTTP uptime monitoring for the active workspace app contract.
+  # Externalized workloads are probed via their public ingress endpoints so the
+  # compose-hosted control plane reflects the current k3s-first operating model.
   - job_name: 'blackbox-http'
     metrics_path: /probe
     params:
@@ -96,22 +97,22 @@ scrape_configs:
           app: foodpulse
           component: frontend
         targets:
-          - http://foodpulse-ui/
+          - https://foodpulse.eseosadevbox.com/
       - labels:
           app: memflip
           component: frontend
         targets:
-          - http://memflip-frontend/api/health
+          - https://memflip.eseosadevbox.com/api/health
       - labels:
           app: memflip
           component: backend
         targets:
-          - http://memflip-backend:3001/health
+          - https://memflip.eseosadevbox.com/api/health
       - labels:
           app: opensis
           component: frontend
         targets:
-          - http://opensis-ui/
+          - https://opensis.eseosadevbox.com/install/index.php
       - labels:
           app: swiftpay
           component: frontend

@@ -93,13 +93,13 @@ export const monitoredApps: MonitoredApp[] = [
           id: 'opensis-ui',
           name: 'OpenSIS UI',
           kind: 'frontend',
-          dockerTarget: 'http://opensis-ui/',
+          dockerTarget: 'https://opensis.eseosadevbox.com/install/index.php',
           browserUrl: 'https://opensis.eseosadevbox.com',
           prometheusLabels: {
             job: 'blackbox-http',
             app: 'opensis',
             component: 'frontend',
-            target: 'http://opensis-ui/',
+            target: 'https://opensis.eseosadevbox.com/install/index.php',
           },
           kubernetes: {
             serviceName: 'opensis-ui',
@@ -219,8 +219,8 @@ export const monitoredApps: MonitoredApp[] = [
     },
     observability: {
       endpoints: [
-        endpoint('memflip-frontend', 'MemFlip Frontend', 'frontend', 'http://memflip-frontend/api/health', 'https://memflip.eseosadevbox.com', 'memflip', 'frontend', '/api/health', 'memflip-dev'),
-        endpoint('memflip-backend', 'MemFlip Backend', 'api', 'http://memflip-backend:3001/health', undefined, 'memflip', 'backend', '/health', 'memflip-dev'),
+        endpoint('memflip-frontend', 'MemFlip Frontend', 'frontend', 'https://memflip.eseosadevbox.com/api/health', 'https://memflip.eseosadevbox.com', 'memflip', 'frontend', '/api/health', 'memflip-dev'),
+        endpoint('memflip-backend', 'MemFlip Backend', 'api', 'https://memflip.eseosadevbox.com/api/health', undefined, 'memflip', 'backend', '/health', 'memflip-dev'),
       ],
       primaryHealthEndpointId: 'memflip-frontend',
       logQuery: '{namespace=~"memflip-dev|memflip-prod"}',
@@ -263,7 +263,7 @@ export const monitoredApps: MonitoredApp[] = [
     },
     observability: {
       endpoints: [
-        endpoint('foodpulse-ui', 'FoodPulse UI', 'frontend', 'http://foodpulse-ui/', 'https://foodpulse.eseosadevbox.com', 'foodpulse', 'frontend', '/', 'foodpulse-dev'),
+        endpoint('foodpulse-ui', 'FoodPulse UI', 'frontend', 'https://foodpulse.eseosadevbox.com/', 'https://foodpulse.eseosadevbox.com', 'foodpulse', 'frontend', '/', 'foodpulse-dev'),
         endpoint('foodpulse-api', 'FoodPulse API', 'api', 'http://foodpulse-api:4567/health', undefined, 'foodpulse', 'api', '/health', 'foodpulse-dev'),
       ],
       primaryHealthEndpointId: 'foodpulse-ui',

@@ -6,6 +6,7 @@ import { monitoredApps } from "../lib/monitored-apps";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const workspaceRoot = path.resolve(__dirname, "../../..");
+const repoRoot = path.resolve(__dirname, "../..");
 
 const errors: string[] = [];
 const warnings: string[] = [];
@@ -34,6 +35,18 @@ function parseCommand(command: string | undefined) {
   };
 }
 
+function resolveRepoPath(repo: string) {
+  const candidateRoots = [workspaceRoot, repoRoot];
+  for (const root of candidateRoots) {
+    const candidate = path.resolve(root, repo);
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  return null;
+}
+
 function ensureUnique(values: string[], label: string) {
   const seen = new Set<string>();
   for (const value of values) {
@@ -51,6 +64,10 @@ function extractHostname(target: string) {
   } catch {
     return null;
   }
+}
+
+function usesExternalProbeTarget(target: string) {
+  return /^https?:\/\//.test(target) && !/^https?:\/\/(localhost|127\.0\.0\.1)([:/]|$)/.test(target);
 }
 
 function isExpectedKubernetesNamespace(appId: string, namespace: string) {
@@ -132,8 +149,8 @@ for (const app of monitoredApps) {
 
   const startCommand = parseCommand(app.runbooks.localStart);
   if (startCommand) {
-    const repoPath = path.join(workspaceRoot, startCommand.repo);
-    if (!fs.existsSync(repoPath)) {
+    const repoPath = resolveRepoPath(startCommand.repo);
+    if (!repoPath) {
       error(`App ${app.id} localStart repo does not exist: ${startCommand.repo}`);
     } else if (startCommand.command.startsWith("./")) {
       const commandPath = path.join(repoPath, startCommand.command.split(/\s+/)[0]);
@@ -174,7 +191,7 @@ for (const app of monitoredApps) {
     const dockerHost = extractHostname(endpoint.dockerTarget);
     if (!dockerHost) {
       error(`Endpoint ${endpoint.id} in ${app.id} has an invalid dockerTarget: ${endpoint.dockerTarget}`);
-    } else if (!app.docker.networkAliases.includes(dockerHost)) {
+    } else if (!usesExternalProbeTarget(endpoint.dockerTarget) && !app.docker.networkAliases.includes(dockerHost)) {
       error(`Endpoint ${endpoint.id} in ${app.id} uses docker host ${dockerHost} not present in networkAliases`);
     }
 

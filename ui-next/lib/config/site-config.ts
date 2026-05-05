@@ -1,4 +1,4 @@
-// Site configuration for the DevOps Easy Learning control plane.
+// Site configuration for the Internal Developer Platform control plane.
 import { SiteConfig } from './types';
 
 const legacySiteNames = new Set([
@@ -56,17 +56,17 @@ function sanitizeLoadedConfig(config: SiteConfig): SiteConfig {
 
 export const DEFAULT_SITE_CONFIG: SiteConfig = {
   // Basic Site Information
-  name: 'DevOps Easy Learning',
-  description: 'Control plane for the DevOps Easy Learning portfolio with real-time metrics, logs, alerts, and operator guidance.',
+  name: 'Internal Developer Platform',
+  description: 'Control plane for the Internal Developer Platform portfolio with real-time metrics, logs, alerts, and operator guidance.',
   url: 'http://localhost:4000',
   version: '1.0.0',
   
   // SEO Configuration
   seo: {
-    title: 'DevOps Easy Learning Control Plane',
+    title: 'Internal Developer Platform Control Plane',
     description: 'Unified control plane for OpenSIS, SwiftPay, FoodPulse, and MemFlip with monitoring, logging, alerts, and operator guidance.',
     keywords: [
-      'devops easy learning',
+      'internal developer platform',
       'control plane',
       'application monitoring',
       'prometheus',
@@ -77,22 +77,22 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
       'incident response',
       'operator guide'
     ],
-    author: 'DevOps Easy Learning Team',
+    author: 'Internal Developer Platform Team',
     robots: 'index, follow',
     canonical: 'http://localhost:4000',
     og: {
-      title: 'DevOps Easy Learning Control Plane',
+      title: 'Internal Developer Platform Control Plane',
       description: 'Unified control plane for app demos, observability, incident response, and operator handoff.',
       type: 'website',
       image: '/banner.png',
       url: 'http://localhost:4000',
-      site_name: 'DevOps Easy Learning'
+      site_name: 'Internal Developer Platform'
     },
     twitter: {
       card: 'summary_large_image',
       site: '@devopseasylearn',
       creator: '@devopseasylearn',
-      title: 'DevOps Easy Learning Control Plane',
+      title: 'Internal Developer Platform Control Plane',
       description: 'Unified control plane for app demos, observability, and operator readiness.',
       image: '/banner.png'
     }
@@ -121,19 +121,19 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
   
   // Contact Information
   contact: {
-    email: 'support@devopseasylearning.local',
+    email: 'support@internaldeveloperplatform.local',
     phone: '+1 (000) 000-0000',
-    address: 'DevOps Easy Learning Lab',
+    address: 'Internal Developer Platform Lab',
     social: {
       twitter: 'https://twitter.com/devopseasylearn',
-      linkedin: 'https://linkedin.com/company/devops-easy-learning',
-      github: 'https://github.com/eseosaiyangbe/DevOps-Easy-Learning'
+      linkedin: 'https://linkedin.com/company/internal-developer-platform',
+      github: 'https://github.com/eseosaiyangbe/internal-developer-platform'
     }
   },
   
   // Company Information
   company: {
-    name: 'DevOps Easy Learning',
+    name: 'Internal Developer Platform',
     description: 'Hands-on portfolio environment for operating mixed-architecture workloads through one control plane.',
     founded: '2026',
     location: 'Toronto, ON'
@@ -144,7 +144,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
     privacy_policy_url: '/privacy-policy',
     terms_of_service_url: '/terms-of-service',
     cookie_policy_url: '/cookie-policy',
-    copyright: '© 2026 DevOps Easy Learning. All rights reserved.'
+    copyright: '© 2026 Internal Developer Platform. All rights reserved.'
   },
   
   // Feature Flags

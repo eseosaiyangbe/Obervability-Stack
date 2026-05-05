@@ -40,9 +40,9 @@ const nextConfig = {
   },
   // Site configuration support
   env: {
-    SITE_NAME: process.env.SITE_NAME || 'DevOps Easy Learning',
+    SITE_NAME: process.env.SITE_NAME || 'Internal Developer Platform',
     SITE_URL: process.env.SITE_URL || 'http://localhost:4000',
-    SITE_DESCRIPTION: process.env.SITE_DESCRIPTION || 'Unified control plane for observability, incidents, and app operations across the DevOps Easy Learning portfolio.',
+    SITE_DESCRIPTION: process.env.SITE_DESCRIPTION || 'Unified control plane for observability, incidents, and app operations across the Internal Developer Platform portfolio.',
   },
   // Only apply rewrites in development
   async rewrites() {

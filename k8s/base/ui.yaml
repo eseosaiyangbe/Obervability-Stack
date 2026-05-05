@@ -5,9 +5,9 @@ metadata:
 data:
   NODE_ENV: production
   PORT: "3000"
-  SITE_NAME: DevOps Easy Learning Control Plane
+  SITE_NAME: Internal Developer Platform Control Plane
   SITE_URL: http://controlplane.devops.local
-  SITE_DESCRIPTION: Shared observability control plane for the DevOps Easy Learning workspace
+  SITE_DESCRIPTION: Shared observability control plane for the Internal Developer Platform workspace
   NEXT_PUBLIC_API_URL: http://controlplane.devops.local/api
   AUTH_MODE: database
   ENABLE_DEMO_LOGIN: "true"
