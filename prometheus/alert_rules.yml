@@ -229,15 +229,28 @@ groups:
 
       # High container CPU usage
       - alert: HighContainerCPUUsage
-        expr: (rate(container_cpu_usage_seconds_total{id!="/"}[5m]) * 100) > 80
+        expr: |
+          (
+            rate(container_cpu_usage_seconds_total{job="cadvisor", id!="/", container!="", image!="", pod!=""}[5m])
+            /
+            on (namespace, pod, container)
+            (
+              container_spec_cpu_quota{job="cadvisor", id!="/", container!="", image!="", pod!=""}
+              /
+              container_spec_cpu_period{job="cadvisor", id!="/", container!="", image!="", pod!=""}
+            )
+          ) * 100 > 80
+          and
+          on (namespace, pod, container)
+          container_spec_cpu_quota{job="cadvisor", id!="/", container!="", image!="", pod!=""} > 0
         for: 5m
         labels:
           severity: warning
           service: containers
           component: cpu
         annotations:
-          summary: "High container CPU usage on {{ $labels.instance }}"
-          description: "Container {{ $labels.name }} CPU usage is above 80% on {{ $labels.instance }}"
+          summary: "High container CPU usage for {{ $labels.namespace }}/{{ $labels.pod }}"
+          description: "Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }} is above 80% of its configured CPU limit."
           runbook_url: "https://docs.example.com/runbooks/high-container-cpu-usage"
 
       # Container OOMKilled
