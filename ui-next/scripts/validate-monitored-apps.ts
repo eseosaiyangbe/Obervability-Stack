@@ -35,10 +35,18 @@ function parseCommand(command: string | undefined) {
   };
 }
 
-function resolveRepoPath(repo: string) {
+function resolveRepoPath(repo: string, requiredRelativePath?: string) {
   const candidateRoots = [workspaceRoot, repoRoot];
   for (const root of candidateRoots) {
     const candidate = path.resolve(root, repo);
+    if (!fs.existsSync(candidate)) {
+      continue;
+    }
+
+    if (requiredRelativePath && !fs.existsSync(path.join(candidate, requiredRelativePath))) {
+      continue;
+    }
+
     if (fs.existsSync(candidate)) {
       return candidate;
     }
@@ -149,7 +157,9 @@ for (const app of monitoredApps) {
 
   const startCommand = parseCommand(app.runbooks.localStart);
   if (startCommand) {
-    const repoPath = resolveRepoPath(startCommand.repo);
+    const helperPath =
+      startCommand.command.startsWith("./") ? startCommand.command.split(/\s+/)[0] : undefined;
+    const repoPath = resolveRepoPath(startCommand.repo, helperPath);
     if (!repoPath) {
       error(`App ${app.id} localStart repo does not exist: ${startCommand.repo}`);
     } else if (startCommand.command.startsWith("./")) {
