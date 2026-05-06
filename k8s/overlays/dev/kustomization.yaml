@@ -5,6 +5,7 @@ namespace: platform-observability-dev
 
 resources:
   - namespace.yaml
+  - public-observability-root-redirects.yaml
   - vault-serviceaccount.yaml
   - vault-secret-store.yaml
   - vault-postgres-external-secret.yaml
@@ -44,6 +45,27 @@ patches:
       - op: replace
         path: /data/NEXT_PUBLIC_GRAFANA_BROWSER_URL
         value: https://grafana.eseosadevbox.com
+      - op: replace
+        path: /data/NEXT_PUBLIC_PROMETHEUS_BROWSER_URL
+        value: https://prometheus.eseosadevbox.com/graph
+      - op: replace
+        path: /data/NEXT_PUBLIC_ALERTMANAGER_BROWSER_URL
+        value: https://alertmanager.eseosadevbox.com/#/alerts
+      - op: replace
+        path: /data/NEXT_PUBLIC_LOKI_BROWSER_URL
+        value: https://loki.eseosadevbox.com/metrics
+      - op: replace
+        path: /data/NEXT_PUBLIC_NODE_EXPORTER_BROWSER_URL
+        value: https://node-exporter.eseosadevbox.com
+      - op: replace
+        path: /data/NEXT_PUBLIC_BLACKBOX_EXPORTER_BROWSER_URL
+        value: https://blackbox-exporter.eseosadevbox.com
+      - op: replace
+        path: /data/NEXT_PUBLIC_CADVISOR_BROWSER_URL
+        value: https://cadvisor.eseosadevbox.com/containers/
+      - op: replace
+        path: /data/NEXT_PUBLIC_PROMTAIL_BROWSER_URL
+        value: https://promtail.eseosadevbox.com/targets
   - target:
       kind: Ingress
       name: devops-monitor-ui
@@ -78,6 +100,140 @@ patches:
                     name: grafana
                     port:
                       number: 3000
+  - target:
+      kind: Ingress
+      name: prometheus
+    patch: |-
+      - op: add
+        path: /metadata/annotations/traefik.ingress.kubernetes.io~1router.middlewares
+        value: platform-observability-dev-prometheus-root-redirect@kubernetescrd
+      - op: add
+        path: /spec/rules/-
+        value:
+          host: prometheus.eseosadevbox.com
+          http:
+            paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                    name: prometheus
+                    port:
+                      number: 9090
+  - target:
+      kind: Ingress
+      name: alertmanager
+    patch: |-
+      - op: add
+        path: /metadata/annotations/traefik.ingress.kubernetes.io~1router.middlewares
+        value: platform-observability-dev-alertmanager-root-redirect@kubernetescrd
+      - op: add
+        path: /spec/rules/-
+        value:
+          host: alertmanager.eseosadevbox.com
+          http:
+            paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                    name: alertmanager
+                    port:
+                      number: 9093
+  - target:
+      kind: Ingress
+      name: loki
+    patch: |-
+      - op: add
+        path: /metadata/annotations/traefik.ingress.kubernetes.io~1router.middlewares
+        value: platform-observability-dev-loki-root-redirect@kubernetescrd
+      - op: add
+        path: /spec/rules/-
+        value:
+          host: loki.eseosadevbox.com
+          http:
+            paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                    name: loki
+                    port:
+                      number: 3100
+  - target:
+      kind: Ingress
+      name: node-exporter
+    patch: |-
+      - op: add
+        path: /spec/rules/-
+        value:
+          host: node-exporter.eseosadevbox.com
+          http:
+            paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                    name: node-exporter
+                    port:
+                      number: 9100
+  - target:
+      kind: Ingress
+      name: blackbox-exporter
+    patch: |-
+      - op: add
+        path: /spec/rules/-
+        value:
+          host: blackbox-exporter.eseosadevbox.com
+          http:
+            paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                    name: blackbox-exporter
+                    port:
+                      number: 9115
+  - target:
+      kind: Ingress
+      name: cadvisor
+    patch: |-
+      - op: add
+        path: /metadata/annotations/traefik.ingress.kubernetes.io~1router.middlewares
+        value: platform-observability-dev-cadvisor-root-redirect@kubernetescrd
+      - op: add
+        path: /spec/rules/-
+        value:
+          host: cadvisor.eseosadevbox.com
+          http:
+            paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                    name: cadvisor
+                    port:
+                      number: 8080
+  - target:
+      kind: Ingress
+      name: promtail
+    patch: |-
+      - op: add
+        path: /metadata/annotations/traefik.ingress.kubernetes.io~1router.middlewares
+        value: platform-observability-dev-promtail-root-redirect@kubernetescrd
+      - op: add
+        path: /spec/rules/-
+        value:
+          host: promtail.eseosadevbox.com
+          http:
+            paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                    name: promtail
+                    port:
+                      number: 9080
   - target:
       kind: Cluster
       name: observability-postgres
