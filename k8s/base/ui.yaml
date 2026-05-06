@@ -23,14 +23,14 @@ data:
   CADVISOR_URL: http://cadvisor:8080
   NODE_EXPORTER_ENABLED: "true"
   CADVISOR_ENABLED: "true"
-  NEXT_PUBLIC_PROMETHEUS_BROWSER_URL: http://prometheus:9090
-  NEXT_PUBLIC_GRAFANA_BROWSER_URL: http://grafana.devops.local
-  NEXT_PUBLIC_LOKI_BROWSER_URL: http://loki:3100/ready
-  NEXT_PUBLIC_ALERTMANAGER_BROWSER_URL: http://alertmanager:9093
-  NEXT_PUBLIC_NODE_EXPORTER_BROWSER_URL: http://node-exporter:9100
-  NEXT_PUBLIC_PROMTAIL_BROWSER_URL: http://promtail:9080
-  NEXT_PUBLIC_BLACKBOX_EXPORTER_BROWSER_URL: http://blackbox-exporter:9115
-  NEXT_PUBLIC_CADVISOR_BROWSER_URL: http://cadvisor:8080
+  NEXT_PUBLIC_PROMETHEUS_BROWSER_URL: http://localhost:9090/graph
+  NEXT_PUBLIC_GRAFANA_BROWSER_URL: https://grafana.eseosadevbox.com
+  NEXT_PUBLIC_LOKI_BROWSER_URL: http://localhost:3100/metrics
+  NEXT_PUBLIC_ALERTMANAGER_BROWSER_URL: http://localhost:9093/#/alerts
+  NEXT_PUBLIC_NODE_EXPORTER_BROWSER_URL: http://localhost:9100
+  NEXT_PUBLIC_PROMTAIL_BROWSER_URL: http://localhost:9080/targets
+  NEXT_PUBLIC_BLACKBOX_EXPORTER_BROWSER_URL: http://localhost:9115
+  NEXT_PUBLIC_CADVISOR_BROWSER_URL: http://localhost:8082/containers/
   NOTIFICATION_STORE_PATH: /app/data/notification-events.json
 ---
 apiVersion: v1

@@ -29,12 +29,12 @@ export class HealthAPI {
 
   private getPublicUrl(serviceName: string): string {
     const publicUrls: Record<string, string> = {
-      Prometheus: process.env.NEXT_PUBLIC_PROMETHEUS_BROWSER_URL || 'http://localhost:9090',
-      Grafana: process.env.NEXT_PUBLIC_GRAFANA_BROWSER_URL || 'http://localhost:3000',
-      Loki: process.env.NEXT_PUBLIC_LOKI_BROWSER_URL || 'http://localhost:3100',
-      Alertmanager: process.env.NEXT_PUBLIC_ALERTMANAGER_BROWSER_URL || 'http://localhost:9093',
+      Prometheus: process.env.NEXT_PUBLIC_PROMETHEUS_BROWSER_URL || 'http://localhost:9090/graph',
+      Grafana: process.env.NEXT_PUBLIC_GRAFANA_BROWSER_URL || 'http://localhost:3000/login',
+      Loki: process.env.NEXT_PUBLIC_LOKI_BROWSER_URL || 'http://localhost:3100/metrics',
+      Alertmanager: process.env.NEXT_PUBLIC_ALERTMANAGER_BROWSER_URL || 'http://localhost:9093/#/alerts',
       'Node Exporter': process.env.NEXT_PUBLIC_NODE_EXPORTER_BROWSER_URL || 'http://localhost:9100',
-      cAdvisor: process.env.NEXT_PUBLIC_CADVISOR_BROWSER_URL || 'http://localhost:8080',
+      cAdvisor: process.env.NEXT_PUBLIC_CADVISOR_BROWSER_URL || 'http://localhost:8082/containers/',
     };
 
     return publicUrls[serviceName] || '#';
