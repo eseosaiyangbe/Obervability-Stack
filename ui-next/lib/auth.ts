@@ -242,16 +242,16 @@ export async function createDemoUser() {
   }
 
   try {
-    const hashedPassword = await bcrypt.hash("demo123", 12)
-    
+    const hashedPassword = await bcrypt.hash("viewer123", 12)
+
     const demoUser = await prisma.user.upsert({
-      where: { email: "demo@example.com" },
+      where: { email: "viewer@example.com" },
       update: {},
       create: {
-        email: "demo@example.com",
-        name: "Demo User",
+        email: "viewer@example.com",
+        name: "Demo Viewer",
         password: hashedPassword,
-        role: UserRole.ADMIN,
+        role: UserRole.VIEWER,
       }
     })
 

@@ -18,10 +18,14 @@ const authMode = process.env.NEXT_PUBLIC_AUTH_MODE === "demo" ? "demo" : "databa
 const demoLoginEnabled =
   process.env.NEXT_PUBLIC_ENABLE_DEMO_LOGIN === "true" ||
   (process.env.NEXT_PUBLIC_ENABLE_DEMO_LOGIN === undefined && process.env.NODE_ENV !== "production")
+const DEFAULT_DEMO_VIEWER = {
+  email: "viewer@example.com",
+  password: "viewer123",
+}
 
 function SignInForm() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [email, setEmail] = useState(demoLoginEnabled ? DEFAULT_DEMO_VIEWER.email : "")
+  const [password, setPassword] = useState(demoLoginEnabled ? DEFAULT_DEMO_VIEWER.password : "")
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -173,16 +177,19 @@ function SignInForm() {
                 
                 {demoLoginEnabled && (
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                    <h3 className="font-semibold mb-3 text-white">Demo Credentials</h3>
+                    <h3 className="font-semibold mb-1 text-white">Default Demo Login</h3>
+                    <p className="text-sm text-blue-100 mb-3">
+                      The sign-in form is prefilled with the least-privileged demo account.
+                    </p>
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-blue-100 text-sm">Email:</span>
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-sm text-blue-100">demo@example.com</span>
+                          <span className="font-mono text-sm text-blue-100">{DEFAULT_DEMO_VIEWER.email}</span>
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => copyToClipboard('demo@example.com', 'email')}
+                            onClick={() => copyToClipboard(DEFAULT_DEMO_VIEWER.email, 'email')}
                             className="h-8 w-8 p-0 hover:bg-white/20 text-white hover:text-white transition-colors"
                             title="Copy email"
                           >
@@ -197,11 +204,11 @@ function SignInForm() {
                       <div className="flex items-center justify-between">
                         <span className="text-blue-100 text-sm">Password:</span>
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-sm text-blue-100">demo123</span>
+                          <span className="font-mono text-sm text-blue-100">{DEFAULT_DEMO_VIEWER.password}</span>
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => copyToClipboard('demo123', 'password')}
+                            onClick={() => copyToClipboard(DEFAULT_DEMO_VIEWER.password, 'password')}
                             className="h-8 w-8 p-0 hover:bg-white/20 text-white hover:text-white transition-colors"
                             title="Copy password"
                           >
