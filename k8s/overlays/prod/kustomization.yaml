@@ -5,6 +5,7 @@ namespace: platform-observability-prod
 
 resources:
   - namespace.yaml
+  - public-observability-root-redirects.yaml
   - vault-serviceaccount.yaml
   - vault-secret-store.yaml
   - vault-postgres-external-secret.yaml
@@ -34,6 +35,9 @@ patches:
         path: /data/NEXT_PUBLIC_API_URL
         value: https://portfolio.eseosadevbox.com/api
       - op: replace
+        path: /data/NEXTAUTH_URL
+        value: https://portfolio.eseosadevbox.com
+      - op: replace
         path: /data/NEXT_PUBLIC_GRAFANA_BROWSER_URL
         value: https://grafana.eseosadevbox.com
       - op: replace
@@ -42,6 +46,27 @@ patches:
       - op: replace
         path: /data/NEXT_PUBLIC_ENABLE_DEMO_LOGIN
         value: "false"
+      - op: replace
+        path: /data/NEXT_PUBLIC_PROMETHEUS_BROWSER_URL
+        value: https://prometheus.eseosadevbox.com/graph
+      - op: replace
+        path: /data/NEXT_PUBLIC_ALERTMANAGER_BROWSER_URL
+        value: https://alertmanager.eseosadevbox.com/#/alerts
+      - op: replace
+        path: /data/NEXT_PUBLIC_LOKI_BROWSER_URL
+        value: https://loki.eseosadevbox.com/metrics
+      - op: replace
+        path: /data/NEXT_PUBLIC_NODE_EXPORTER_BROWSER_URL
+        value: https://node-exporter.eseosadevbox.com
+      - op: replace
+        path: /data/NEXT_PUBLIC_BLACKBOX_EXPORTER_BROWSER_URL
+        value: https://blackbox-exporter.eseosadevbox.com
+      - op: replace
+        path: /data/NEXT_PUBLIC_CADVISOR_BROWSER_URL
+        value: https://cadvisor.eseosadevbox.com/containers/
+      - op: replace
+        path: /data/NEXT_PUBLIC_PROMTAIL_BROWSER_URL
+        value: https://promtail.eseosadevbox.com/targets
   - target:
       kind: Cluster
       name: observability-postgres
@@ -121,3 +146,151 @@ patches:
           - hosts:
               - grafana.eseosadevbox.com
             secretName: grafana-prod-tls
+  - target:
+      kind: Ingress
+      name: prometheus
+    patch: |-
+      - op: add
+        path: /metadata/annotations/traefik.ingress.kubernetes.io~1router.middlewares
+        value: platform-observability-prod-prometheus-root-redirect@kubernetescrd
+      - op: replace
+        path: /metadata/annotations/traefik.ingress.kubernetes.io~1router.entrypoints
+        value: web,websecure
+      - op: add
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: letsencrypt-prod
+      - op: replace
+        path: /spec/rules/0/host
+        value: prometheus.eseosadevbox.com
+      - op: add
+        path: /spec/tls
+        value:
+          - hosts:
+              - prometheus.eseosadevbox.com
+            secretName: prometheus-prod-tls
+  - target:
+      kind: Ingress
+      name: alertmanager
+    patch: |-
+      - op: add
+        path: /metadata/annotations/traefik.ingress.kubernetes.io~1router.middlewares
+        value: platform-observability-prod-alertmanager-root-redirect@kubernetescrd
+      - op: replace
+        path: /metadata/annotations/traefik.ingress.kubernetes.io~1router.entrypoints
+        value: web,websecure
+      - op: add
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: letsencrypt-prod
+      - op: replace
+        path: /spec/rules/0/host
+        value: alertmanager.eseosadevbox.com
+      - op: add
+        path: /spec/tls
+        value:
+          - hosts:
+              - alertmanager.eseosadevbox.com
+            secretName: alertmanager-prod-tls
+  - target:
+      kind: Ingress
+      name: loki
+    patch: |-
+      - op: add
+        path: /metadata/annotations/traefik.ingress.kubernetes.io~1router.middlewares
+        value: platform-observability-prod-loki-root-redirect@kubernetescrd
+      - op: replace
+        path: /metadata/annotations/traefik.ingress.kubernetes.io~1router.entrypoints
+        value: web,websecure
+      - op: add
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: letsencrypt-prod
+      - op: replace
+        path: /spec/rules/0/host
+        value: loki.eseosadevbox.com
+      - op: add
+        path: /spec/tls
+        value:
+          - hosts:
+              - loki.eseosadevbox.com
+            secretName: loki-prod-tls
+  - target:
+      kind: Ingress
+      name: node-exporter
+    patch: |-
+      - op: replace
+        path: /metadata/annotations/traefik.ingress.kubernetes.io~1router.entrypoints
+        value: web,websecure
+      - op: add
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: letsencrypt-prod
+      - op: replace
+        path: /spec/rules/0/host
+        value: node-exporter.eseosadevbox.com
+      - op: add
+        path: /spec/tls
+        value:
+          - hosts:
+              - node-exporter.eseosadevbox.com
+            secretName: node-exporter-prod-tls
+  - target:
+      kind: Ingress
+      name: blackbox-exporter
+    patch: |-
+      - op: replace
+        path: /metadata/annotations/traefik.ingress.kubernetes.io~1router.entrypoints
+        value: web,websecure
+      - op: add
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: letsencrypt-prod
+      - op: replace
+        path: /spec/rules/0/host
+        value: blackbox-exporter.eseosadevbox.com
+      - op: add
+        path: /spec/tls
+        value:
+          - hosts:
+              - blackbox-exporter.eseosadevbox.com
+            secretName: blackbox-exporter-prod-tls
+  - target:
+      kind: Ingress
+      name: cadvisor
+    patch: |-
+      - op: add
+        path: /metadata/annotations/traefik.ingress.kubernetes.io~1router.middlewares
+        value: platform-observability-prod-cadvisor-root-redirect@kubernetescrd
+      - op: replace
+        path: /metadata/annotations/traefik.ingress.kubernetes.io~1router.entrypoints
+        value: web,websecure
+      - op: add
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: letsencrypt-prod
+      - op: replace
+        path: /spec/rules/0/host
+        value: cadvisor.eseosadevbox.com
+      - op: add
+        path: /spec/tls
+        value:
+          - hosts:
+              - cadvisor.eseosadevbox.com
+            secretName: cadvisor-prod-tls
+  - target:
+      kind: Ingress
+      name: promtail
+    patch: |-
+      - op: add
+        path: /metadata/annotations/traefik.ingress.kubernetes.io~1router.middlewares
+        value: platform-observability-prod-promtail-root-redirect@kubernetescrd
+      - op: replace
+        path: /metadata/annotations/traefik.ingress.kubernetes.io~1router.entrypoints
+        value: web,websecure
+      - op: add
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: letsencrypt-prod
+      - op: replace
+        path: /spec/rules/0/host
+        value: promtail.eseosadevbox.com
+      - op: add
+        path: /spec/tls
+        value:
+          - hosts:
+              - promtail.eseosadevbox.com
+            secretName: promtail-prod-tls

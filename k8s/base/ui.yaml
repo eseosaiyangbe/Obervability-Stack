@@ -24,7 +24,7 @@ data:
   NODE_EXPORTER_ENABLED: "true"
   CADVISOR_ENABLED: "true"
   NEXT_PUBLIC_PROMETHEUS_BROWSER_URL: http://localhost:9090/graph
-  NEXT_PUBLIC_GRAFANA_BROWSER_URL: https://grafana.eseosadevbox.com
+  NEXT_PUBLIC_GRAFANA_BROWSER_URL: http://localhost:3000/login
   NEXT_PUBLIC_LOKI_BROWSER_URL: http://localhost:3100/metrics
   NEXT_PUBLIC_ALERTMANAGER_BROWSER_URL: http://localhost:9093/#/alerts
   NEXT_PUBLIC_NODE_EXPORTER_BROWSER_URL: http://localhost:9100
