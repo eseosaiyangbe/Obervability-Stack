@@ -33,8 +33,13 @@ Thumbs.db
 tmp/
 temp/
 *.tmp
+.playwright-cli/
+output/playwright/
 
 # Backup files
 *.bak
 *.backup
 *.db
+
+# Local scratch utilities
+ui-next/count-users.js

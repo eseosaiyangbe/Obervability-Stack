@@ -43,8 +43,17 @@ patches:
         path: /data/NEXT_PUBLIC_API_URL
         value: https://portfolio.eseosadevbox.com/api
       - op: replace
+        path: /data/NEXTAUTH_URL
+        value: https://portfolio.eseosadevbox.com
+      - op: replace
         path: /data/NEXT_PUBLIC_GRAFANA_BROWSER_URL
         value: https://grafana.eseosadevbox.com
+      - op: replace
+        path: /data/ENABLE_DEMO_LOGIN
+        value: "true"
+      - op: replace
+        path: /data/NEXT_PUBLIC_ENABLE_DEMO_LOGIN
+        value: "true"
       - op: replace
         path: /data/NEXT_PUBLIC_PROMETHEUS_BROWSER_URL
         value: https://prometheus.eseosadevbox.com/graph
