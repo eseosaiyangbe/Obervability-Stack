@@ -53,3 +53,14 @@ scrape_configs:
           job: kubernetes-pods
           namespace: foodpulse-dev
           __path__: /var/log/pods/foodpulse-dev_*/*/*.log
+
+  - job_name: opensis-dev-pods
+    pipeline_stages:
+      - cri: {}
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: kubernetes-pods
+          namespace: opensis-dev
+          __path__: /var/log/pods/opensis-dev_*/*/*.log
