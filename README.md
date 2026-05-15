@@ -178,7 +178,10 @@ railway up
 #### **Kubernetes**
 ```bash
 # Current owned path
-./scripts/k8s-dev-deploy.sh --skip-apply
+./scripts/k8s-start.sh
+./scripts/k8s-stop.sh
+./scripts/k8s-reset.sh --help
+./scripts/k8s-dev-verify.sh
 
 # Review the Kubernetes path
 sed -n '1,160p' k8s/README.md

@@ -63,12 +63,27 @@ What is still intentionally staged:
 From the `Obervability-Stack` repo root:
 
 ```bash
-./scripts/k8s-dev-deploy.sh --skip-apply
+./scripts/k8s-start.sh
+./scripts/k8s-stop.sh
+./scripts/k8s-reset.sh --help
 ./scripts/k8s-dev-verify.sh
-./scripts/k8s-dev-destroy.sh
 ```
 
-Use `--skip-apply` while reviewing manifest generation only.
+What they mean:
+
+- `k8s-start.sh`
+  - deploys the control plane when `platform-observability-dev` does not exist yet
+  - resumes preserved workloads when the namespace already exists
+- `k8s-stop.sh`
+  - safely pauses the control plane
+  - scales deployments and StatefulSets down
+  - hibernates the `observability-postgres` CloudNativePG cluster
+  - unschedules the DaemonSets without deleting the namespace or PVCs
+- `k8s-reset.sh`
+  - destructive reset
+  - deletes `platform-observability-dev` and all data in that namespace
+
+Use `start` and `stop` for normal operations. Use `reset` only when you intentionally want a full rebuild of the observability control plane.
 
 ## Browser Access
 

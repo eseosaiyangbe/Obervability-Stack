@@ -62,7 +62,41 @@ spec:
         - name: db-init
           image: devops-monitor-db-init:dev
           imagePullPolicy: IfNotPresent
-          command: ["sh", "-c", "npx prisma migrate deploy && npm run db:seed"]
+          command:
+            - sh
+            - -c
+            - |
+              node -e '
+              const net = require("net");
+              const host = process.env.OBSERVABILITY_DB_WAIT_HOST || "observability-postgres-rw";
+              const port = Number(process.env.OBSERVABILITY_DB_WAIT_PORT || 5432);
+              const timeoutMs = Number(process.env.OBSERVABILITY_DB_WAIT_TIMEOUT_MS || 180000);
+              const intervalMs = Number(process.env.OBSERVABILITY_DB_WAIT_INTERVAL_MS || 2000);
+              const deadline = Date.now() + timeoutMs;
+
+              function tryConnect() {
+                const socket = net.createConnection({ host, port });
+                socket.setTimeout(5000);
+                socket.on("connect", () => {
+                  console.log(`[db-init] Database reachable at ${host}:${port}`);
+                  socket.end();
+                  process.exit(0);
+                });
+                socket.on("timeout", () => socket.destroy(new Error("timeout")));
+                socket.on("error", (error) => {
+                  socket.destroy();
+                  if (Date.now() >= deadline) {
+                    console.error(`[db-init] Timed out waiting for ${host}:${port}: ${error.message}`);
+                    process.exit(1);
+                  }
+                  setTimeout(tryConnect, intervalMs);
+                });
+              }
+
+              tryConnect();
+              ' &&
+              npx prisma migrate deploy &&
+              npm run db:seed
           envFrom:
             - configMapRef:
                 name: observability-ui-config
