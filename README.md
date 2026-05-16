@@ -1,16 +1,16 @@
-# 📦 DevOps Monitoring in a Box
+# Internal Developer Platform Control Plane
 
 <p align="center">
   <img src="./ui-next/public/banner.png" alt="banner"/>
 </p>
 
-## 🚀 Overview
+## Overview
 
-This project provides a **ready-to-use monitoring stack** for DevOps engineers and beginners.
-With just **one command**, you get:
+This project provides the control plane for an owned application portfolio with unified observability, incident response, and operator workflows.
+With one deployment path, it brings the platform surface and supporting telemetry together:
 
-> **🎯 Demo Preview Available**: Check out the live demo at [devops-monitoring-in-a-box.vercel.app](https://devops-monitoring-in-a-box.vercel.app)  
-> **Login**: demo@example.com / demo123 (Demo credentials only - configure your own for production)
+> **Live preview**: [portfolio.eseosadevbox.com](https://portfolio.eseosadevbox.com)  
+> **Access**: `admin@example.com / admin@123`, `editor@example.com / editor123`, `viewer@example.com / viewer123`
 
 * **Prometheus** → Metrics collection
 * **Grafana** → Beautiful dashboards
@@ -20,9 +20,9 @@ With just **one command**, you get:
 * **🔔 Notification Service** → Multi-channel notifications (Slack, Teams, Discord, Email, Webhooks)
 * **🎨 Modern React UI** → **Unified dashboard experience** (What makes us unique!)
 
-👉 Perfect for learning, testing, or quick local monitoring setup.
+This platform is designed to operate OpenSIS, SwiftPay, FoodPulse, and MemFlip through one consistent engineering and operator experience.
 
-**🚀 What Sets Us Apart:** While most monitoring projects stop at Prometheus + Grafana, we provide a **modern, responsive web interface** that unifies all your monitoring tools into one beautiful dashboard experience!
+What sets it apart: the platform does not stop at Prometheus and Grafana. It provides a unified control plane for service health, logs, alerts, architecture context, incident evidence, and workload ownership.
 
 ## 🖼️ Visual Showcase
 

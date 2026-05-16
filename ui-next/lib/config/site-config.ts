@@ -82,7 +82,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
     canonical: 'http://localhost:4000',
     og: {
       title: 'Internal Developer Platform Control Plane',
-      description: 'Unified control plane for app demos, observability, incident response, and operator handoff.',
+      description: 'Unified control plane for the application portfolio with observability, incident response, and operator handoff.',
       type: 'website',
       image: '/banner.png',
       url: 'http://localhost:4000',
@@ -93,7 +93,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
       site: '@devopseasylearn',
       creator: '@devopseasylearn',
       title: 'Internal Developer Platform Control Plane',
-      description: 'Unified control plane for app demos, observability, and operator readiness.',
+      description: 'Unified control plane for the application portfolio with observability and operator readiness.',
       image: '/banner.png'
     }
   },
@@ -134,7 +134,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
   // Company Information
   company: {
     name: 'Internal Developer Platform',
-    description: 'Hands-on portfolio environment for operating mixed-architecture workloads through one control plane.',
+    description: 'Owned application portfolio operated through one control plane with shared observability, recovery, and service governance.',
     founded: '2026',
     location: 'Toronto, ON'
   },

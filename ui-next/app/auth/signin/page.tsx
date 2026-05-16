@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, Suspense } from "react"
-import { signIn, getSession } from "next-auth/react"
+import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,10 +11,9 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Loader2, Github, Chrome, AlertCircle, Eye, EyeOff, Home, Copy, Check } from "lucide-react"
+import { Loader2, Github, Chrome, AlertCircle, Eye, EyeOff, Home } from "lucide-react"
 import Link from "next/link"
 
-const authMode = process.env.NEXT_PUBLIC_AUTH_MODE === "demo" ? "demo" : "database"
 const demoLoginEnabled =
   process.env.NEXT_PUBLIC_ENABLE_DEMO_LOGIN === "true" ||
   (process.env.NEXT_PUBLIC_ENABLE_DEMO_LOGIN === undefined && process.env.NODE_ENV !== "production")
@@ -31,27 +30,10 @@ function SignInForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
-  const [copiedEmail, setCopiedEmail] = useState(false)
-  const [copiedPassword, setCopiedPassword] = useState(false)
   
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get("from") || "/dashboard"
-
-  const copyToClipboard = async (text: string, type: 'email' | 'password') => {
-    try {
-      await navigator.clipboard.writeText(text)
-      if (type === 'email') {
-        setCopiedEmail(true)
-        setTimeout(() => setCopiedEmail(false), 2000)
-      } else {
-        setCopiedPassword(true)
-        setTimeout(() => setCopiedPassword(false), 2000)
-      }
-    } catch (err) {
-      console.error('Failed to copy text: ', err)
-    }
-  }
 
   const handleInputChange = (field: string, value: string) => {
     if (field === "email") setEmail(value)
@@ -119,18 +101,6 @@ function SignInForm() {
     }
   }
 
-  const handleOAuthSignIn = async (provider: string) => {
-    setIsLoading(true)
-    setError("")
-
-    try {
-      await signIn(provider, { callbackUrl })
-    } catch (error) {
-      setError("An error occurred. Please try again.")
-      setIsLoading(false)
-    }
-  }
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-slate-900 dark:to-gray-900 p-3 sm:p-4 relative overflow-hidden">
       {/* Background decorative elements */}
@@ -160,96 +130,30 @@ function SignInForm() {
                   <Chrome className="h-8 w-8 text-white" />
                 </div>
                 <h1 className="text-3xl lg:text-4xl font-bold mb-4">
-                  Welcome Back
+                  Platform Access
                 </h1>
                 <p className="text-blue-100 text-lg mb-8">
-                  Sign in to access your DevOps Monitoring Dashboard and manage your infrastructure.
+                  Sign in to access the Internal Developer Platform control plane, review service health,
+                  and operate the application portfolio with one consistent workflow.
                 </p>
-
-                <div className="flex flex-wrap gap-2 mb-6">
-                  <span className="px-3 py-1 rounded-full bg-white/15 border border-white/20 text-xs font-medium tracking-wide uppercase">
-                    Auth Mode: {authMode}
-                  </span>
-                  <span className="px-3 py-1 rounded-full bg-white/15 border border-white/20 text-xs font-medium tracking-wide uppercase">
-                    Demo Login: {demoLoginEnabled ? "Enabled" : "Disabled"}
-                  </span>
-                </div>
                 
-                {demoLoginEnabled && (
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                    <h3 className="font-semibold mb-1 text-white">Default Demo Login</h3>
-                    <p className="text-sm text-blue-100 mb-3">
-                      The sign-in form is prefilled with the least-privileged demo account.
-                    </p>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-blue-100 text-sm">Email:</span>
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-sm text-blue-100">{DEFAULT_DEMO_VIEWER.email}</span>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => copyToClipboard(DEFAULT_DEMO_VIEWER.email, 'email')}
-                            className="h-8 w-8 p-0 hover:bg-white/20 text-white hover:text-white transition-colors"
-                            title="Copy email"
-                          >
-                            {copiedEmail ? (
-                              <Check className="h-4 w-4 text-green-300" />
-                            ) : (
-                              <Copy className="h-4 w-4" />
-                            )}
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-blue-100 text-sm">Password:</span>
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-sm text-blue-100">{DEFAULT_DEMO_VIEWER.password}</span>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => copyToClipboard(DEFAULT_DEMO_VIEWER.password, 'password')}
-                            className="h-8 w-8 p-0 hover:bg-white/20 text-white hover:text-white transition-colors"
-                            title="Copy password"
-                          >
-                            {copiedPassword ? (
-                              <Check className="h-4 w-4 text-green-300" />
-                            ) : (
-                              <Copy className="h-4 w-4" />
-                            )}
-                          </Button>
-                        </div>
-                      </div>
-                      {copiedEmail && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="text-green-300 text-xs text-center"
-                        >
-                          Email copied to clipboard!
-                        </motion.div>
-                      )}
-                      {copiedPassword && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="text-green-300 text-xs text-center"
-                        >
-                          Password copied to clipboard!
-                        </motion.div>
-                      )}
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+                  <h3 className="font-semibold mb-3 text-white">Operator Workflow</h3>
+                  <div className="space-y-3 text-sm text-blue-100">
+                    <div className="flex items-start gap-3">
+                      <span className="mt-1 h-2 w-2 rounded-full bg-white/80" />
+                      <p>Review application health, logs, alerts, and service-level signals from one control plane.</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="mt-1 h-2 w-2 rounded-full bg-white/80" />
+                      <p>Move from incident detection to workload runbooks and operator evidence without leaving the platform.</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="mt-1 h-2 w-2 rounded-full bg-white/80" />
+                      <p>Operate a portfolio that now includes owned services, infrastructure recovery paths, and production-style verification.</p>
                     </div>
                   </div>
-                )}
-
-                {!demoLoginEnabled && (
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                    <h3 className="font-semibold mb-2 text-white">Operator Mode</h3>
-                    <p className="text-sm text-blue-100">
-                      Demo credentials are disabled in this environment. Sign in with a seeded or registered database-backed account.
-                    </p>
-                  </div>
-                )}
+                </div>
               </motion.div>
             </div>
             

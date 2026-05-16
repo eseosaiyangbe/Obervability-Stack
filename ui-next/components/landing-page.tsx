@@ -2,16 +2,7 @@
 
 import Link from "next/link"
 import { motion } from "framer-motion"
-import {
-  Activity,
-  ArrowRight,
-  BookOpen,
-  Compass,
-  GitBranch,
-  Layers,
-  ShieldCheck,
-  TerminalSquare,
-} from "lucide-react"
+import { Activity, ArrowRight, BookOpen, GitBranch, Layers, ShieldCheck, TerminalSquare } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -25,36 +16,30 @@ function authRedirect(path: string) {
 const workloadCards = [
   {
     name: "SwiftPay",
-    role: "Microservices",
-    summary: "Gateway, wallet, transaction, notification, and business telemetry under one operator model.",
+    role: "Payments Platform",
+    summary: "Distributed payment services with gateway, wallet, transaction, notification, and operational telemetry under one governed runtime.",
   },
   {
     name: "OpenSIS",
-    role: "Legacy Platform",
-    summary: "Legacy PHP workload wrapped with Vault-aware checks, database visibility, and modernization thinking.",
+    role: "Student Information System",
+    summary: "A legacy education platform brought under controlled operations with secrets management, health visibility, and repeatable recovery paths.",
   },
   {
     name: "FoodPulse",
-    role: "HA Lab",
-    summary: "Redis, Postgres, and HAProxy topology for failover drills and resilience storytelling.",
+    role: "Resilience Platform",
+    summary: "A stateful application portfolio used to exercise Redis, PostgreSQL, and high-availability recovery patterns in a realistic operating model.",
   },
   {
     name: "MemFlip",
-    role: "Onboarding App",
-    summary: "The smallest repeatable app integration pattern for bringing new workloads into the control plane.",
+    role: "Portfolio Workload",
+    summary: "A smaller owned service that proves the repeatable integration pattern for onboarding and operating application workloads through the same platform.",
   },
 ]
 
 const quickLinks = [
   {
-    title: "Open Demo Center",
-    description: "Walk the polished presenter flow from control plane to app handoff.",
-    href: authRedirect("/demo"),
-    icon: Compass,
-  },
-  {
     title: "View Managed Apps",
-    description: "See the launch board for OpenSIS, SwiftPay, FoodPulse, and MemFlip.",
+    description: "Review the service portfolio for OpenSIS, SwiftPay, FoodPulse, and MemFlip from one operator entrypoint.",
     href: authRedirect("/services"),
     icon: Layers,
   },
@@ -66,8 +51,8 @@ const quickLinks = [
     external: true,
   },
   {
-    title: "Kubernetes Direction",
-    description: "Show how the local Compose lab is intentionally shaped for cluster migration later.",
+    title: "Platform Architecture",
+    description: "Review the architecture and operating direction behind the platform portfolio.",
     href: `${repositoryUrl}/WORKSPACE-ARCHITECTURE.md`,
     icon: GitBranch,
     external: true,
@@ -92,12 +77,12 @@ export function LandingPage() {
                   Internal Developer Platform
                 </Badge>
                 <h1 className="text-2xl font-black tracking-tight sm:text-4xl lg:text-5xl">
-                  One control plane for four different workload stories
+                  One control plane for an owned application portfolio
                 </h1>
                 <p className="mt-4 max-w-2xl text-base leading-7 text-blue-100 sm:text-lg">
-                  This workspace is a mixed-architecture operations lab. It turns a microservices app,
-                  a legacy platform, a resilience lab, and a lightweight onboarding app into one shared
-                  monitoring, incident, and operator experience.
+                  This platform brings payments, education, resilience, and portfolio workloads into one
+                  professional operator experience with shared observability, incident evidence, recovery
+                  controls, and service-level governance.
                 </p>
               </div>
             </div>
@@ -107,28 +92,28 @@ export function LandingPage() {
             <div className="space-y-5">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-700 dark:text-blue-300">
-                  Demo Promise
+                  Platform Mission
                 </p>
                 <h2 className="mt-2 text-2xl font-black tracking-tight text-gray-950 dark:text-white">
-                  Start with the platform, then drill into the app story that matters
+                  Start with the control plane, then move directly into the workload that matters
                 </h2>
                 <p className="mt-3 max-w-2xl text-sm leading-7 text-gray-600 dark:text-gray-400 sm:text-base">
-                  The Phase 6 goal is simple: a new reviewer should understand what this project is,
-                  why these apps exist together, and how an operator moves from dashboard signal to
-                  runbook and live audit without needing side explanations.
+                  The landing experience should explain the portfolio clearly, show that the platform is
+                  operated intentionally, and let a reviewer move from high-level visibility to workload,
+                  runbook, and operational evidence without needing side explanations.
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-3">
                 <Button asChild size="lg" className="gap-2 rounded-2xl bg-blue-600 px-6 text-white hover:bg-blue-700">
-                  <Link href={authRedirect("/demo")}>
-                    Open Demo Center
+                  <Link href={authRedirect("/dashboard")}>
+                    Open Control Plane
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
                 <Button asChild variant="outline" size="lg" className="gap-2 rounded-2xl bg-white dark:bg-gray-950">
                   <Link href={authRedirect("/services")}>
-                    Managed Apps
+                    Service Portfolio
                     <Layers className="h-4 w-4" />
                   </Link>
                 </Button>
@@ -173,6 +158,38 @@ export function LandingPage() {
                   </motion.div>
                 ))}
               </div>
+
+              <div className="rounded-3xl border border-blue-100 bg-blue-50/70 p-5 dark:border-blue-900/40 dark:bg-blue-950/20">
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-700 dark:text-blue-300">
+                      Portfolio
+                    </p>
+                    <p className="mt-2 text-lg font-bold text-gray-950 dark:text-white">5 owned services</p>
+                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                      One platform team, one operating model, one shared control surface.
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-700 dark:text-blue-300">
+                      Operations
+                    </p>
+                    <p className="mt-2 text-lg font-bold text-gray-950 dark:text-white">Metrics, logs, alerts</p>
+                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                      Unified observability with runbooks, recovery evidence, and service ownership context.
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-700 dark:text-blue-300">
+                      Runtime
+                    </p>
+                    <p className="mt-2 text-lg font-bold text-gray-950 dark:text-white">Compose and k3s</p>
+                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                      Local developer workflows aligned with state-preserving Kubernetes lifecycle controls.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <Card className="border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
@@ -182,7 +199,7 @@ export function LandingPage() {
                   Workload Storyboard
                 </CardTitle>
                 <CardDescription>
-                  The control plane exists to make these four workloads operable through one shared model.
+                  The platform exists to make each workload operable through one shared engineering and operator model.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">

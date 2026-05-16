@@ -54,15 +54,15 @@ const demoSteps = [
     label: "Control plane",
     href: "/dashboard",
     command: "http://localhost:4000",
-    talkingPoint: "This is a control plane for a mixed-architecture workspace, not a dashboard pasted onto one app.",
+    talkingPoint: "This is the operating control plane for the application portfolio, not a dashboard attached to one isolated service.",
     icon: Compass,
   },
   {
     title: "Compare The Workloads",
-    label: "Architecture story",
+    label: "Portfolio architecture",
     href: "/services/compare",
     command: "Open /services/compare",
-    talkingPoint: "Explain why the workspace includes microservices, a legacy platform, a resilience lab, and a small onboarding app.",
+    talkingPoint: "Explain how the portfolio spans payments, education, resilience, and onboarding workloads under one shared operating model.",
     icon: Layers,
   },
   {
@@ -83,10 +83,10 @@ const demoSteps = [
   },
   {
     title: "Show FoodPulse",
-    label: "Resilience lab",
+    label: "Resilience workload",
     href: "/services/foodpulse",
     command: "./scripts/devops-monitor.sh foodpulse-live",
-    talkingPoint: "Use FoodPulse to explain the Compose HAProxy lab, the k3s CloudNativePG plus Redis Sentinel path, and how resilience changes across environments.",
+    talkingPoint: "Use FoodPulse to explain the resilience workload, the k3s CloudNativePG plus Redis Sentinel path, and how recovery patterns evolve across environments.",
     icon: Activity,
   },
   {
@@ -130,13 +130,13 @@ const workloadRoles = [
   },
   {
     name: "FoodPulse",
-    role: "Resilience lab",
-    summary: "Compose HAProxy drills plus a real k3s path with CloudNativePG, Redis Sentinel, topology awareness, and failover behavior.",
+    role: "Resilience workload",
+    summary: "A resilience-focused service with a real k3s path using CloudNativePG, Redis Sentinel, topology awareness, and failover behavior.",
   },
   {
     name: "MemFlip",
-    role: "Onboarding app",
-    summary: "Small frontend/backend app that shows the minimum control-plane pattern and the first reusable k3s migration path.",
+    role: "Portfolio workload",
+    summary: "A smaller frontend and backend service that proves the minimum control-plane pattern and a reusable k3s integration path.",
   },
 ]
 
@@ -223,19 +223,19 @@ export default function DemoCenterPage() {
               <div className="max-w-3xl">
                 <Badge className="mb-4 border-white/30 bg-white/15 text-white">
                   <Compass className="mr-1 h-3 w-3" />
-                  Phase 6 demo path
+                  Portfolio operations path
                 </Badge>
-                <h1 className="text-3xl font-black tracking-tight sm:text-5xl">Demo Center</h1>
+                <h1 className="text-3xl font-black tracking-tight sm:text-5xl">Operations Briefing</h1>
                 <p className="mt-4 max-w-2xl text-base leading-7 text-cyan-50">
-                  A guided presenter path for showing the control plane, app comparison, live audits,
-                  incident evidence, and Kubernetes direction without jumping between repos manually.
+                  A guided executive and operator walkthrough for the control plane, workload portfolio,
+                  live audits, incident evidence, and platform direction without jumping between repos manually.
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4 xl:min-w-[34rem]">
                 <div className="rounded-2xl border border-white/20 bg-white/10 p-4">
-                  <p className="text-cyan-50">Demo state</p>
-                  <p className="mt-1 text-lg font-black">{demoReady ? "Ready" : "Check"}</p>
+                  <p className="text-cyan-50">Briefing state</p>
+                  <p className="mt-1 text-lg font-black">{demoReady ? "Ready" : "Review"}</p>
                 </div>
                 <div className="rounded-2xl border border-white/20 bg-white/10 p-4">
                   <p className="text-cyan-50">Apps</p>
@@ -274,7 +274,7 @@ export default function DemoCenterPage() {
               )}
               <div>
                 <p className="font-bold text-gray-950 dark:text-white">
-                  {demoReady ? "Environment looks safe to demo" : "Review baseline before presenting"}
+                  {demoReady ? "Environment is ready for a live platform briefing" : "Review the operating baseline before presenting"}
                 </p>
                 <p className="mt-2 text-sm leading-6 text-gray-700 dark:text-gray-300">
                   Live health currently reports {healthyApps}/{totalApps || 0} managed apps healthy.

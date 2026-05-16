@@ -18,7 +18,6 @@ import {
   Activity,
   Database,
   Monitor,
-  Heart,
   ChevronLeft,
   Layout,
   Plug,
@@ -38,7 +37,7 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home, color: 'from-blue-500 to-indigo-600' },
   { name: 'Templates', href: '/templates', icon: Layout, color: 'from-purple-500 to-pink-600' },
   { name: 'Services', href: '/services', icon: Server, color: 'from-green-500 to-emerald-600' },
-  { name: 'Demo Center', href: '/demo', icon: Compass, color: 'from-teal-500 to-cyan-600' },
+  { name: 'Operations Briefing', href: '/demo', icon: Compass, color: 'from-teal-500 to-cyan-600' },
   { name: 'Metrics', href: '/metrics', icon: BarChart3, color: 'from-orange-500 to-red-600' },
   { name: 'Logs', href: '/logs', icon: FileText, color: 'from-indigo-500 to-blue-600' },
   { name: 'Active Alerts', href: '/alerts', icon: Bell, color: 'from-red-500 to-pink-600' },
@@ -516,15 +515,14 @@ export const Sidebar = memo(() => {
               <div className="space-y-4">
                 <VersionBadge variant="compact" className="mx-auto" />
                 <div className="flex items-center justify-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-                  <span>Built with</span>
-                  <Heart className="h-4 w-4 text-red-500 animate-pulse" />
-                  <span>Portfolio operations lab</span>
+                  <CheckCircle className="h-4 w-4 text-emerald-500" />
+                  <span>Application portfolio control plane</span>
                 </div>
               </div>
             ) : (
               <div className="flex justify-center space-y-2">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-red-100 to-pink-100 dark:from-red-900/30 dark:to-pink-900/30 flex items-center justify-center">
-                  <Heart className="h-5 w-5 text-red-500 animate-pulse" />
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-100 to-blue-100 dark:from-emerald-900/30 dark:to-blue-900/30 flex items-center justify-center">
+                  <CheckCircle className="h-5 w-5 text-emerald-500" />
                 </div>
               </div>
             )}
