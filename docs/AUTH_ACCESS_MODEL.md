@@ -62,9 +62,19 @@ Recommended behavior:
 
 Demo users:
 
-- `demo@example.com` / `demo123`
+- `admin@example.com` / `admin@123`
 - `editor@example.com` / `editor123`
 - `viewer@example.com` / `viewer123`
+
+Behavior details:
+
+- when demo login is enabled, the known demo users are accepted immediately
+- that keeps operator sign-in usable even if the database path is slow or temporarily unavailable
+- the seeded user table is still the long-term source of truth for database-backed access
+
+Retired demo credential:
+
+- `demo@example.com` / `demo123` is no longer valid and should fail
 
 ## Registration Behavior
 
@@ -107,3 +117,22 @@ The current platform decision is:
 - keep demo access available locally when helpful
 - stop treating demo-only auth as the primary architecture
 - treat database-backed auth as the real control-plane path going forward
+
+## Public Hostname Contract
+
+The public control-plane hostname for the live dev slice is:
+
+- `https://portfolio.eseosadevbox.com`
+
+The production overlay must not reuse that same hostname.
+
+Operational rule:
+
+- `dev` owns `portfolio.eseosadevbox.com`
+- `prod` must use a different hostname, currently `portfolio-prod.eseosadevbox.com`
+
+Why this matters:
+
+- if both overlays claim the same host on Traefik, public authentication becomes nondeterministic
+- the browser can land on the wrong namespace even when the rebuilt app and seeded users are correct
+- this was already observed live and was resolved by separating the ingress hosts

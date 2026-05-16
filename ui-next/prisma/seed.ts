@@ -1,19 +1,31 @@
-import { UserRole } from '@prisma/client'
+import { UserRole, UserStatus } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { prisma } from '../lib/prisma-server'
 
 async function main() {
   // Create demo admin user
-  const hashedPassword = await bcrypt.hash('demo123', 12)
-  
-  const demoUser = await prisma.user.upsert({
-    where: { email: 'demo@example.com' },
-    update: {},
-    create: {
+  const adminPassword = await bcrypt.hash('admin@123', 12)
+
+  await prisma.user.deleteMany({
+    where: {
       email: 'demo@example.com',
+    },
+  })
+
+  const adminUser = await prisma.user.upsert({
+    where: { email: 'admin@example.com' },
+    update: {
       name: 'Demo Admin',
-      password: hashedPassword,
+      password: adminPassword,
       role: UserRole.ADMIN,
+      status: UserStatus.ACTIVE,
+    },
+    create: {
+      email: 'admin@example.com',
+      name: 'Demo Admin',
+      password: adminPassword,
+      role: UserRole.ADMIN,
+      status: UserStatus.ACTIVE,
     }
   })
 
@@ -22,12 +34,18 @@ async function main() {
   
   const viewerUser = await prisma.user.upsert({
     where: { email: 'viewer@example.com' },
-    update: {},
+    update: {
+      name: 'Demo Viewer',
+      password: viewerPassword,
+      role: UserRole.VIEWER,
+      status: UserStatus.ACTIVE,
+    },
     create: {
       email: 'viewer@example.com',
       name: 'Demo Viewer',
       password: viewerPassword,
       role: UserRole.VIEWER,
+      status: UserStatus.ACTIVE,
     }
   })
 
@@ -36,17 +54,23 @@ async function main() {
   
   const editorUser = await prisma.user.upsert({
     where: { email: 'editor@example.com' },
-    update: {},
+    update: {
+      name: 'Demo Editor',
+      password: editorPassword,
+      role: UserRole.EDITOR,
+      status: UserStatus.ACTIVE,
+    },
     create: {
       email: 'editor@example.com',
       name: 'Demo Editor',
       password: editorPassword,
       role: UserRole.EDITOR,
+      status: UserStatus.ACTIVE,
     }
   })
 
   console.log('Demo users created:')
-  console.log('- Admin: demo@example.com / demo123')
+  console.log('- Admin: admin@example.com / admin@123')
   console.log('- Viewer: viewer@example.com / viewer123')
   console.log('- Editor: editor@example.com / editor123')
 }

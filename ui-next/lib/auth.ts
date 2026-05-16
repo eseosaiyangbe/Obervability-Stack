@@ -15,8 +15,8 @@ if (typeof window === "undefined") {
 const DEMO_USERS = [
   {
     id: "demo-admin",
-    email: "demo@example.com",
-    password: "demo123",
+    email: "admin@example.com",
+    password: "admin@123",
     name: "Demo Admin",
     role: UserRole.ADMIN,
   },
@@ -82,11 +82,16 @@ const providers: NextAuthOptions["providers"] = [
 
       const authMode = getAuthMode()
       const demoLoginEnabled = isDemoLoginEnabled()
+      const demoUser = demoLoginEnabled
+        ? authenticateDemoUser(credentials.email, credentials.password)
+        : null
+
+      if (demoUser) {
+        return demoUser
+      }
 
       if (authMode === "demo") {
-        return demoLoginEnabled
-          ? authenticateDemoUser(credentials.email, credentials.password)
-          : null
+        return null
       }
 
       if (!dbAvailable) {
@@ -242,20 +247,26 @@ export async function createDemoUser() {
   }
 
   try {
-    const hashedPassword = await bcrypt.hash("viewer123", 12)
+    const viewerPassword = await bcrypt.hash("viewer123", 12)
 
-    const demoUser = await prisma.user.upsert({
+    const viewerUser = await prisma.user.upsert({
       where: { email: "viewer@example.com" },
-      update: {},
+      update: {
+        name: "Demo Viewer",
+        password: viewerPassword,
+        role: UserRole.VIEWER,
+        status: UserStatus.ACTIVE,
+      },
       create: {
         email: "viewer@example.com",
         name: "Demo Viewer",
-        password: hashedPassword,
+        password: viewerPassword,
         role: UserRole.VIEWER,
+        status: UserStatus.ACTIVE,
       }
     })
 
-    return demoUser
+    return viewerUser
   } catch (error) {
     console.error("Error creating demo user:", error)
     return null

@@ -18,11 +18,13 @@ The intent is to preserve the control-plane contract in a Kubernetes-native shap
   - Vault-backed secret delivery through External Secrets Operator
   - in-cluster PostgreSQL through CloudNativePG
   - local image for `devops-monitor-ui`
+  - public control-plane host: `portfolio.eseosadevbox.com`
 - `overlays/prod`
   - production contract
   - stricter hostnames and sizing
   - Vault remains the secret source of truth
   - ArgoCD is the intended reconciler
+  - public control-plane host: `portfolio-prod.eseosadevbox.com`
 
 ## Scope
 
@@ -57,6 +59,21 @@ What is still intentionally staged:
 
 - `prod` remains a stricter contract, not a live local rollout claim
 - `OpenSIS` continuity remains a later bridge concern because it still runs outside the cluster today
+
+## Ingress Guardrail
+
+`dev` and `prod` must not advertise the same public control-plane hostname.
+
+Required rule:
+
+- `platform-observability-dev` owns `portfolio.eseosadevbox.com`
+- `platform-observability-prod` owns `portfolio-prod.eseosadevbox.com`
+
+Why this is non-negotiable:
+
+- if both namespaces publish `portfolio.eseosadevbox.com`, Traefik can route the same browser request to different control-plane backends
+- that creates misleading auth results, stale UI behavior, and hard-to-reproduce incident symptoms
+- the auth issue where `viewer@example.com` and `admin@example.com` looked broken while `demo@example.com` still succeeded was traced to exactly this host collision
 
 ## Operator Commands
 

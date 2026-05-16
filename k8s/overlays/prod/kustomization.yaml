@@ -30,13 +30,13 @@ patches:
     patch: |-
       - op: replace
         path: /data/SITE_URL
-        value: https://portfolio.eseosadevbox.com
+        value: https://portfolio-prod.eseosadevbox.com
       - op: replace
         path: /data/NEXT_PUBLIC_API_URL
-        value: https://portfolio.eseosadevbox.com/api
+        value: https://portfolio-prod.eseosadevbox.com/api
       - op: replace
         path: /data/NEXTAUTH_URL
-        value: https://portfolio.eseosadevbox.com
+        value: https://portfolio-prod.eseosadevbox.com
       - op: replace
         path: /data/NEXT_PUBLIC_GRAFANA_BROWSER_URL
         value: https://grafana.eseosadevbox.com
@@ -120,12 +120,12 @@ patches:
         value: letsencrypt-prod
       - op: replace
         path: /spec/rules/0/host
-        value: portfolio.eseosadevbox.com
+        value: portfolio-prod.eseosadevbox.com
       - op: add
         path: /spec/tls
         value:
           - hosts:
-              - portfolio.eseosadevbox.com
+              - portfolio-prod.eseosadevbox.com
             secretName: controlplane-prod-tls
   - target:
       kind: Ingress
