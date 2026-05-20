@@ -190,15 +190,24 @@ groups:
     rules:
       # Container restarting frequently
       - alert: ContainerRestarting
-        expr: increase(container_start_time_seconds[15m]) > 0
+        expr: |
+          changes(
+            container_start_time_seconds{
+              job="cadvisor",
+              id!="/",
+              container!="",
+              pod!="",
+              image!=""
+            }[15m]
+          ) > 0
         for: 5m
         labels:
           severity: warning
           service: containers
           component: restart
         annotations:
-          summary: "Container restarting frequently on {{ $labels.instance }}"
-          description: "Container {{ $labels.name }} has restarted in the last 15 minutes on {{ $labels.instance }}"
+          summary: "Container restarting frequently in {{ $labels.namespace }}/{{ $labels.pod }}"
+          description: "Container {{ $labels.container }} in {{ $labels.namespace }}/{{ $labels.pod }} has restarted in the last 15 minutes on {{ $labels.instance }}"
           runbook_url: "https://docs.example.com/runbooks/container-restarting"
 
       # High container memory usage
