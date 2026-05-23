@@ -56,6 +56,18 @@ Inspect stored backups:
 ./scripts/k8s-backup-inspect.sh
 ```
 
+Delete all stored backups:
+
+```bash
+./scripts/k8s-backup-delete.sh --all
+```
+
+Delete older backups but keep the newest PostgreSQL dump and newest Alertmanager archive:
+
+```bash
+./scripts/k8s-backup-delete.sh --keep-latest
+```
+
 Restore the latest backup set:
 
 ```bash
@@ -104,6 +116,13 @@ Inspect retained backup artifacts:
 
 ```bash
 ./scripts/k8s-backup-inspect.sh
+```
+
+Delete backup artifacts:
+
+```bash
+./scripts/k8s-backup-delete.sh --all
+./scripts/k8s-backup-delete.sh --keep-latest
 ```
 
 Check recent control-plane events:

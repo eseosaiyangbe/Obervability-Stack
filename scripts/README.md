@@ -248,6 +248,22 @@ This directory contains all the shell scripts for managing the Monitoring in a B
 - mounts `observability-backup-storage`
 - lists retained PostgreSQL dump and Alertmanager archive artifacts
 
+### `k8s-backup-delete.sh`
+**Backup artifact cleanup helper** for the control-plane backup PVC.
+
+```bash
+# Delete all backup artifacts
+./scripts/k8s-backup-delete.sh --all
+
+# Keep only the newest PostgreSQL dump and newest Alertmanager archive
+./scripts/k8s-backup-delete.sh --keep-latest
+```
+
+**Features:**
+- deletes all backup artifacts when requested
+- prunes older backup artifacts while keeping the newest backup set
+- mounts `observability-backup-storage` directly so cleanup is reliable on local `k3s`
+
 ### `k8s-restore-run.sh`
 **Control-plane restore runner** for the owned `k3s` path.
 

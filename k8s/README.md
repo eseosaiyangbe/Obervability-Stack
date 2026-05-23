@@ -86,6 +86,7 @@ From the `Obervability-Stack` repo root:
 ./scripts/k8s-dev-verify.sh
 ./scripts/k8s-backup-run.sh
 ./scripts/k8s-backup-inspect.sh
+./scripts/k8s-backup-delete.sh --help
 ./scripts/k8s-restore-run.sh
 ./scripts/k8s-restore-verify.sh
 ```
@@ -107,6 +108,8 @@ What they mean:
   - creates a one-off control-plane backup from the scheduled backup contract
 - `k8s-backup-inspect.sh`
   - lists retained control-plane backup artifacts from the backup PVC
+- `k8s-backup-delete.sh`
+  - deletes all backups or prunes older backup artifacts while keeping the newest set
 - `k8s-restore-run.sh`
   - restores PostgreSQL-backed control-plane data and Alertmanager persistent state
 - `k8s-restore-verify.sh`
@@ -134,6 +137,7 @@ kubectl get application observability-dev -n argocd -o wide
 kubectl get cronjob,pvc,sa -n platform-observability-dev | rg 'observability-control-plane-backup|observability-backup-storage|observability-db-backup|NAME'
 ./scripts/k8s-backup-run.sh
 ./scripts/k8s-backup-inspect.sh
+./scripts/k8s-backup-delete.sh --keep-latest
 ```
 
 ## Browser Access
