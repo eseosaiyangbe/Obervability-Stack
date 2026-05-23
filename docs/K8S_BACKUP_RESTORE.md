@@ -86,6 +86,18 @@ Verify restore state:
 ./scripts/k8s-restore-verify.sh
 ```
 
+For a controlled restore drill on the GitOps-managed dev control plane, suspend automated sync temporarily before scaling workloads down:
+
+```bash
+kubectl patch application internal-developer-platform-dev-root -n argocd --type json -p='[{"op":"remove","path":"/spec/syncPolicy/automated"}]'
+kubectl patch application observability-dev -n argocd --type json -p='[{"op":"remove","path":"/spec/syncPolicy/automated"}]'
+./scripts/k8s-restore-run.sh observability-postgres-YYYYMMDDTHHMMSSZ.dump alertmanager-YYYYMMDDTHHMMSSZ.tgz
+./scripts/k8s-restore-verify.sh
+kubectl patch application internal-developer-platform-dev-root -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":{"prune":true,"selfHeal":true}}}}'
+kubectl patch application observability-dev -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":{"prune":true,"selfHeal":true},"syncOptions":["CreateNamespace=true"]}}}'
+kubectl annotate application observability-dev -n argocd argocd.argoproj.io/refresh=hard --overwrite
+```
+
 ## Useful Live Commands
 
 Check ArgoCD state for the control-plane app:
@@ -254,6 +266,22 @@ kubectl get pods -n platform-observability-dev
 
 ```bash
 ./scripts/k8s-restore-run.sh observability-postgres-YYYYMMDDTHHMMSSZ.dump alertmanager-YYYYMMDDTHHMMSSZ.tgz
+```
+
+5. for a restore drill on a GitOps-managed child application, suspend automated sync on both the root app and the child app first or ArgoCD will immediately scale the control-plane workloads back up during the restore window
+
+```bash
+kubectl patch application internal-developer-platform-dev-root -n argocd --type json -p='[{"op":"remove","path":"/spec/syncPolicy/automated"}]'
+kubectl patch application observability-dev -n argocd --type json -p='[{"op":"remove","path":"/spec/syncPolicy/automated"}]'
+```
+
+6. after the drill, restore automated sync and force a hard refresh on the child app
+
+```bash
+kubectl patch application internal-developer-platform-dev-root -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":{"prune":true,"selfHeal":true}}}}'
+kubectl patch application observability-dev -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":{"prune":true,"selfHeal":true},"syncOptions":["CreateNamespace=true"]}}}'
+kubectl annotate application observability-dev -n argocd argocd.argoproj.io/refresh=hard --overwrite
+kubectl get application observability-dev -n argocd -o wide
 ```
 
 ## Relationship To Phase 8

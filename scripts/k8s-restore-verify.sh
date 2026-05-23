@@ -59,18 +59,27 @@ spec:
         - -ec
         - |
           echo "Verifying PostgreSQL restore state"
-          psql -h "\${PGHOST}" -p "\${PGPORT}" -U "\${PGUSER}" -d "\${PGDATABASE}" <<'SQL'
-          SELECT tablename
-          FROM pg_tables
-          WHERE schemaname = 'public'
-            AND tablename IN ('_prisma_migrations', 'notification_events', 'notification_settings', 'dashboard')
-          ORDER BY tablename;
+          psql -h "\${PGHOST}" -p "\${PGPORT}" -U "\${PGUSER}" -d "\${PGDATABASE}" -v ON_ERROR_STOP=1 -c "
+            SELECT tablename
+            FROM pg_tables
+            WHERE schemaname = 'public'
+              AND tablename IN ('_prisma_migrations', 'notification_events', 'notification_settings');
+          "
 
-          SELECT COUNT(*) AS prisma_migration_rows FROM "_prisma_migrations";
-          SELECT COUNT(*) AS notification_event_rows FROM notification_events;
-          SELECT COUNT(*) AS notification_settings_rows FROM notification_settings;
-          SELECT COUNT(*) AS grafana_dashboard_rows FROM dashboard;
-SQL
+          psql -h "\${PGHOST}" -p "\${PGPORT}" -U "\${PGUSER}" -d "\${PGDATABASE}" -v ON_ERROR_STOP=1 -c "
+            SELECT COUNT(*) AS prisma_migration_rows FROM \"_prisma_migrations\";
+            SELECT COUNT(*) AS notification_event_rows FROM notification_events;
+            SELECT COUNT(*) AS notification_settings_rows FROM notification_settings;
+          "
+
+          grafana_tables=\$(psql -h "\${PGHOST}" -p "\${PGPORT}" -U "\${PGUSER}" -d "\${PGDATABASE}" -At -c 'SELECT COUNT(*) FROM pg_tables WHERE schemaname = '\''public'\'' AND tablename = '\''dashboard'\'';')
+          if [ "\${grafana_tables}" = "1" ]; then
+            psql -h "\${PGHOST}" -p "\${PGPORT}" -U "\${PGUSER}" -d "\${PGDATABASE}" -v ON_ERROR_STOP=1 -c "
+              SELECT COUNT(*) AS grafana_dashboard_rows FROM dashboard;
+            "
+          else
+            echo "Grafana dashboard table not present in the application database, which is acceptable when Grafana uses its dedicated PostgreSQL database."
+          fi
 
           echo "Verifying Alertmanager data files"
           if ! find /alertmanager -mindepth 1 -print -quit >/dev/null 2>&1; then

@@ -175,10 +175,30 @@ spec:
         claimName: ${ALERTMANAGER_PVC}
 EOF
 
+for _ in $(seq 1 60); do
+  if kubectl get pod -n "${NAMESPACE}" "${POD_NAME}" >/dev/null 2>&1; then
+    break
+  fi
+  sleep 1
+done
+
+if ! kubectl get pod -n "${NAMESPACE}" "${POD_NAME}" >/dev/null 2>&1; then
+  echo "ERROR: restore pod ${POD_NAME} was not created" >&2
+  exit 1
+fi
+
+seen_pod=0
 for _ in $(seq 1 600); do
   phase="$(kubectl get pod -n "${NAMESPACE}" "${POD_NAME}" -o jsonpath='{.status.phase}' 2>/dev/null || true)"
+  if [ -n "${phase}" ]; then
+    seen_pod=1
+  fi
   if [ "${phase}" = "Succeeded" ] || [ "${phase}" = "Failed" ]; then
     break
+  fi
+  if [ "${seen_pod}" = "1" ] && [ -z "${phase}" ]; then
+    echo "ERROR: restore pod ${POD_NAME} disappeared before reaching a terminal phase" >&2
+    exit 1
   fi
   sleep 1
 done

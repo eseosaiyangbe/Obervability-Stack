@@ -280,6 +280,7 @@ This directory contains all the shell scripts for managing the Monitoring in a B
 - restores PostgreSQL-backed control-plane data
 - restores Alertmanager persistent state
 - scales workloads back up after restore
+- includes stronger restore-pod creation checks so the script fails explicitly instead of hanging silently if the restore pod never appears
 
 ### `k8s-restore-verify.sh`
 **Restore verification runner** for the owned `k3s` path.
@@ -293,6 +294,7 @@ This directory contains all the shell scripts for managing the Monitoring in a B
 - confirms the main control-plane workloads are ready again
 - verifies PostgreSQL-backed control-plane tables exist
 - verifies Alertmanager data files exist on the PVC
+- handles the dedicated Grafana PostgreSQL path cleanly during verification
 
 ### `start.sh`
 **Quick start script** for the monitoring stack.
