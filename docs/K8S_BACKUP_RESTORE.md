@@ -138,4 +138,4 @@ This implementation uses:
 
 - Kubernetes manifests
 - repo-local operator scripts
-- stock `postgres:16-alpine` and `busybox:1.36` runtime images
+- stock `postgres:18-alpine` and `busybox:1.36` runtime images

@@ -4,7 +4,7 @@ set -eu
 NAMESPACE="${NAMESPACE:-platform-observability-dev}"
 POD_NAME="${POD_NAME:-observability-restore-verify}"
 ALERTMANAGER_PVC="${ALERTMANAGER_PVC:-data-alertmanager-0}"
-IMAGE="${IMAGE:-postgres:16-alpine}"
+IMAGE="${IMAGE:-postgres:18-alpine}"
 POSTGRES_SECRET="${POSTGRES_SECRET:-observability-postgres-app}"
 PGHOST_VALUE="${PGHOST_VALUE:-observability-postgres-rw}"
 PGPORT_VALUE="${PGPORT_VALUE:-5432}"
