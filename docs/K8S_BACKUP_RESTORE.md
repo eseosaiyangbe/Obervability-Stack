@@ -74,6 +74,44 @@ Verify restore state:
 ./scripts/k8s-restore-verify.sh
 ```
 
+## Useful Live Commands
+
+Check ArgoCD state for the control-plane app:
+
+```bash
+kubectl get application observability-dev -n argocd -o wide
+```
+
+Check backup resources directly:
+
+```bash
+kubectl get cronjob,pvc,sa -n platform-observability-dev | rg 'observability-control-plane-backup|observability-backup-storage|observability-db-backup|NAME'
+```
+
+Check the backup CronJob runtime image:
+
+```bash
+kubectl get cronjob observability-control-plane-backup -n platform-observability-dev -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].image}{"\n"}'
+```
+
+Run a one-off backup and stream the job logs:
+
+```bash
+./scripts/k8s-backup-run.sh
+```
+
+Inspect retained backup artifacts:
+
+```bash
+./scripts/k8s-backup-inspect.sh
+```
+
+Check recent control-plane events:
+
+```bash
+kubectl get events -n platform-observability-dev --sort-by=.lastTimestamp | tail -n 30
+```
+
 ## Restore Behavior
 
 The restore path is intentionally sequenced.
@@ -116,6 +154,87 @@ Use:
 
 ```bash
 ./scripts/k8s-restore-verify.sh
+```
+
+## Live Validation Completed
+
+This backup and restore slice was validated live on `2026-05-23`.
+
+What was proven:
+
+- ArgoCD reconciled the new backup contract into `observability-dev`
+- the backup PVC `observability-backup-storage` was created and bound
+- the service account `observability-db-backup` was created
+- the CronJob `observability-control-plane-backup` was created
+- a manual backup job completed successfully
+- backup artifacts were written to the PVC
+
+Validated artifact examples:
+
+- `observability-postgres-20260523T082940Z.dump`
+- `alertmanager-20260523T082940Z.tgz`
+
+Useful proof commands:
+
+```bash
+kubectl get application observability-dev -n argocd -o wide
+kubectl get cronjob,pvc,sa -n platform-observability-dev | rg 'observability-control-plane-backup|observability-backup-storage|observability-db-backup|NAME'
+./scripts/k8s-backup-run.sh
+./scripts/k8s-backup-inspect.sh
+```
+
+## Failure We Hit And Fixed
+
+The first backup run failed for a real operational reason:
+
+- the backup container used `postgres:16-alpine`
+- the live CloudNativePG server was PostgreSQL `18.3`
+- `pg_dump` aborted on server version mismatch
+
+Observed error:
+
+```text
+pg_dump: error: aborting because of server version mismatch
+pg_dump: detail: server version: 18.3 ...; pg_dump version: 16.13
+```
+
+Fix applied:
+
+- backup and restore tooling was aligned to `postgres:18-alpine`
+
+Additional hardening applied:
+
+- backup artifacts are now written to temporary files first and moved into place only on success
+- restore selection ignores zero-byte backup artifacts
+
+This matters because a failed backup run should never leave partial files that look restoreable.
+
+## Pre-Restore Sanity Checks
+
+Before you run a restore, do these checks:
+
+1. confirm the app is currently `Synced` and `Healthy`
+
+```bash
+kubectl get application observability-dev -n argocd -o wide
+```
+
+2. confirm the backup files you plan to use exist and are non-zero
+
+```bash
+./scripts/k8s-backup-inspect.sh
+```
+
+3. confirm the control-plane workloads are currently stable enough to scale down safely
+
+```bash
+kubectl get pods -n platform-observability-dev
+```
+
+4. if you are targeting a named backup set, record the exact filenames first
+
+```bash
+./scripts/k8s-restore-run.sh observability-postgres-YYYYMMDDTHHMMSSZ.dump alertmanager-YYYYMMDDTHHMMSSZ.tgz
 ```
 
 ## Relationship To Phase 8

@@ -127,6 +127,15 @@ Primary reference:
 
 - [K8S_BACKUP_RESTORE.md](/Users/raymond/Documents/DevOps-Easy-Learning/observability-stack/docs/K8S_BACKUP_RESTORE.md)
 
+Fast operator checks:
+
+```bash
+kubectl get application observability-dev -n argocd -o wide
+kubectl get cronjob,pvc,sa -n platform-observability-dev | rg 'observability-control-plane-backup|observability-backup-storage|observability-db-backup|NAME'
+./scripts/k8s-backup-run.sh
+./scripts/k8s-backup-inspect.sh
+```
+
 ## Browser Access
 
 Once Traefik is healthy and your local `/etc/hosts` maps the ingress address, the main browser entrypoints are:

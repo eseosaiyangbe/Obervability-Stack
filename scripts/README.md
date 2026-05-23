@@ -223,6 +223,61 @@ This directory contains all the shell scripts for managing the Monitoring in a B
 - Verifies the control-plane API layer through `/api/services/health`, `/api/apps`, and `/api/apps/health`
 - Uses cross-platform resource checks that work on macOS and Linux
 
+### `k8s-backup-run.sh`
+**One-off Kubernetes control-plane backup runner** for the owned `k3s` path.
+
+```bash
+# Usage
+./scripts/k8s-backup-run.sh
+```
+
+**Features:**
+- creates a manual Job from `observability-control-plane-backup`
+- waits for backup completion
+- prints the backup job logs
+
+### `k8s-backup-inspect.sh`
+**Backup artifact inspector** for the control-plane backup PVC.
+
+```bash
+# Usage
+./scripts/k8s-backup-inspect.sh
+```
+
+**Features:**
+- mounts `observability-backup-storage`
+- lists retained PostgreSQL dump and Alertmanager archive artifacts
+
+### `k8s-restore-run.sh`
+**Control-plane restore runner** for the owned `k3s` path.
+
+```bash
+# Usage
+./scripts/k8s-restore-run.sh
+
+# Restore a specific backup set
+./scripts/k8s-restore-run.sh observability-postgres-YYYYMMDDTHHMMSSZ.dump alertmanager-YYYYMMDDTHHMMSSZ.tgz
+```
+
+**Features:**
+- scales down `grafana`, `devops-monitor-ui`, and `alertmanager`
+- restores PostgreSQL-backed control-plane data
+- restores Alertmanager persistent state
+- scales workloads back up after restore
+
+### `k8s-restore-verify.sh`
+**Restore verification runner** for the owned `k3s` path.
+
+```bash
+# Usage
+./scripts/k8s-restore-verify.sh
+```
+
+**Features:**
+- confirms the main control-plane workloads are ready again
+- verifies PostgreSQL-backed control-plane tables exist
+- verifies Alertmanager data files exist on the PVC
+
 ### `start.sh`
 **Quick start script** for the monitoring stack.
 
