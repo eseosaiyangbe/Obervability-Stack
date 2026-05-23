@@ -67,6 +67,14 @@ spec:
                   timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
                   db_backup="/backup/observability-postgres-${timestamp}.dump"
                   alertmanager_backup="/backup/alertmanager-${timestamp}.tgz"
+                  db_tmp="${db_backup}.tmp"
+                  alertmanager_tmp="${alertmanager_backup}.tmp"
+
+                  cleanup() {
+                    rm -f "${db_tmp}" "${alertmanager_tmp}"
+                  }
+
+                  trap cleanup EXIT
 
                   echo "Waiting for PostgreSQL at ${PGHOST}:${PGPORT}"
                   for _ in $(seq 1 60); do
@@ -86,13 +94,17 @@ spec:
                     --if-exists \
                     --no-owner \
                     --no-privileges \
-                    --file="${db_backup}"
+                    --file="${db_tmp}"
 
                   if [ -d /alertmanager ] && find /alertmanager -mindepth 1 -print -quit >/dev/null 2>&1; then
-                    tar -czf "${alertmanager_backup}" -C /alertmanager .
+                    tar -czf "${alertmanager_tmp}" -C /alertmanager .
                   else
-                    tar -czf "${alertmanager_backup}" --files-from /dev/null
+                    tar -czf "${alertmanager_tmp}" --files-from /dev/null
                   fi
+
+                  mv "${db_tmp}" "${db_backup}"
+                  mv "${alertmanager_tmp}" "${alertmanager_backup}"
+                  trap - EXIT
 
                   keep="${KEEP_BACKUPS:-7}"
                   if [ "${keep}" -gt 0 ] 2>/dev/null; then

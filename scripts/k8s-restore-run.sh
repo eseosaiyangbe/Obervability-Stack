@@ -116,13 +116,13 @@ spec:
           alertmanager_backup="\${ALERTMANAGER_BACKUP_FILE}"
 
           if [ -z "\${postgres_backup}" ]; then
-            postgres_backup="\$(ls -1 /backup/observability-postgres-*.dump 2>/dev/null | sort | tail -n 1)"
+            postgres_backup="\$(find /backup -maxdepth 1 -type f -name 'observability-postgres-*.dump' -size +0c 2>/dev/null | sort | tail -n 1)"
           elif [ "\${postgres_backup#/}" = "\${postgres_backup}" ]; then
             postgres_backup="/backup/\${postgres_backup}"
           fi
 
           if [ -z "\${alertmanager_backup}" ]; then
-            alertmanager_backup="\$(ls -1 /backup/alertmanager-*.tgz 2>/dev/null | sort | tail -n 1)"
+            alertmanager_backup="\$(find /backup -maxdepth 1 -type f -name 'alertmanager-*.tgz' -size +0c 2>/dev/null | sort | tail -n 1)"
           elif [ "\${alertmanager_backup#/}" = "\${alertmanager_backup}" ]; then
             alertmanager_backup="/backup/\${alertmanager_backup}"
           fi
