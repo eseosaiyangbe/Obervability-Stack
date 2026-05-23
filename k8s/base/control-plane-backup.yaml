@@ -1,0 +1,116 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: observability-db-backup
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: observability-backup-storage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: observability-control-plane-backup
+spec:
+  schedule: "0 3 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      ttlSecondsAfterFinished: 86400
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: observability-control-plane-backup
+        spec:
+          serviceAccountName: observability-db-backup
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: postgres:16-alpine
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: PGHOST
+                  value: observability-postgres-rw
+                - name: PGPORT
+                  value: "5432"
+                - name: PGUSER
+                  valueFrom:
+                    secretKeyRef:
+                      name: observability-postgres-app
+                      key: username
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: observability-postgres-app
+                      key: password
+                - name: PGDATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: observability-postgres-app
+                      key: database
+                - name: KEEP_BACKUPS
+                  value: "7"
+              command:
+                - /bin/sh
+                - -ec
+                - |
+                  timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
+                  db_backup="/backup/observability-postgres-${timestamp}.dump"
+                  alertmanager_backup="/backup/alertmanager-${timestamp}.tgz"
+
+                  echo "Waiting for PostgreSQL at ${PGHOST}:${PGPORT}"
+                  for _ in $(seq 1 60); do
+                    if pg_isready -h "${PGHOST}" -p "${PGPORT}" -U "${PGUSER}" -d "${PGDATABASE}" >/dev/null 2>&1; then
+                      break
+                    fi
+                    sleep 2
+                  done
+
+                  pg_dump \
+                    --host="${PGHOST}" \
+                    --port="${PGPORT}" \
+                    --username="${PGUSER}" \
+                    --dbname="${PGDATABASE}" \
+                    --format=custom \
+                    --clean \
+                    --if-exists \
+                    --no-owner \
+                    --no-privileges \
+                    --file="${db_backup}"
+
+                  if [ -d /alertmanager ] && find /alertmanager -mindepth 1 -print -quit >/dev/null 2>&1; then
+                    tar -czf "${alertmanager_backup}" -C /alertmanager .
+                  else
+                    tar -czf "${alertmanager_backup}" --files-from /dev/null
+                  fi
+
+                  keep="${KEEP_BACKUPS:-7}"
+                  if [ "${keep}" -gt 0 ] 2>/dev/null; then
+                    ls -1t /backup/observability-postgres-*.dump 2>/dev/null | tail -n +"$((keep + 1))" | xargs -r rm -f
+                    ls -1t /backup/alertmanager-*.tgz 2>/dev/null | tail -n +"$((keep + 1))" | xargs -r rm -f
+                  fi
+
+                  ls -lh /backup
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backup
+                - name: alertmanager-data
+                  mountPath: /alertmanager
+                  readOnly: true
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: observability-backup-storage
+            - name: alertmanager-data
+              persistentVolumeClaim:
+                claimName: data-alertmanager-0

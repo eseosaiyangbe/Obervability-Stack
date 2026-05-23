@@ -84,6 +84,10 @@ From the `Obervability-Stack` repo root:
 ./scripts/k8s-stop.sh
 ./scripts/k8s-reset.sh --help
 ./scripts/k8s-dev-verify.sh
+./scripts/k8s-backup-run.sh
+./scripts/k8s-backup-inspect.sh
+./scripts/k8s-restore-run.sh
+./scripts/k8s-restore-verify.sh
 ```
 
 What they mean:
@@ -99,8 +103,29 @@ What they mean:
 - `k8s-reset.sh`
   - destructive reset
   - deletes `platform-observability-dev` and all data in that namespace
+- `k8s-backup-run.sh`
+  - creates a one-off control-plane backup from the scheduled backup contract
+- `k8s-backup-inspect.sh`
+  - lists retained control-plane backup artifacts from the backup PVC
+- `k8s-restore-run.sh`
+  - restores PostgreSQL-backed control-plane data and Alertmanager persistent state
+- `k8s-restore-verify.sh`
+  - verifies restore readiness and restored state
 
 Use `start` and `stop` for normal operations. Use `reset` only when you intentionally want a full rebuild of the observability control plane.
+
+## Backup And Restore
+
+The owned Kubernetes control plane now has an explicit backup and restore path.
+
+Coverage:
+
+- PostgreSQL-backed UI, notification, and Grafana metadata
+- Alertmanager persistent state
+
+Primary reference:
+
+- [K8S_BACKUP_RESTORE.md](/Users/raymond/Documents/DevOps-Easy-Learning/observability-stack/docs/K8S_BACKUP_RESTORE.md)
 
 ## Browser Access
 

@@ -40,6 +40,7 @@ configMapGenerator:
 
 resources:
   - postgres-cluster.yaml
+  - control-plane-backup.yaml
   - prometheus.yaml
   - alertmanager.yaml
   - loki.yaml
