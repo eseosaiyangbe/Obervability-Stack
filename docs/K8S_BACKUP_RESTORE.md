@@ -86,6 +86,111 @@ Verify restore state:
 ./scripts/k8s-restore-verify.sh
 ```
 
+## End-To-End Restore Drill
+
+This is the recommended end-to-end operator sequence for a controlled restore drill on the GitOps-managed `dev` control plane.
+
+Run from the `observability-stack` repo root unless the command explicitly starts with `kubectl`.
+
+### 1. Confirm The Target App Is Stable
+
+```bash
+kubectl get application internal-developer-platform-dev-root observability-dev -n argocd -o wide
+kubectl get pods -n platform-observability-dev
+```
+
+Expected baseline:
+
+- `internal-developer-platform-dev-root` is `Synced Healthy`
+- `observability-dev` is `Synced Healthy`
+- main control-plane workloads are `Running`
+
+### 2. Confirm The Backup Set Exists
+
+```bash
+./scripts/k8s-backup-inspect.sh
+```
+
+Example validated backup set from the live drill:
+
+- `observability-postgres-20260523T210236Z.dump`
+- `alertmanager-20260523T210236Z.tgz`
+
+### 3. Suspend Automated Sync Temporarily
+
+This step is required for a real restore drill on the GitOps-managed control plane.
+
+Why:
+
+- patching `selfHeal=false` on the child application alone is not sufficient
+- the root ArgoCD application can reapply the child `Application` and restore automation during the drill
+- for a clean restore window, suspend automated sync on both the root app and the child app
+
+```bash
+kubectl patch application internal-developer-platform-dev-root -n argocd --type json -p='[{"op":"remove","path":"/spec/syncPolicy/automated"}]'
+kubectl patch application observability-dev -n argocd --type json -p='[{"op":"remove","path":"/spec/syncPolicy/automated"}]'
+kubectl get application internal-developer-platform-dev-root observability-dev -n argocd -o yaml | rg -n "syncPolicy|automated|selfHeal|prune" -A3 -B2
+```
+
+### 4. Run The Restore
+
+Restore the named backup set:
+
+```bash
+./scripts/k8s-restore-run.sh observability-postgres-20260523T210236Z.dump alertmanager-20260523T210236Z.tgz
+```
+
+What this should do:
+
+- scale down `grafana`
+- scale down `devops-monitor-ui`
+- scale down `alertmanager`
+- restore PostgreSQL data from the selected dump
+- restore Alertmanager state from the selected archive
+- scale the workloads back up
+
+### 5. Verify The Restored State
+
+```bash
+./scripts/k8s-restore-verify.sh
+```
+
+Expected verification signals:
+
+- `_prisma_migrations` exists
+- `notification_events` exists
+- `notification_settings` exists
+- Grafana metadata is queryable
+- Alertmanager PVC contains restored data files
+
+### 6. Re-Enable GitOps Automation
+
+```bash
+kubectl patch application internal-developer-platform-dev-root -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":{"prune":true,"selfHeal":true}}}}'
+kubectl patch application observability-dev -n argocd --type merge -p '{"spec":{"syncPolicy":{"automated":{"prune":true,"selfHeal":true},"syncOptions":["CreateNamespace=true"]}}}'
+kubectl annotate application observability-dev -n argocd argocd.argoproj.io/refresh=hard --overwrite
+kubectl get application internal-developer-platform-dev-root observability-dev -n argocd -o wide
+```
+
+Expected end state:
+
+- `internal-developer-platform-dev-root` returns to `Synced Healthy`
+- `observability-dev` returns to `Synced Healthy`
+
+### 7. Final Runtime Check
+
+```bash
+kubectl get pods -n platform-observability-dev
+kubectl get events -n platform-observability-dev --sort-by=.lastTimestamp | tail -n 30
+```
+
+The drill is complete only when:
+
+- restore verification passed
+- GitOps automation is restored
+- ArgoCD shows the control-plane app as `Synced Healthy`
+- the main control-plane workloads are back in `Running`
+
 For a controlled restore drill on the GitOps-managed dev control plane, suspend automated sync temporarily before scaling workloads down:
 
 ```bash
@@ -199,6 +304,10 @@ What was proven:
 - the CronJob `observability-control-plane-backup` was created
 - a manual backup job completed successfully
 - backup artifacts were written to the PVC
+- a controlled restore drill completed successfully against the GitOps-managed `dev` control plane
+- restored PostgreSQL state was queryable again
+- restored Alertmanager PVC state was present again
+- ArgoCD automation was restored after the drill and the app returned to `Synced Healthy`
 
 Validated artifact examples:
 
@@ -212,6 +321,8 @@ kubectl get application observability-dev -n argocd -o wide
 kubectl get cronjob,pvc,sa -n platform-observability-dev | rg 'observability-control-plane-backup|observability-backup-storage|observability-db-backup|NAME'
 ./scripts/k8s-backup-run.sh
 ./scripts/k8s-backup-inspect.sh
+./scripts/k8s-restore-run.sh observability-postgres-20260523T210236Z.dump alertmanager-20260523T210236Z.tgz
+./scripts/k8s-restore-verify.sh
 ```
 
 ## Failure We Hit And Fixed

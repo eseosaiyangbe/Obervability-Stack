@@ -281,6 +281,7 @@ This directory contains all the shell scripts for managing the Monitoring in a B
 - restores Alertmanager persistent state
 - scales workloads back up after restore
 - includes stronger restore-pod creation checks so the script fails explicitly instead of hanging silently if the restore pod never appears
+- intended to be used with temporary ArgoCD automation suspension during a live restore drill on the GitOps-managed `dev` control plane
 
 ### `k8s-restore-verify.sh`
 **Restore verification runner** for the owned `k3s` path.
@@ -295,6 +296,10 @@ This directory contains all the shell scripts for managing the Monitoring in a B
 - verifies PostgreSQL-backed control-plane tables exist
 - verifies Alertmanager data files exist on the PVC
 - handles the dedicated Grafana PostgreSQL path cleanly during verification
+
+**Useful pairing:**
+- run it immediately after `k8s-restore-run.sh`
+- then restore ArgoCD automation and force a hard refresh on `observability-dev`
 
 ### `start.sh`
 **Quick start script** for the monitoring stack.

@@ -138,7 +138,13 @@ kubectl get cronjob,pvc,sa -n platform-observability-dev | rg 'observability-con
 ./scripts/k8s-backup-run.sh
 ./scripts/k8s-backup-inspect.sh
 ./scripts/k8s-backup-delete.sh --keep-latest
+./scripts/k8s-restore-run.sh observability-postgres-YYYYMMDDTHHMMSSZ.dump alertmanager-YYYYMMDDTHHMMSSZ.tgz
+./scripts/k8s-restore-verify.sh
 ```
+
+For the full controlled restore-drill sequence, including temporary ArgoCD sync suspension and re-enable, use:
+
+- [K8S_BACKUP_RESTORE.md](/Users/raymond/Documents/DevOps-Easy-Learning/observability-stack/docs/K8S_BACKUP_RESTORE.md)
 
 ## Browser Access
 
