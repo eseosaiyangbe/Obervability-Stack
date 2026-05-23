@@ -87,10 +87,6 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 RUN mkdir -p .next && \
     chown -R nextjs:nodejs .next
 
-# Writable storage for local notification inbox and runtime config.
-RUN mkdir -p /app/data && \
-    chown -R nextjs:nodejs /app/data
-
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./

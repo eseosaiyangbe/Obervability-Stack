@@ -1,5 +1,4 @@
-import fs from 'fs/promises';
-import path from 'path';
+import { prisma } from './prisma-server'
 
 export interface NotificationInboxEvent {
   id: string;
@@ -19,73 +18,103 @@ export interface NotificationInboxEvent {
 }
 
 const MAX_EVENTS = 200;
-let writeQueue = Promise.resolve();
 
-function getStorePath() {
-  return process.env.NOTIFICATION_STORE_PATH || '/tmp/devops-monitor-notifications.json';
-}
-
-async function ensureStoreDirectory(storePath: string) {
-  await fs.mkdir(path.dirname(storePath), { recursive: true });
-}
-
-async function readEvents(): Promise<NotificationInboxEvent[]> {
-  const storePath = getStorePath();
-
-  try {
-    const content = await fs.readFile(storePath, 'utf8');
-    if (!content.trim()) {
-      return [];
-    }
-
-    const parsed = JSON.parse(content);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
-    const code = (error as NodeJS.ErrnoException).code;
-    if (code === 'ENOENT') {
-      return [];
-    }
-
-    if (error instanceof SyntaxError) {
-      console.error(`Notification inbox store is invalid JSON: ${storePath}`, error);
-      return [];
-    }
-
-    throw error;
+function normalizeRecord(value: unknown): Record<string, string> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return {};
   }
-}
 
-async function writeEvents(events: NotificationInboxEvent[]) {
-  const storePath = getStorePath();
-  const tempPath = `${storePath}.${process.pid}.${Date.now()}.tmp`;
-
-  await ensureStoreDirectory(storePath);
-  await fs.writeFile(tempPath, JSON.stringify(events.slice(0, MAX_EVENTS), null, 2));
-  await fs.rename(tempPath, storePath);
-}
-
-async function withSerializedWrite<T>(operation: () => Promise<T>): Promise<T> {
-  const nextWrite = writeQueue.then(operation, operation);
-  writeQueue = nextWrite.then(
-    () => undefined,
-    () => undefined,
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>).map(([key, item]) => [key, String(item ?? '')]),
   );
+}
 
-  return nextWrite;
+function mapStoredEvent(event: {
+  id: string
+  receivedAt: Date
+  status: string
+  severity: string
+  title: string
+  description: string
+  app: string | null
+  service: string | null
+  component: string | null
+  instance: string | null
+  runbookUrl: string | null
+  fingerprint: string | null
+  labels: unknown
+  annotations: unknown
+}): NotificationInboxEvent {
+  return {
+    id: event.id,
+    receivedAt: event.receivedAt.toISOString(),
+    status: event.status,
+    severity: event.severity,
+    title: event.title,
+    description: event.description,
+    app: event.app ?? undefined,
+    service: event.service ?? undefined,
+    component: event.component ?? undefined,
+    instance: event.instance ?? undefined,
+    runbookUrl: event.runbookUrl ?? undefined,
+    fingerprint: event.fingerprint ?? undefined,
+    labels: normalizeRecord(event.labels),
+    annotations: normalizeRecord(event.annotations),
+  };
+}
+
+async function trimNotificationHistory() {
+  const count = await prisma.notificationEvent.count();
+
+  if (count <= MAX_EVENTS) {
+    return;
+  }
+
+  const staleEvents = await prisma.notificationEvent.findMany({
+    orderBy: [
+      { receivedAt: 'desc' },
+      { createdAt: 'desc' },
+    ],
+    skip: MAX_EVENTS,
+    select: { id: true },
+  });
+
+  if (staleEvents.length === 0) {
+    return;
+  }
+
+  await prisma.notificationEvent.deleteMany({
+    where: {
+      id: {
+        in: staleEvents.map((event) => event.id),
+      },
+    },
+  });
 }
 
 export async function listNotificationEvents(limit = 50): Promise<NotificationInboxEvent[]> {
-  const events = await readEvents();
-  return events.slice(0, limit);
+  const events = await prisma.notificationEvent.findMany({
+    orderBy: [
+      { receivedAt: 'desc' },
+      { createdAt: 'desc' },
+    ],
+    take: limit,
+  });
+
+  return events.map(mapStoredEvent);
 }
 
 export async function getNotificationEventSummary() {
-  const events = await readEvents();
+  const [total, firing, resolved] = await prisma.$transaction([
+    prisma.notificationEvent.count(),
+    prisma.notificationEvent.count({ where: { status: 'firing' } }),
+    prisma.notificationEvent.count({ where: { status: 'resolved' } }),
+  ]);
 
   return {
-    total: events.length,
-    firing: events.filter((event) => event.status === 'firing').length,
-    resolved: events.filter((event) => event.status === 'resolved').length,
+    total,
+    firing,
+    resolved,
   };
 }
 
@@ -94,30 +123,39 @@ export async function saveNotificationEvents(events: NotificationInboxEvent[]) {
     return;
   }
 
-  await withSerializedWrite(async () => {
-    const existingEvents = await readEvents();
-    await writeEvents([...events, ...existingEvents]);
+  await prisma.notificationEvent.createMany({
+    data: events.map((event) => ({
+      id: event.id,
+      receivedAt: new Date(event.receivedAt),
+      status: event.status,
+      severity: event.severity,
+      title: event.title,
+      description: event.description,
+      app: event.app,
+      service: event.service,
+      component: event.component,
+      instance: event.instance,
+      runbookUrl: event.runbookUrl,
+      fingerprint: event.fingerprint,
+      labels: event.labels,
+      annotations: event.annotations,
+    })),
+    skipDuplicates: true,
   });
+
+  await trimNotificationHistory();
 }
 
 export async function deleteNotificationEvent(id: string) {
-  return withSerializedWrite(async () => {
-    const existingEvents = await readEvents();
-    const nextEvents = existingEvents.filter((event) => event.id !== id);
-
-    if (nextEvents.length === existingEvents.length) {
-      return false;
-    }
-
-    await writeEvents(nextEvents);
-    return true;
+  const deleted = await prisma.notificationEvent.deleteMany({
+    where: { id },
   });
+
+  return deleted.count > 0;
 }
 
 export async function clearNotificationEvents() {
-  await withSerializedWrite(async () => {
-    await writeEvents([]);
-  });
+  await prisma.notificationEvent.deleteMany();
 }
 
 export function alertmanagerPayloadToEvents(payload: any): NotificationInboxEvent[] {
@@ -143,8 +181,8 @@ export function alertmanagerPayloadToEvents(payload: any): NotificationInboxEven
       instance: labels.instance,
       runbookUrl: annotations.runbook_url,
       fingerprint,
-      labels,
-      annotations,
+      labels: normalizeRecord(labels),
+      annotations: normalizeRecord(annotations),
     };
   });
 }

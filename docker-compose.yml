@@ -393,7 +393,6 @@ services:
       - NEXT_PUBLIC_PROMTAIL_BROWSER_URL=${NEXT_PUBLIC_PROMTAIL_BROWSER_URL:-http://localhost:9080/targets}
       - NEXT_PUBLIC_BLACKBOX_EXPORTER_BROWSER_URL=${NEXT_PUBLIC_BLACKBOX_EXPORTER_BROWSER_URL:-http://localhost:9115}
       - NEXT_PUBLIC_CADVISOR_BROWSER_URL=${NEXT_PUBLIC_CADVISOR_BROWSER_URL:-http://localhost:8082/containers/}
-      - NOTIFICATION_STORE_PATH=${NOTIFICATION_STORE_PATH:-/app/data/notification-events.json}
       - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-}
       - SLACK_CHANNEL=${SLACK_CHANNEL:-#alerts}
       - SLACK_USERNAME=${SLACK_USERNAME:-DevOps Monitor}
@@ -405,8 +404,6 @@ services:
       - SMTP_PASS=${SMTP_PASS:-}
       - EMAIL_FROM=${EMAIL_FROM:-alerts@devops-monitoring.local}
       - EMAIL_TO=${EMAIL_TO:-admin@devops-monitoring.local}
-    volumes:
-      - devops_monitor_ui_data:/app/data
     restart: unless-stopped
     deploy:
       resources:
@@ -445,7 +442,6 @@ volumes:
   grafana_data:
   loki_data:
   alertmanager_data:
-  devops_monitor_ui_data:
 
 networks:
   monitoring:

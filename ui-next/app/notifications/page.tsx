@@ -209,7 +209,7 @@ export default function NotificationsPage() {
   }, [appFilter, notifications, searchQuery, serviceFilter, severityFilter, statusFilter])
 
   const handleDeleteNotification = async (event: NotificationInboxEvent) => {
-    const confirmed = window.confirm(`Delete notification "${event.title}" from the local inbox?`)
+    const confirmed = window.confirm(`Delete notification "${event.title}" from the notification history?`)
 
     if (!confirmed) {
       return
@@ -219,7 +219,7 @@ export default function NotificationsPage() {
   }
 
   const handleClearInbox = async () => {
-    const confirmed = window.confirm("Delete all notifications from the local inbox? This does not delete alerts from Alertmanager.")
+    const confirmed = window.confirm("Delete all notifications from the persisted notification history? This does not delete alerts from Alertmanager.")
 
     if (!confirmed) {
       return

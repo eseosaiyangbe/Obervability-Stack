@@ -31,7 +31,6 @@ data:
   NEXT_PUBLIC_PROMTAIL_BROWSER_URL: http://localhost:9080/targets
   NEXT_PUBLIC_BLACKBOX_EXPORTER_BROWSER_URL: http://localhost:9115
   NEXT_PUBLIC_CADVISOR_BROWSER_URL: http://localhost:8082/containers/
-  NOTIFICATION_STORE_PATH: /app/data/notification-events.json
 ---
 apiVersion: v1
 kind: Service
@@ -129,9 +128,6 @@ spec:
           ports:
             - name: http
               containerPort: 3000
-          volumeMounts:
-            - name: data
-              mountPath: /app/data
           readinessProbe:
             httpGet:
               path: /
@@ -151,6 +147,3 @@ spec:
             limits:
               cpu: 500m
               memory: 768Mi
-      volumes:
-        - name: data
-          emptyDir: {}

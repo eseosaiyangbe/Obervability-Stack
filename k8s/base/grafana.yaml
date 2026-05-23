@@ -38,6 +38,27 @@ spec:
                 secretKeyRef:
                   name: observability-grafana-admin
                   key: admin-password
+            - name: GF_DATABASE_TYPE
+              value: postgres
+            - name: GF_DATABASE_HOST
+              value: observability-postgres-rw:5432
+            - name: GF_DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: observability-grafana-admin
+                  key: db-name
+            - name: GF_DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: observability-grafana-admin
+                  key: db-user
+            - name: GF_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: observability-grafana-admin
+                  key: db-password
+            - name: GF_DATABASE_SSL_MODE
+              value: disable
             - name: GF_USERS_ALLOW_SIGN_UP
               value: "false"
             - name: GF_ANALYTICS_REPORTING_ENABLED
@@ -48,8 +69,6 @@ spec:
             - name: http
               containerPort: 3000
           volumeMounts:
-            - name: data
-              mountPath: /var/lib/grafana
             - name: datasources
               mountPath: /etc/grafana/provisioning/datasources
             - name: dashboards-provider
@@ -78,8 +97,6 @@ spec:
               cpu: 500m
               memory: 768Mi
       volumes:
-        - name: data
-          emptyDir: {}
         - name: datasources
           configMap:
             name: observability-grafana-datasources

@@ -505,7 +505,7 @@ export default function AlertsPage() {
                   <a
                     href="/notifications"
                     className="block h-full p-3 sm:p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl border border-green-200 dark:border-green-800 hover:border-green-400 dark:hover:border-green-600 hover:shadow-md transition"
-                    title="Resolved alerts are stored in the notification inbox, not the active Alertmanager feed."
+                    title="Resolved alerts are stored in the notification history, not the active Alertmanager feed."
                   >
                     <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-2">
                       <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
@@ -584,7 +584,7 @@ export default function AlertsPage() {
               size="sm"
               className="gap-1.5 h-9 sm:h-10 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800"
             >
-              <a href="/notifications" title="Open resolved alert history in the notification inbox">
+              <a href="/notifications" title="Open resolved alert history in the notification archive">
                 <Calendar className="h-4 w-4" />
                 <span className="hidden sm:inline">History</span>
                 <span className="sm:hidden">Hist</span>

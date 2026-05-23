@@ -1704,13 +1704,13 @@ receivers:
 - Added a writable UI data volume:
 
 ```yaml
-devops_monitor_ui_data:/app/data
+Notification history is persisted in PostgreSQL through the control-plane application schema.
 ```
 
 - Added runtime storage path:
 
 ```text
-NOTIFICATION_STORE_PATH=/app/data/notification-events.json
+Notification history is persisted in PostgreSQL through the control-plane application schema.
 ```
 
 Validation commands:

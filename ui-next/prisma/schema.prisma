@@ -172,6 +172,39 @@ model AdminAuditLog {
   @@map("admin_audit_logs")
 }
 
+model NotificationSettings {
+  id        String   @id @default(cuid())
+  scope     String   @unique @default("default")
+  config    Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("notification_settings")
+}
+
+model NotificationEvent {
+  id          String   @id
+  receivedAt  DateTime
+  status      String
+  severity    String
+  title       String
+  description String
+  app         String?
+  service     String?
+  component   String?
+  instance    String?
+  runbookUrl  String?
+  fingerprint String?
+  labels      Json
+  annotations Json
+  createdAt   DateTime @default(now())
+
+  @@index([receivedAt])
+  @@index([status])
+  @@index([severity])
+  @@map("notification_events")
+}
+
 // Enums
 enum UserRole {
   ADMIN

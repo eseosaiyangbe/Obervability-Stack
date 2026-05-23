@@ -1,34 +1,28 @@
 import axios from 'axios'
+import { Prisma } from '@prisma/client'
 import nodemailer from 'nodemailer'
-import { NotificationsConfig, NotificationChannelConfig } from './config/types'
+import { NotificationsConfig } from './config/types'
 import { alertmanagerPayloadToEvents, saveNotificationEvents } from './notification-inbox'
+import { prisma } from './prisma-server'
+
+const NOTIFICATION_SETTINGS_SCOPE = 'default'
 
 export class NotificationService {
   private config: NotificationsConfig | null = null
   private emailTransporter: nodemailer.Transporter | null = null
 
-  constructor() {
-    this.loadConfiguration()
-  }
-
   private async loadConfiguration() {
     try {
-      // Load from config.json or use default
-      const configPath = process.env.CONFIG_PATH || './config.json'
-      const fs = await import('fs')
-      
-      if (fs.existsSync(configPath)) {
-        const configFile = fs.readFileSync(configPath, 'utf8')
-        const fullConfig = JSON.parse(configFile)
-        this.config = fullConfig.notifications || this.getDefaultConfig()
-      } else {
-        this.config = this.getDefaultConfig()
-      }
-      
+      const storedSettings = await prisma.notificationSettings.findUnique({
+        where: { scope: NOTIFICATION_SETTINGS_SCOPE },
+      })
+
+      this.config = (storedSettings?.config as NotificationsConfig | null) || this.getDefaultConfig()
       this.setupEmailTransporter()
     } catch (error) {
       console.error('Failed to load configuration:', error)
       this.config = this.getDefaultConfig()
+      this.setupEmailTransporter()
     }
   }
 
@@ -101,42 +95,36 @@ export class NotificationService {
   private setupEmailTransporter() {
     if (this.config?.channels?.email?.enabled && this.config.channels.email.smtp) {
       this.emailTransporter = nodemailer.createTransport(this.config.channels.email.smtp)
+    } else {
+      this.emailTransporter = null
     }
   }
 
-  async getConfiguration(): Promise<NotificationsConfig> {
-    if (!this.config) {
-      await this.loadConfiguration()
-    }
+  private async ensureConfigurationLoaded(): Promise<NotificationsConfig> {
+    await this.loadConfiguration()
     return this.config || this.getDefaultConfig()
+  }
+
+  async getConfiguration(): Promise<NotificationsConfig> {
+    return this.ensureConfigurationLoaded()
   }
 
   async updateConfiguration(newConfig: NotificationsConfig): Promise<void> {
     this.config = newConfig
     this.setupEmailTransporter()
-    
-    // Save to config file
-    try {
-      const configPath = process.env.CONFIG_PATH || './config.json'
-      const fs = await import('fs')
-      
-      let fullConfig = {}
-      if (fs.existsSync(configPath)) {
-        const configFile = fs.readFileSync(configPath, 'utf8')
-        fullConfig = JSON.parse(configFile)
-      }
-      
-      fullConfig = { ...fullConfig, notifications: newConfig }
-      fs.writeFileSync(configPath, JSON.stringify(fullConfig, null, 2))
-    } catch (error) {
-      console.error('Failed to save configuration:', error)
-    }
+
+    await prisma.notificationSettings.upsert({
+      where: { scope: NOTIFICATION_SETTINGS_SCOPE },
+      update: { config: newConfig as Prisma.InputJsonValue },
+      create: {
+        scope: NOTIFICATION_SETTINGS_SCOPE,
+        config: newConfig as Prisma.InputJsonValue,
+      },
+    })
   }
 
   async sendNotification(channel: string, message: any, severity = 'info', metadata = {}): Promise<any[]> {
-    if (!this.config) {
-      await this.loadConfiguration()
-    }
+    await this.ensureConfigurationLoaded()
 
     const results = []
 
@@ -222,16 +210,14 @@ export class NotificationService {
   }
 
   async processAlertWebhook(alertData: any): Promise<any[]> {
-    if (!this.config) {
-      await this.loadConfiguration()
-    }
+    await this.ensureConfigurationLoaded()
 
     const results = []
     const inboxEvents = alertmanagerPayloadToEvents(alertData)
 
     await saveNotificationEvents(inboxEvents)
     results.push({
-      channel: 'local-inbox',
+      channel: 'notification-inbox',
       success: true,
       stored: inboxEvents.length,
     })

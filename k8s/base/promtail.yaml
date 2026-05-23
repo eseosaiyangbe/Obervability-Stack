@@ -37,7 +37,7 @@ spec:
             - name: config
               mountPath: /etc/promtail
             - name: run
-              mountPath: /run/promtail
+              mountPath: /var/lib/promtail
             - name: pods
               mountPath: /var/log/pods
               readOnly: true
@@ -56,7 +56,9 @@ spec:
           configMap:
             name: observability-promtail-config
         - name: run
-          emptyDir: {}
+          hostPath:
+            path: /var/lib/promtail
+            type: DirectoryOrCreate
         - name: pods
           hostPath:
             path: /var/log/pods

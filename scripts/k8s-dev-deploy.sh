@@ -139,6 +139,7 @@ fi
 
 echo "[observability-k8s] Applying dev overlay"
 kubectl delete job devops-monitor-db-init -n platform-observability-dev --ignore-not-found --wait=true >/dev/null 2>&1 || true
+kubectl delete deployment alertmanager -n platform-observability-dev --ignore-not-found --wait=true >/dev/null 2>&1 || true
 kubectl apply -k k8s/overlays/dev
 
 echo "[observability-k8s] Restarting UI deployment to pick up the refreshed local image"
@@ -158,7 +159,7 @@ kubectl wait --for=condition=complete job/devops-monitor-db-init -n platform-obs
 echo "[observability-k8s] Waiting for primary workloads"
 kubectl rollout status statefulset/prometheus -n platform-observability-dev --timeout=300s
 kubectl rollout status statefulset/loki -n platform-observability-dev --timeout=300s
-kubectl rollout status deployment/alertmanager -n platform-observability-dev --timeout=300s
+kubectl rollout status statefulset/alertmanager -n platform-observability-dev --timeout=300s
 kubectl rollout status deployment/grafana -n platform-observability-dev --timeout=300s
 kubectl rollout status deployment/blackbox-exporter -n platform-observability-dev --timeout=300s
 kubectl rollout status deployment/devops-monitor-ui -n platform-observability-dev --timeout=300s

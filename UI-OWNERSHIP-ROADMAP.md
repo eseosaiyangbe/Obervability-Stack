@@ -538,7 +538,7 @@ Implemented first pass:
 
 - Alertmanager now sends webhooks to `devops-monitor-ui`.
 - The UI webhook API stores incoming Alertmanager payloads in a local notification inbox.
-- The local inbox is persisted in the `devops_monitor_ui_data` Docker volume.
+- Notification history is persisted in PostgreSQL through the control-plane application schema.
 - `GET /api/notifications/webhook` lists stored notification events.
 - `POST /api/notifications/webhook` receives Alertmanager webhook payloads.
 - A controlled Alertmanager test alert reached the UI inbox.
