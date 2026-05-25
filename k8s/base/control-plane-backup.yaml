@@ -20,6 +20,7 @@ metadata:
   name: observability-control-plane-backup
 spec:
   schedule: "0 3 * * *"
+  timeZone: "Etc/UTC"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3

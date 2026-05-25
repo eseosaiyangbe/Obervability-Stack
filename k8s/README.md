@@ -126,6 +126,11 @@ Coverage:
 - PostgreSQL-backed UI, notification, and Grafana metadata
 - Alertmanager persistent state
 
+Schedule standard:
+
+- the control-plane backup CronJob runs daily at `03:00 UTC`
+- the CronJob timezone is explicitly pinned to `Etc/UTC`
+
 Primary reference:
 
 - [K8S_BACKUP_RESTORE.md](/Users/raymond/Documents/DevOps-Easy-Learning/observability-stack/docs/K8S_BACKUP_RESTORE.md)

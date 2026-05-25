@@ -32,8 +32,14 @@ Scheduled control-plane backups are produced by:
 
 Default scheduled behavior:
 
-- daily backup run at `0 3 * * *`
+- daily backup run at `0 3 * * *` in `Etc/UTC`
 - keep the most recent `7` backup sets
+
+Timezone policy:
+
+- the control-plane backup CronJob is pinned to `Etc/UTC`
+- backup filenames are written in UTC
+- operator-facing local time conversions should be treated as secondary documentation only
 
 Each backup set includes:
 
