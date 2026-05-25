@@ -1,6 +1,32 @@
 #!/usr/bin/env sh
 set -eu
 
+usage() {
+  cat <<'EOF'
+Usage:
+  ./scripts/k8s-restore-run.sh
+  ./scripts/k8s-restore-run.sh <postgres-backup.dump> <alertmanager-backup.tgz>
+  ./scripts/k8s-restore-run.sh --help
+
+Behavior:
+  With no arguments, restore the newest valid PostgreSQL and Alertmanager backups.
+  With two arguments, restore the specific backup pair you name.
+EOF
+}
+
+case "${1:-}" in
+  -h|--help)
+    usage
+    exit 0
+    ;;
+esac
+
+if [ "$#" -ne 0 ] && [ "$#" -ne 2 ]; then
+  echo "ERROR: expected either zero arguments or exactly two backup filenames" >&2
+  usage >&2
+  exit 1
+fi
+
 NAMESPACE="${NAMESPACE:-platform-observability-dev}"
 POD_NAME="${POD_NAME:-observability-control-plane-restore}"
 BACKUP_PVC="${BACKUP_PVC:-observability-backup-storage}"
