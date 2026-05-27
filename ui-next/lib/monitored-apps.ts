@@ -264,7 +264,7 @@ export const monitoredApps: MonitoredApp[] = [
     observability: {
       endpoints: [
         endpoint('foodpulse-ui', 'FoodPulse UI', 'frontend', 'https://foodpulse.eseosadevbox.com/', 'https://foodpulse.eseosadevbox.com', 'foodpulse', 'frontend', '/', 'foodpulse-dev'),
-        endpoint('foodpulse-api', 'FoodPulse API', 'api', 'http://foodpulse-api:4567/health', undefined, 'foodpulse', 'api', '/health', 'foodpulse-dev'),
+        endpoint('foodpulse-api', 'FoodPulse API', 'api', 'http://foodpulse-api.foodpulse-dev.svc.cluster.local:4567/health', undefined, 'foodpulse', 'api', '/health', 'foodpulse-dev'),
       ],
       primaryHealthEndpointId: 'foodpulse-ui',
       logQuery: '{namespace=~"foodpulse-dev|foodpulse-prod"}',

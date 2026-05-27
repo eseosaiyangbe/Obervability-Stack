@@ -256,7 +256,7 @@ scrape_configs:
   # The API exposes vote and Node.js process metrics on observability-net.
   - job_name: 'foodpulse-api'
     static_configs:
-      - targets: ['foodpulse-api:4567']
+      - targets: ['foodpulse-api.foodpulse-dev.svc.cluster.local:4567']
         labels:
           app: foodpulse
           component: api
