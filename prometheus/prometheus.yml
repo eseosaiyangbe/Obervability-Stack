@@ -99,6 +99,11 @@ scrape_configs:
         targets:
           - https://foodpulse.eseosadevbox.com/
       - labels:
+          app: foodpulse
+          component: api
+        targets:
+          - http://foodpulse-api.foodpulse-dev.svc.cluster.local:4567/health
+      - labels:
           app: memflip
           component: frontend
         targets:
