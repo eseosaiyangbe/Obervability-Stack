@@ -89,7 +89,7 @@ const categoryLabels: Record<string, string> = {
   "student-information-system": "Legacy Platform",
   "wallet-platform": "Microservices",
   "resilience-lab": "HA Lab",
-  "demo-app": "Demo App",
+  "demo-app": "Reference Workload",
 }
 
 async function fetchOverview(appId: string) {

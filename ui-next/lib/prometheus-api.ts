@@ -25,6 +25,10 @@ export interface PrometheusRangeResponse {
 
 export class PrometheusAPI {
   private httpClient: HttpClient;
+  private static readonly RUNNING_PODS_QUERY =
+    'count(max by (namespace, pod) (kube_pod_status_phase{phase="Running"} == 1))';
+  private static readonly ACTIVE_PODS_FALLBACK_QUERY =
+    'count(count by (namespace, pod) (container_last_seen{pod!="",container!="POD"}))';
 
   constructor(baseURL?: string) {
     this.httpClient = new HttpClient({
@@ -220,14 +224,35 @@ export class PrometheusAPI {
     return result;
   }
 
+  async getRunningPodCount(): Promise<number> {
+    const primaryResponse = await this.instantQuery<PrometheusQueryResponse>(
+      PrometheusAPI.RUNNING_PODS_QUERY
+    );
+
+    if (primaryResponse.data.result.length > 0) {
+      return Math.round(parseFloat(primaryResponse.data.result[0].value[1]));
+    }
+
+    const fallbackResponse = await this.instantQuery<PrometheusQueryResponse>(
+      PrometheusAPI.ACTIVE_PODS_FALLBACK_QUERY
+    );
+
+    if (fallbackResponse.data.result.length > 0) {
+      return Math.round(parseFloat(fallbackResponse.data.result[0].value[1]));
+    }
+
+    return 0;
+  }
+
   // Get all current metrics at once
   async getAllCurrentMetrics() {
-    const [cpu, memory, disk, network, load] = await Promise.all([
+    const [cpu, memory, disk, network, load, runningPods] = await Promise.all([
       this.getCPUUsage(),
       this.getMemoryUsage(),
       this.getDiskUsage(),
       this.getNetworkTraffic(),
       this.getSystemLoad(),
+      this.getRunningPodCount(),
     ]);
 
     return {
@@ -236,6 +261,7 @@ export class PrometheusAPI {
       disk,
       network,
       load,
+      runningPods,
     };
   }
 }

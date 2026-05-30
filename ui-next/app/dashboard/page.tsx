@@ -74,6 +74,11 @@ function formatNetwork(value?: number | null) {
   return `${value.toFixed(1)} MB/s`
 }
 
+function formatCount(value?: number | null) {
+  if (value === null || value === undefined || Number.isNaN(value)) return "--"
+  return `${Math.round(value)}`
+}
+
 function categoryLabel(category?: string) {
   switch (category) {
     case "student-information-system":
@@ -83,7 +88,7 @@ function categoryLabel(category?: string) {
     case "resilience-lab":
       return "HA Lab"
     case "demo-app":
-      return "Demo App"
+      return "Reference Workload"
     default:
       return "Managed App"
   }
@@ -230,13 +235,20 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent className="p-4 sm:p-6">
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-6">
                 <DashboardStat
                   title="Healthy Apps"
                   value={`${summary?.healthyApps ?? 0}/${summary?.totalApps ?? health.length}`}
                   detail={`${monitoredEndpointCount} monitored endpoints`}
                   tone="green"
                   icon={<CheckCircle className="h-5 w-5" />}
+                />
+                <DashboardStat
+                  title="Running Pods"
+                  value={formatCount(metrics.data?.runningPods)}
+                  detail="Current cluster pods in Running phase"
+                  tone="blue"
+                  icon={<Server className="h-5 w-5" />}
                 />
                 <DashboardStat
                   title="Firing Alerts"
@@ -266,9 +278,9 @@ export default function DashboardPage() {
                   icon={<HardDrive className="h-5 w-5" />}
                 />
                 <DashboardStat
-                  title="Network"
+                  title="Network Throughput"
                   value={formatNetwork(networkTotal)}
-                  detail="Current traffic sample"
+                  detail="Inbound + outbound node traffic"
                   tone="orange"
                   icon={<Wifi className="h-5 w-5" />}
                 />
