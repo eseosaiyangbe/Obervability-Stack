@@ -229,7 +229,7 @@ export default function DashboardPage() {
                   <VersionBadge variant="compact" />
                   <Badge className="border-white/20 bg-white/15 text-white">
                     <Activity className="mr-1 h-3 w-3" />
-                    Live Data
+                    Live Platform Data
                   </Badge>
                 </div>
               </div>
@@ -237,37 +237,37 @@ export default function DashboardPage() {
             <CardContent className="p-4 sm:p-6">
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-6">
                 <DashboardStat
-                  title="Healthy Apps"
+                  title="App Health"
                   value={`${summary?.healthyApps ?? 0}/${summary?.totalApps ?? health.length}`}
-                  detail={`${monitoredEndpointCount} monitored endpoints`}
+                  detail={`${monitoredEndpointCount} monitored app endpoints`}
                   tone="green"
                   icon={<CheckCircle className="h-5 w-5" />}
                 />
                 <DashboardStat
-                  title="Running Pods"
+                  title="Cluster Running Pods"
                   value={formatCount(metrics.data?.runningPods)}
-                  detail="Current cluster pods in Running phase"
+                  detail="Kubernetes pods currently in Running phase"
                   tone="blue"
                   icon={<Server className="h-5 w-5" />}
                 />
                 <DashboardStat
-                  title="Firing Alerts"
+                  title="Active Alerts"
                   value={`${stats.firing}`}
-                  detail={stats.firing > 0 ? "Needs operator review" : "No active fires"}
+                  detail={stats.firing > 0 ? "Requires operator review" : "No active alert fires"}
                   tone={stats.firing > 0 ? "red" : "slate"}
                   icon={<Bell className="h-5 w-5" />}
                 />
                 <DashboardStat
-                  title="CPU"
+                  title="Node CPU"
                   value={formatPercent(metrics.data?.cpu)}
-                  detail="Host pressure signal"
+                  detail="Current node CPU utilization"
                   tone="blue"
                   icon={<Cpu className="h-5 w-5" />}
                 />
                 <DashboardStat
-                  title="Disk Usage"
+                  title="Root Disk Utilization"
                   value={formatPercent(metrics.data?.disk)}
-                  detail="Root filesystem utilization"
+                  detail="Current node root filesystem in use"
                   tone={
                     metrics.data?.disk && metrics.data.disk >= 90
                       ? "red"
@@ -278,9 +278,9 @@ export default function DashboardPage() {
                   icon={<HardDrive className="h-5 w-5" />}
                 />
                 <DashboardStat
-                  title="Network Throughput"
+                  title="Node Network Throughput"
                   value={formatNetwork(networkTotal)}
-                  detail="Inbound + outbound node traffic"
+                  detail="Aggregate node ingress plus egress traffic"
                   tone="orange"
                   icon={<Wifi className="h-5 w-5" />}
                 />

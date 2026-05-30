@@ -19,7 +19,7 @@ function fetchCurrentMetrics() {
     disk: number;
     network: { inbound: number; outbound: number };
     load: { load1: number; load5: number; load15: number };
-    runningPods: number;
+    runningPods: number | null;
   }>('/api/metrics/current');
 }
 
