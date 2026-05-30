@@ -37,7 +37,7 @@ const incidentDrillUrl = `${repositoryUrl}/docs/INCIDENT_DRILLS.md`
 
 const operatorGuides: Record<string, OperatorGuide> = {
   opensis: {
-    story: "Legacy PHP app wrapped with modern platform practices, Vault dependency checks, and database-backed reachability.",
+    story: "Student information platform operated with Vault-backed secret delivery, database reachability controls, and production-style Kubernetes observability.",
     firstChecks: [
       "./scripts/devops-monitor.sh opensis-live",
       "cd ../opensis && docker compose ps vault vault-agent-app vault-agent-db opensis-ui opensis-db",
@@ -48,7 +48,7 @@ const operatorGuides: Record<string, OperatorGuide> = {
     runbookUrl: `${repositoryUrl}/docs/OPENSIS_OPERATOR_RUNBOOK.md`,
   },
   swiftpay: {
-    story: "Microservices money-flow app for gateway health, wallet dependencies, async transaction processing, business metrics, and the second real k3s migration slice.",
+    story: "Payment platform composed of independently deployable services for gateway availability, wallet integrity, asynchronous transaction processing, and operational business telemetry on Kubernetes.",
     firstChecks: [
       "./scripts/devops-monitor.sh swiftpay-live",
       "cd ../swiftpay && ./scripts/k8s-dev-verify.sh",
@@ -60,7 +60,7 @@ const operatorGuides: Record<string, OperatorGuide> = {
     runbookUrl: `${repositoryUrl}/docs/SWIFTPAY_OPERATOR_RUNBOOK.md`,
   },
   foodpulse: {
-    story: "Resilience lab that now spans both worlds: Compose keeps the HAProxy teaching path, while k3s uses CloudNativePG and Sentinel-aware Redis failover.",
+    story: "Consumer-facing application operated with a resilience-focused Kubernetes model built around CloudNativePG, Sentinel-backed Redis, and controlled failover behavior.",
     firstChecks: [
       "./scripts/devops-monitor.sh foodpulse-live",
       "cd ../foodpulse && ./scripts/k8s-dev-verify.sh",
@@ -72,7 +72,7 @@ const operatorGuides: Record<string, OperatorGuide> = {
     runbookUrl: `${repositoryUrl}/docs/FOODPULSE_OPERATOR_RUNBOOK.md`,
   },
   memflip: {
-    story: "Lightweight onboarding app that now serves as the first real k3s migration slice and the repeatable frontend/backend template for the workspace.",
+    story: "Internet-facing web application used as a compact reference workload for frontend and backend delivery, ingress validation, and repeatable Kubernetes deployment patterns.",
     firstChecks: [
       "./scripts/devops-monitor.sh memflip-live",
       "cd ../memflip && ./scripts/k8s-dev-verify.sh",

@@ -48,29 +48,29 @@ const appProfiles: Record<string, {
   risk: string
 }> = {
   opensis: {
-    demoRole: "Legacy modernization story",
-    operatorValue: "Shows how an older PHP platform can be wrapped with health checks, Vault dependency awareness, and controlled access.",
+    demoRole: "Legacy platform modernization workload",
+    operatorValue: "Demonstrates how a legacy student information platform can be operated with health checks, Vault-backed secret delivery, and controlled access patterns.",
     k8sFocus: "Namespace isolation, secret injection, database readiness, and service-level probes.",
     liveAudit: "./scripts/devops-monitor.sh opensis-live",
     risk: "Legacy app behavior can be fragile, so platform checks must be explicit and repeatable.",
   },
   swiftpay: {
-    demoRole: "Flagship microservices story",
-    operatorValue: "Shows gateway health, wallet services, transaction flow, async dependencies, business telemetry, and the second real k3s migration slice.",
+    demoRole: "Production-style payment services workload",
+    operatorValue: "Demonstrates gateway health, wallet service integrity, asynchronous transaction flow, dependency visibility, and business telemetry across a Kubernetes-hosted payment stack.",
     k8sFocus: "Service discovery, per-service health probes, queue dependency checks, migration jobs, and horizontal scaling boundaries.",
     liveAudit: "./scripts/devops-monitor.sh swiftpay-live",
     risk: "Multiple services can fail independently, so operators need fast dependency mapping and clear infrastructure contracts.",
   },
   foodpulse: {
-    demoRole: "Resilience and failover story",
-    operatorValue: "Shows both the Compose-era HAProxy lab and the owned k3s path with CloudNativePG plus Sentinel-aware Redis failover.",
+    demoRole: "Resilience and failover workload",
+    operatorValue: "Demonstrates a resilience-focused operating model with CloudNativePG, Sentinel-backed Redis, and controlled failover behavior across the owned Kubernetes path.",
     k8sFocus: "Stateful dependencies, operator-managed Postgres, Sentinel-aware Redis discovery, readiness gates, and topology-aware recovery.",
     liveAudit: "./scripts/devops-monitor.sh foodpulse-live",
     risk: "Resilience stories become misleading if Compose teaching paths and Kubernetes platform paths are mixed together without explicit operator guidance.",
   },
   memflip: {
-    demoRole: "Onboarding plus first k3s slice",
-    operatorValue: "Shows the minimum frontend/backend integration pattern and proves the first real workload migration into the local k3s cluster.",
+    demoRole: "Reference web workload",
+    operatorValue: "Demonstrates a compact but production-minded frontend and backend delivery pattern with ingress validation, network policy coverage, and repeatable Kubernetes deployment flow.",
     k8sFocus: "Repeatable deploy and verify workflow, ingress on Traefik, explicit network policy, and a reusable small-service contract.",
     liveAudit: "./scripts/devops-monitor.sh memflip-live",
     risk: "Simple apps are easy to under-document, which makes migration templates drift unless deploy and verification steps stay explicit.",

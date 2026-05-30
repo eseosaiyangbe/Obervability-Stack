@@ -64,7 +64,7 @@ export const monitoredApps: MonitoredApp[] = [
   {
     id: 'opensis',
     name: 'OpenSIS',
-    description: 'Student information system with a live k3s dev slice and a Vault-first Kubernetes contract.',
+    description: 'Student information platform with Vault-backed Kubernetes operations and a production-minded dev environment.',
     ownership: 'owned',
     status: 'active',
     priority: 1,
@@ -125,7 +125,7 @@ export const monitoredApps: MonitoredApp[] = [
   {
     id: 'swiftpay',
     name: 'SwiftPay',
-    description: 'Wallet/payment microservices app that now serves as the second real k3s migration slice.',
+    description: 'Payment microservices platform with gateway, wallet, transaction, and notification services operated on Kubernetes.',
     ownership: 'cloned-public-repo',
     status: 'active',
     priority: 2,
@@ -194,7 +194,7 @@ export const monitoredApps: MonitoredApp[] = [
   {
     id: 'memflip',
     name: 'MemFlip',
-    description: 'Frontend/backend onboarding app that now doubles as the first real k3s migration template.',
+    description: 'Internet-facing reference application for frontend and backend delivery, ingress validation, and reusable Kubernetes deployment patterns.',
     ownership: 'cloned-public-repo',
     status: 'active',
     priority: 3,
@@ -238,7 +238,7 @@ export const monitoredApps: MonitoredApp[] = [
   {
     id: 'foodpulse',
     name: 'FoodPulse',
-    description: 'Resilience lab app that now carries an owned k3s slice with CloudNativePG and Sentinel-aware Redis failover.',
+    description: 'Consumer-facing application with a resilience-focused Kubernetes model built on CloudNativePG and Sentinel-backed Redis failover.',
     ownership: 'cloned-public-repo',
     status: 'active',
     priority: 4,
