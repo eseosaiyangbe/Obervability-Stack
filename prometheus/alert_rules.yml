@@ -58,10 +58,19 @@ groups:
         expr: |
           max by(instance, device, fstype, mountpoint) (
             (
-              node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs|rpc_pipefs|nsfs|autofs|devtmpfs"}
-              - node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs|rpc_pipefs|nsfs|autofs|devtmpfs"}
+              node_filesystem_size_bytes{
+                fstype!~"tmpfs|overlay|squashfs|rpc_pipefs|nsfs|autofs|devtmpfs|virtiofs",
+                mountpoint!~"/Users/.+|/mnt/lima-rosetta"
+              }
+              - node_filesystem_avail_bytes{
+                fstype!~"tmpfs|overlay|squashfs|rpc_pipefs|nsfs|autofs|devtmpfs|virtiofs",
+                mountpoint!~"/Users/.+|/mnt/lima-rosetta"
+              }
             )
-            / node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs|rpc_pipefs|nsfs|autofs|devtmpfs"} * 100
+            / node_filesystem_size_bytes{
+              fstype!~"tmpfs|overlay|squashfs|rpc_pipefs|nsfs|autofs|devtmpfs|virtiofs",
+              mountpoint!~"/Users/.+|/mnt/lima-rosetta"
+            } * 100
           ) > 85
         for: 5m
         labels:
@@ -69,19 +78,28 @@ groups:
           service: system
           component: disk
         annotations:
-          summary: "High disk usage on {{ $labels.instance }}"
-          description: "Disk usage is above 85% for more than 5 minutes on {{ $labels.instance }}"
-          runbook_url: "https://docs.example.com/runbooks/high-disk-usage"
+          summary: "High node filesystem usage on {{ $labels.instance }}:{{ $labels.mountpoint }}"
+          description: "Node filesystem usage is above 85% for more than 5 minutes on mount {{ $labels.mountpoint }} (device {{ $labels.device }}) for {{ $labels.instance }}."
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/OPERATOR_HEALTH_WORKFLOW.md"
 
       # Critical disk usage
       - alert: CriticalDiskUsage
         expr: |
           max by(instance, device, fstype, mountpoint) (
             (
-              node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs|rpc_pipefs|nsfs|autofs|devtmpfs"}
-              - node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs|rpc_pipefs|nsfs|autofs|devtmpfs"}
+              node_filesystem_size_bytes{
+                fstype!~"tmpfs|overlay|squashfs|rpc_pipefs|nsfs|autofs|devtmpfs|virtiofs",
+                mountpoint!~"/Users/.+|/mnt/lima-rosetta"
+              }
+              - node_filesystem_avail_bytes{
+                fstype!~"tmpfs|overlay|squashfs|rpc_pipefs|nsfs|autofs|devtmpfs|virtiofs",
+                mountpoint!~"/Users/.+|/mnt/lima-rosetta"
+              }
             )
-            / node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs|rpc_pipefs|nsfs|autofs|devtmpfs"} * 100
+            / node_filesystem_size_bytes{
+              fstype!~"tmpfs|overlay|squashfs|rpc_pipefs|nsfs|autofs|devtmpfs|virtiofs",
+              mountpoint!~"/Users/.+|/mnt/lima-rosetta"
+            } * 100
           ) > 95
         for: 2m
         labels:
@@ -89,9 +107,9 @@ groups:
           service: system
           component: disk
         annotations:
-          summary: "Critical disk usage on {{ $labels.instance }}"
-          description: "Disk usage is above 95% for more than 2 minutes on {{ $labels.instance }}"
-          runbook_url: "https://docs.example.com/runbooks/critical-disk-usage"
+          summary: "Critical node filesystem usage on {{ $labels.instance }}:{{ $labels.mountpoint }}"
+          description: "Node filesystem usage is above 95% for more than 2 minutes on mount {{ $labels.mountpoint }} (device {{ $labels.device }}) for {{ $labels.instance }}."
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/OPERATOR_HEALTH_WORKFLOW.md"
 
       # Node down
       - alert: NodeDown
