@@ -12,7 +12,7 @@ groups:
         annotations:
           summary: "High CPU usage on {{ $labels.instance }}"
           description: "CPU usage is above 80% for more than 5 minutes on {{ $labels.instance }}"
-          runbook_url: "https://docs.example.com/runbooks/high-cpu-usage"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
 
       # Critical CPU usage
       - alert: CriticalCPUUsage
@@ -25,7 +25,7 @@ groups:
         annotations:
           summary: "Critical CPU usage on {{ $labels.instance }}"
           description: "CPU usage is above 95% for more than 2 minutes on {{ $labels.instance }}"
-          runbook_url: "https://docs.example.com/runbooks/critical-cpu-usage"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
 
       # High memory usage
       - alert: HighMemoryUsage
@@ -38,7 +38,7 @@ groups:
         annotations:
           summary: "High memory usage on {{ $labels.instance }}"
           description: "Memory usage is above 85% for more than 5 minutes on {{ $labels.instance }}"
-          runbook_url: "https://docs.example.com/runbooks/high-memory-usage"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
 
       # Critical memory usage
       - alert: CriticalMemoryUsage
@@ -51,7 +51,7 @@ groups:
         annotations:
           summary: "Critical memory usage on {{ $labels.instance }}"
           description: "Memory usage is above 95% for more than 2 minutes on {{ $labels.instance }}"
-          runbook_url: "https://docs.example.com/runbooks/critical-memory-usage"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
 
       # High disk usage
       - alert: HighDiskUsage
@@ -122,7 +122,7 @@ groups:
         annotations:
           summary: "Node {{ $labels.instance }} is down"
           description: "Node {{ $labels.instance }} has been down for more than 1 minute"
-          runbook_url: "https://docs.example.com/runbooks/node-down"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
 
       # High load average
       - alert: HighLoadAverage
@@ -135,7 +135,7 @@ groups:
         annotations:
           summary: "High load average on {{ $labels.instance }}"
           description: "1-minute load average is above 80% of available CPU cores for more than 5 minutes on {{ $labels.instance }}"
-          runbook_url: "https://docs.example.com/runbooks/high-load-average"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
 
       # Network interface down
       - alert: NetworkInterfaceDown
@@ -148,7 +148,7 @@ groups:
         annotations:
           summary: "Network interface down on {{ $labels.instance }}"
           description: "Network interface {{ $labels.device }} is down on {{ $labels.instance }}"
-          runbook_url: "https://docs.example.com/runbooks/network-interface-down"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
 
   - name: prometheus_alerts
     rules:
@@ -163,7 +163,7 @@ groups:
         annotations:
           summary: "Prometheus is down"
           description: "Prometheus has been down for more than 1 minute"
-          runbook_url: "https://docs.example.com/runbooks/prometheus-down"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
 
       # High scrape duration
       - alert: HighScrapeDuration
@@ -176,7 +176,7 @@ groups:
         annotations:
           summary: "High scrape duration on {{ $labels.instance }}"
           description: "Scrape duration is above 10 seconds for more than 5 minutes on {{ $labels.instance }}"
-          runbook_url: "https://docs.example.com/runbooks/high-scrape-duration"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
 
       # Prometheus configuration reload failed
       - alert: PrometheusConfigReloadFailed
@@ -189,7 +189,7 @@ groups:
         annotations:
           summary: "Prometheus configuration reload failed"
           description: "Prometheus configuration reload has failed"
-          runbook_url: "https://docs.example.com/runbooks/prometheus-config-reload-failed"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
 
       # Prometheus storage corruption
       - alert: PrometheusStorageCorruption
@@ -202,7 +202,7 @@ groups:
         annotations:
           summary: "Prometheus storage corruption detected"
           description: "Prometheus has more than 1M series, possible storage corruption"
-          runbook_url: "https://docs.example.com/runbooks/prometheus-storage-corruption"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
 
   - name: container_alerts
     rules:
@@ -226,7 +226,7 @@ groups:
         annotations:
           summary: "Container restarting frequently in {{ $labels.namespace }}/{{ $labels.pod }}"
           description: "Container {{ $labels.container }} in {{ $labels.namespace }}/{{ $labels.pod }} has restarted in the last 15 minutes on {{ $labels.instance }}"
-          runbook_url: "https://docs.example.com/runbooks/container-restarting"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
 
       # High container memory usage
       - alert: HighContainerMemoryUsage
@@ -239,7 +239,7 @@ groups:
         annotations:
           summary: "High container memory usage on {{ $labels.instance }}"
           description: "Container {{ $labels.name }} memory working set is above 80% of its limit on {{ $labels.instance }}"
-          runbook_url: "https://docs.example.com/runbooks/high-container-memory-usage"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
 
       # Critical container memory usage
       - alert: CriticalContainerMemoryUsage
@@ -252,7 +252,7 @@ groups:
         annotations:
           summary: "Critical container memory usage on {{ $labels.instance }}"
           description: "Container {{ $labels.name }} memory working set is above 95% of its limit on {{ $labels.instance }}"
-          runbook_url: "https://docs.example.com/runbooks/critical-container-memory-usage"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
 
       # High container CPU usage
       - alert: HighContainerCPUUsage
@@ -278,7 +278,7 @@ groups:
         annotations:
           summary: "High container CPU usage for {{ $labels.namespace }}/{{ $labels.pod }}"
           description: "Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }} is above 80% of its configured CPU limit."
-          runbook_url: "https://docs.example.com/runbooks/high-container-cpu-usage"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
 
       # Container OOMKilled
       - alert: ContainerOOMKilled
@@ -291,7 +291,7 @@ groups:
         annotations:
           summary: "Container OOMKilled on {{ $labels.instance }}"
           description: "Container {{ $labels.name }} was OOMKilled on {{ $labels.instance }}"
-          runbook_url: "https://docs.example.com/runbooks/container-oomkilled"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
 
   - name: application_alerts
     rules:
@@ -307,7 +307,7 @@ groups:
         annotations:
           summary: "OpenSIS is down"
           description: "OpenSIS endpoint {{ $labels.instance }} has failed Blackbox probing for more than 1 minute"
-          runbook_url: "https://docs.example.com/runbooks/opensis-down"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/OPENSIS_OPERATOR_RUNBOOK.md"
 
       # OpenSIS high probe latency
       - alert: OpenSISHighProbeLatency
@@ -321,7 +321,7 @@ groups:
         annotations:
           summary: "OpenSIS probe latency is high"
           description: "OpenSIS endpoint {{ $labels.instance }} has Blackbox probe latency above 2 seconds for more than 5 minutes"
-          runbook_url: "https://docs.example.com/runbooks/opensis-high-latency"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/OPENSIS_OPERATOR_RUNBOOK.md"
 
       # SwiftPay component down
       - alert: SwiftPayComponentDown
@@ -335,7 +335,7 @@ groups:
         annotations:
           summary: "SwiftPay component is down"
           description: "SwiftPay {{ $labels.component }} endpoint {{ $labels.instance }} has failed Blackbox probing for more than 1 minute"
-          runbook_url: "https://docs.example.com/runbooks/swiftpay-component-down"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/SWIFTPAY_OPERATOR_RUNBOOK.md"
 
       # SwiftPay high probe latency
       - alert: SwiftPayHighProbeLatency
@@ -349,7 +349,7 @@ groups:
         annotations:
           summary: "SwiftPay probe latency is high"
           description: "SwiftPay {{ $labels.component }} endpoint {{ $labels.instance }} has Blackbox probe latency above 2 seconds for more than 5 minutes"
-          runbook_url: "https://docs.example.com/runbooks/swiftpay-high-latency"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/SWIFTPAY_OPERATOR_RUNBOOK.md"
 
       # SwiftPay Prometheus metrics scrape down
       - alert: SwiftPayMetricsScrapeDown
@@ -460,7 +460,7 @@ groups:
         annotations:
           summary: "High HTTP error rate on {{ $labels.instance }}"
           description: "HTTP error rate is above 5% for more than 5 minutes on {{ $labels.instance }}"
-          runbook_url: "https://docs.example.com/runbooks/high-http-error-rate"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/SERVICE_HEALTH_GUIDE.md"
 
       # Critical HTTP error rate
       - alert: CriticalHTTPErrorRate
@@ -473,7 +473,7 @@ groups:
         annotations:
           summary: "Critical HTTP error rate on {{ $labels.instance }}"
           description: "HTTP error rate is above 10% for more than 2 minutes on {{ $labels.instance }}"
-          runbook_url: "https://docs.example.com/runbooks/critical-http-error-rate"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/SERVICE_HEALTH_GUIDE.md"
 
       # High response time
       - alert: HighResponseTime
@@ -499,7 +499,7 @@ groups:
         annotations:
           summary: "Application down on {{ $labels.instance }}"
           description: "Application {{ $labels.job }} is down on {{ $labels.instance }}"
-          runbook_url: "https://docs.example.com/runbooks/application-down"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/SERVICE_HEALTH_GUIDE.md"
 
   - name: managed_app_signal_alerts
     rules:
@@ -754,7 +754,7 @@ groups:
         annotations:
           summary: "Grafana is down"
           description: "Grafana has been down for more than 1 minute"
-          runbook_url: "https://docs.example.com/runbooks/grafana-down"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
 
       # Loki down
       - alert: LokiDown
@@ -767,7 +767,7 @@ groups:
         annotations:
           summary: "Loki is down"
           description: "Loki has been down for more than 1 minute"
-          runbook_url: "https://docs.example.com/runbooks/loki-down"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
 
       # Alertmanager down
       - alert: AlertmanagerDown
@@ -780,7 +780,7 @@ groups:
         annotations:
           summary: "Alertmanager is down"
           description: "Alertmanager has been down for more than 1 minute"
-          runbook_url: "https://docs.example.com/runbooks/alertmanager-down"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
 
       # Promtail down
       - alert: PromtailDown
@@ -793,7 +793,7 @@ groups:
         annotations:
           summary: "Promtail is down"
           description: "Promtail has been down for more than 1 minute"
-          runbook_url: "https://docs.example.com/runbooks/promtail-down"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
 
   - name: database_alerts
     rules:
@@ -808,7 +808,7 @@ groups:
         annotations:
           summary: "Database down on {{ $labels.instance }}"
           description: "Database {{ $labels.job }} is down on {{ $labels.instance }}"
-          runbook_url: "https://docs.example.com/runbooks/database-down"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
 
       # High database connections
       - alert: HighDatabaseConnections
@@ -821,7 +821,7 @@ groups:
         annotations:
           summary: "High database connections on {{ $labels.instance }}"
           description: "Database connections are above 80 on {{ $labels.instance }}"
-          runbook_url: "https://docs.example.com/runbooks/high-database-connections"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
 
       # Slow database queries
       - alert: SlowDatabaseQueries
@@ -834,4 +834,4 @@ groups:
         annotations:
           summary: "Slow database queries on {{ $labels.instance }}"
           description: "Database query performance is degraded on {{ $labels.instance }}"
-          runbook_url: "https://docs.example.com/runbooks/slow-database-queries"
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
