@@ -484,9 +484,9 @@ groups:
           service: application
           component: performance
         annotations:
-          summary: "High response time on {{ $labels.instance }}"
-          description: "95th percentile response time is above 1 second for more than 5 minutes on {{ $labels.instance }}"
-          runbook_url: "https://docs.example.com/runbooks/high-response-time"
+          summary: "High HTTP latency on {{ $labels.instance }}"
+          description: "P95 HTTP response time is above 1 second for more than 5 minutes on {{ $labels.instance }} (job={{ $labels.job }}, component={{ $labels.component }}, route={{ $labels.route }})."
+          runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/SERVICE_HEALTH_GUIDE.md"
 
       # Application down
       - alert: ApplicationDown
