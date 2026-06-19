@@ -228,7 +228,7 @@ remote_write:
   annotations:
     summary: "High CPU usage on {{ $labels.instance }}"
     description: "CPU usage is above 80% for more than 5 minutes on {{ $labels.instance }}"
-    runbook_url: "https://docs.example.com/runbooks/high-cpu-usage"
+    runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
 ```
 
 #### **Benefits:**
@@ -371,7 +371,7 @@ smtp_require_tls: true
 #### **2. Runbook Integration**
 ```yaml
 annotations:
-  runbook_url: "https://docs.example.com/runbooks/high-cpu-usage"
+  runbook_url: "https://github.com/eseosaiyangbe/observability-stack/blob/main/docs/ALERT_RUNBOOK_INDEX.md"
 ```
 
 #### **3. Alert Grouping**
