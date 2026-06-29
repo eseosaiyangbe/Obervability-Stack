@@ -5,6 +5,7 @@ namespace: platform-observability-prod
 
 resources:
   - namespace.yaml
+  - prod-resource-quota.yaml
   - public-observability-root-redirects.yaml
   - vault-serviceaccount.yaml
   - vault-secret-store.yaml
@@ -17,6 +18,7 @@ resources:
 
 labels:
   - pairs:
+      app.kubernetes.io/part-of: internal-developer-platform
       cluster: k3s
       environment: prod
       secret-source: vault
