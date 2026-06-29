@@ -81,13 +81,13 @@ Choose your preferred deployment method based on your needs:
 
 ### 🐳 **Docker Deployment (Recommended)**
 
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://hub.docker.com/r/harshhaareddy/devops-monitoring-box)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://hub.docker.com/)
 
 **Option 1: Use Pre-built Image (Fastest)**
 ```bash
-# Pull and run the pre-built image
-docker pull harshhaareddy/devops-monitoring-box:latest
-docker run -d -p 4000:4000 --name devops-monitor harshhaareddy/devops-monitoring-box:latest
+# Pull and run a published Docker Hub image
+docker pull <your-dockerhub-username>/devops-monitoring-box:latest
+docker run -d -p 4000:4000 --name devops-monitor <your-dockerhub-username>/devops-monitoring-box:latest
 
 # Access the application
 open http://localhost:4000
@@ -100,13 +100,13 @@ git clone https://github.com/NotHarshhaa/devops-monitoring-in-a-box.git
 cd devops-monitoring-in-a-box
 
 # Build your custom image
-docker build -t your-username/devops-monitoring-box:latest .
+docker build -t <your-dockerhub-username>/devops-monitoring-box:latest .
 
 # Run your custom image
-docker run -d -p 4000:4000 --name devops-monitor your-username/devops-monitoring-box:latest
+docker run -d -p 4000:4000 --name devops-monitor <your-dockerhub-username>/devops-monitoring-box:latest
 
 # Push to your registry (optional)
-docker push your-username/devops-monitoring-box:latest
+docker push <your-dockerhub-username>/devops-monitoring-box:latest
 ```
 
 **Option 3: Full Stack with Docker Compose**

@@ -1,6 +1,6 @@
 # Docker Deployment Guide
 
-This guide covers the complete Docker deployment setup for the DevOps Monitoring Dashboard, including automated publishing to Docker Hub.
+This guide covers the complete Docker deployment setup for the DevOps Monitoring Dashboard, including automated publishing to Docker Hub as the primary registry.
 
 ## 📋 Prerequisites
 
@@ -14,12 +14,12 @@ This guide covers the complete Docker deployment setup for the DevOps Monitoring
 
 1. **Build the Docker image locally:**
    ```bash
-   docker build -t devops-monitoring-dashboard:latest .
+   docker build -t devops-monitoring-box:latest .
    ```
 
 2. **Run the container:**
    ```bash
-   docker run -p 3000:3000 devops-monitoring-dashboard:latest
+   docker run -p 3000:3000 devops-monitoring-box:latest
    ```
 
 3. **Verify the dashboard:**
@@ -97,7 +97,7 @@ The GitHub Actions workflow automatically triggers on:
 3. **Monitor the build:**
    - Go to your GitHub repository
    - Click on the **Actions** tab
-   - Watch the "Docker Build and Publish" workflow
+   - Watch the "Publish Docker Hub Image" workflow
 
 4. **Verify the published image:**
    - Check [Docker Hub](https://hub.docker.com) for your image
@@ -107,8 +107,8 @@ The GitHub Actions workflow automatically triggers on:
 
 When you push a tag like `v1.0.0`, the following tags will be created:
 
-- `yourusername/devops-monitoring-dashboard:latest`
-- `yourusername/devops-monitoring-dashboard:v1.0.0`
+- `yourusername/devops-monitoring-box:latest`
+- `yourusername/devops-monitoring-box:v1.0.0`
 
 ## 🏗️ Full Stack Deployment
 
@@ -140,10 +140,10 @@ If you only want to run the dashboard:
 
 ```bash
 # Pull the latest image
-docker pull yourusername/devops-monitoring-dashboard:latest
+docker pull yourusername/devops-monitoring-box:latest
 
 # Run the container
-docker run -p 3000:3000 yourusername/devops-monitoring-dashboard:latest
+docker run -p 3000:3000 yourusername/devops-monitoring-box:latest
 ```
 
 ## 🔧 Configuration
@@ -170,14 +170,14 @@ You can override the default configuration by:
    docker run -p 3000:3000 \
      -e SITE_NAME="My Company Monitoring" \
      -e SITE_URL="https://monitoring.mycompany.com" \
-     yourusername/devops-monitoring-dashboard:latest
+     yourusername/devops-monitoring-box:latest
    ```
 
 2. **Configuration Files:**
    ```bash
    docker run -p 3000:3000 \
      -v $(pwd)/config.json:/app/config.json \
-     yourusername/devops-monitoring-dashboard:latest
+     yourusername/devops-monitoring-box:latest
    ```
 
 ## 🐛 Troubleshooting

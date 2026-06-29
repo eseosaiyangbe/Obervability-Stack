@@ -1,0 +1,149 @@
+name: Publish Docker Hub Image
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - "v*"
+    paths:
+      - ".github/workflows/publish-dockerhub-image.yml"
+      - "ui-next/**"
+  workflow_dispatch:
+    inputs:
+      git_ref:
+        description: Git commit SHA, branch, or tag to build
+        required: true
+        default: main
+        type: string
+      image_tag:
+        description: Immutable or release tag to publish
+        required: true
+        default: latest
+        type: string
+      publish:
+        description: Push the image to Docker Hub
+        required: true
+        default: true
+        type: boolean
+      build_platforms:
+        description: Target platforms
+        required: true
+        default: multi-arch
+        type: choice
+        options:
+          - multi-arch
+          - single-arch
+
+permissions:
+  contents: read
+
+env:
+  REGISTRY: docker.io
+  IMAGE_REPOSITORY: devops-monitoring-box
+
+jobs:
+  publish:
+    name: Build and publish UI image
+    runs-on: ubuntu-latest
+    env:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.git_ref || github.ref }}
+          fetch-depth: 0
+
+      - name: Ensure Docker Hub configuration exists
+        if: ${{ github.event.inputs.publish != 'false' }}
+        run: |
+          set -euo pipefail
+          [ -n "${DOCKERHUB_USERNAME:-}" ] || { echo "DOCKERHUB_USERNAME secret is required"; exit 1; }
+          [ -n "${DOCKERHUB_TOKEN:-}" ] || { echo "DOCKERHUB_TOKEN secret is required"; exit 1; }
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        if: ${{ github.event.inputs.publish != 'false' }}
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Resolve image name
+        id: image
+        run: |
+          set -euo pipefail
+          echo "name=${REGISTRY}/${DOCKERHUB_USERNAME}/${IMAGE_REPOSITORY}" >> "$GITHUB_OUTPUT"
+
+      - name: Extract image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.image.outputs.name }}
+          tags: |
+            type=ref,event=tag
+            type=raw,value=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.image_tag || 'latest' }}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and publish image
+        id: buildx
+        continue-on-error: true
+        uses: docker/build-push-action@v6
+        with:
+          context: ./ui-next
+          file: ./ui-next/Dockerfile
+          push: ${{ github.event.inputs.publish != 'false' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: ${{ github.event.inputs.build_platforms == 'single-arch' && 'linux/amd64' || 'linux/amd64,linux/arm64' }}
+          build-args: |
+            NODE_OPTIONS=--max-old-space-size=2048
+            NEXT_BUILD_WORKERS=1
+          cache-from: |
+            type=gha
+            type=registry,ref=${{ steps.image.outputs.name }}:latest
+          cache-to: type=gha,mode=max
+
+      - name: Build fallback linux/amd64 image
+        if: ${{ steps.buildx.outcome == 'failure' }}
+        id: fallback
+        uses: docker/build-push-action@v6
+        with:
+          context: ./ui-next
+          file: ./ui-next/Dockerfile
+          push: ${{ github.event.inputs.publish != 'false' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64
+          build-args: |
+            NODE_OPTIONS=--max-old-space-size=4096
+          cache-from: |
+            type=gha
+            type=registry,ref=${{ steps.image.outputs.name }}:latest
+          cache-to: type=gha,mode=max
+
+      - name: Run Docker Scout critical scan
+        if: ${{ github.event.inputs.publish != 'false' }}
+        uses: docker/scout-action@v1
+        with:
+          command: cves
+          image: ${{ steps.image.outputs.name }}:${{ github.event_name == 'workflow_dispatch' && github.event.inputs.image_tag || 'latest' }}
+          only-severities: critical
+          exit-code: true
+          write-comment: true
+
+      - name: Summarize release
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## Docker Hub image release
+
+          - validation is handled separately by `.github/workflows/validate.yml`
+          - this workflow publishes the `ui-next` production image to Docker Hub
+          - Docker Hub is the primary registry path for this repository
+          - the fallback build path publishes linux/amd64 only if multi-arch buildx fails
+          EOF
