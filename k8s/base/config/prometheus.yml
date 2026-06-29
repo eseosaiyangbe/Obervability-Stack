@@ -153,45 +153,113 @@ scrape_configs:
           app: foodpulse
           component: api
 
+  # SwiftPay k3s metrics must be scraped from pod-backed endpoints, not through
+  # load-balanced Services, otherwise pod-local counters and histograms become
+  # mathematically invalid once replicas exceed one.
   - job_name: swiftpay-api-gateway
-    static_configs:
-      - targets:
-          - api-gateway.swiftpay-dev.svc.cluster.local:80
-        labels:
-          app: swiftpay
-          component: api-gateway
+    kubernetes_sd_configs:
+      - role: endpoints
+        namespaces:
+          names: [swiftpay-dev]
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_name]
+        regex: api-gateway
+        action: keep
+      - source_labels: [__meta_kubernetes_endpoint_port_name]
+        regex: http
+        action: keep
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      - target_label: app
+        replacement: swiftpay
+      - target_label: component
+        replacement: api-gateway
 
   - job_name: swiftpay-auth-service
-    static_configs:
-      - targets:
-          - auth-service.swiftpay-dev.svc.cluster.local:3004
-        labels:
-          app: swiftpay
-          component: auth-service
+    kubernetes_sd_configs:
+      - role: endpoints
+        namespaces:
+          names: [swiftpay-dev]
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_name]
+        regex: auth-service
+        action: keep
+      - source_labels: [__meta_kubernetes_endpoint_port_name,__meta_kubernetes_endpoint_port_number]
+        regex: ;3004|3004;3004
+        action: keep
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      - target_label: app
+        replacement: swiftpay
+      - target_label: component
+        replacement: auth-service
 
   - job_name: swiftpay-wallet-service
-    static_configs:
-      - targets:
-          - wallet-service.swiftpay-dev.svc.cluster.local:3001
-        labels:
-          app: swiftpay
-          component: wallet-service
+    kubernetes_sd_configs:
+      - role: endpoints
+        namespaces:
+          names: [swiftpay-dev]
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_name]
+        regex: wallet-service
+        action: keep
+      - source_labels: [__meta_kubernetes_endpoint_port_name,__meta_kubernetes_endpoint_port_number]
+        regex: ;3001|3001;3001
+        action: keep
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      - target_label: app
+        replacement: swiftpay
+      - target_label: component
+        replacement: wallet-service
 
   - job_name: swiftpay-transaction-service
-    static_configs:
-      - targets:
-          - transaction-service.swiftpay-dev.svc.cluster.local:3002
-        labels:
-          app: swiftpay
-          component: transaction-service
+    kubernetes_sd_configs:
+      - role: endpoints
+        namespaces:
+          names: [swiftpay-dev]
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_name]
+        regex: transaction-service
+        action: keep
+      - source_labels: [__meta_kubernetes_endpoint_port_name,__meta_kubernetes_endpoint_port_number]
+        regex: ;3002|3002;3002
+        action: keep
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      - target_label: app
+        replacement: swiftpay
+      - target_label: component
+        replacement: transaction-service
 
   - job_name: swiftpay-notification-service
-    static_configs:
-      - targets:
-          - notification-service.swiftpay-dev.svc.cluster.local:3003
-        labels:
-          app: swiftpay
-          component: notification-service
+    kubernetes_sd_configs:
+      - role: endpoints
+        namespaces:
+          names: [swiftpay-dev]
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_name]
+        regex: notification-service
+        action: keep
+      - source_labels: [__meta_kubernetes_endpoint_port_name,__meta_kubernetes_endpoint_port_number]
+        regex: ;3003|3003;3003
+        action: keep
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      - target_label: app
+        replacement: swiftpay
+      - target_label: component
+        replacement: notification-service
 
   - job_name: opensis-mariadb
     static_configs:
