@@ -1,8 +1,6 @@
 # Logging Configuration for DevOps Monitoring Stack
 # This file defines centralized logging configuration for all services
 
-version: '3.8'
-
 x-logging: &default-logging
   driver: "json-file"
   options:
