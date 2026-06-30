@@ -36,6 +36,10 @@ on:
           - multi-arch
           - single-arch
 
+concurrency:
+  group: publish-dockerhub-image-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -80,6 +84,16 @@ jobs:
           set -euo pipefail
           echo "name=${REGISTRY}/${DOCKERHUB_USERNAME}/${IMAGE_REPOSITORY}" >> "$GITHUB_OUTPUT"
 
+      - name: Resolve build platforms
+        id: platforms
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.build_platforms }}" = "multi-arch" ]; then
+            echo "value=linux/amd64,linux/arm64" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=linux/amd64" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Extract image metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -100,7 +114,7 @@ jobs:
           push: ${{ github.event.inputs.publish != 'false' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: ${{ github.event.inputs.build_platforms == 'single-arch' && 'linux/amd64' || 'linux/amd64,linux/arm64' }}
+          platforms: ${{ steps.platforms.outputs.value }}
           build-args: |
             NODE_OPTIONS=--max-old-space-size=2048
             NEXT_BUILD_WORKERS=1
@@ -145,5 +159,7 @@ jobs:
           - validation is handled separately by `.github/workflows/validate.yml`
           - this workflow publishes the `ui-next` production image to Docker Hub
           - Docker Hub is the primary registry path for this repository
+          - push-triggered publishes default to linux/amd64 for faster and more reliable delivery
+          - workflow dispatch can still request multi-arch publication explicitly
           - the fallback build path publishes linux/amd64 only if multi-arch buildx fails
           EOF
