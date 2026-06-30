@@ -1,5 +1,6 @@
 # Use the official Node.js runtime as the base image
 FROM node:20-alpine AS base
+RUN apk upgrade --no-cache
 
 # Install dependencies only when needed
 FROM base AS deps
