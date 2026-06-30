@@ -24,6 +24,27 @@ This platform is designed to operate OpenSIS, SwiftPay, FoodPulse, and MemFlip t
 
 What sets it apart: the platform does not stop at Prometheus and Grafana. It provides a unified control plane for service health, logs, alerts, architecture context, incident evidence, and workload ownership.
 
+## Current Runtime Truth
+
+The active public runtime for this repository is the `dev` control-plane slice.
+
+- live public `dev` host: `https://portfolio.eseosadevbox.com`
+- active cluster namespace: `platform-observability-dev`
+- active Argo CD application: `observability-dev`
+- Docker Hub is the primary image registry path for the UI image
+- `prod` remains a held promotion contract and must be reconciled manually when intentionally activated
+
+Current CI/CD lanes:
+
+- `.github/workflows/validate.yml`
+  - validates repository integrity and build health
+- `.github/workflows/publish-dockerhub-image.yml`
+  - publishes the `ui-next` image to Docker Hub
+- `.github/workflows/smoke-dev-public.yml`
+  - verifies the active public `dev` edge at `https://portfolio.eseosadevbox.com`
+
+There is intentionally no automatic `prod` deployment lane in this repository today. That is the honest operating model for the current home-lab platform.
+
 ## 🖼️ Visual Showcase
 
 See what you'll get with our modern monitoring dashboard:

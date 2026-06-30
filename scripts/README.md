@@ -218,6 +218,21 @@ This directory contains all the shell scripts for managing the Monitoring in a B
 
 **Features:**
 - Validates Docker and Compose access
+
+### `smoke-dev.sh`
+**Public dev edge smoke check** for the active control-plane runtime.
+
+```bash
+# Usage
+./scripts/smoke-dev.sh
+```
+
+**Features:**
+- verifies the `observability-dev` Argo CD application is present
+- prints current `platform-observability-dev` pod state
+- probes `https://portfolio.eseosadevbox.com/`
+- probes `https://portfolio.eseosadevbox.com/api/health`
+- provides a read-only check that the live public `dev` control plane is reachable
 - Checks the default service set from the live Compose config
 - Verifies public endpoints like Prometheus, Grafana, Loki, Alertmanager, Node Exporter, and the UI
 - Verifies the control-plane API layer through `/api/services/health`, `/api/apps`, and `/api/apps/health`

@@ -48,7 +48,7 @@ jobs:
     name: Build and publish UI image
     runs-on: ubuntu-latest
     env:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     steps:
       - name: Check out repository
@@ -61,7 +61,7 @@ jobs:
         if: ${{ github.event.inputs.publish != 'false' }}
         run: |
           set -euo pipefail
-          [ -n "${DOCKERHUB_USERNAME:-}" ] || { echo "DOCKERHUB_USERNAME secret is required"; exit 1; }
+          [ -n "${DOCKERHUB_USERNAME:-}" ] || { echo "DOCKERHUB_USERNAME variable is required"; exit 1; }
           [ -n "${DOCKERHUB_TOKEN:-}" ] || { echo "DOCKERHUB_TOKEN secret is required"; exit 1; }
 
       - name: Set up Docker Buildx
@@ -71,7 +71,7 @@ jobs:
         if: ${{ github.event.inputs.publish != 'false' }}
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Resolve image name
