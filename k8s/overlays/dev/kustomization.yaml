@@ -28,10 +28,11 @@ labels:
       secret-source: vault
     includeSelectors: false
 
+patchesStrategicMerge:
+  - dev-cnpg-ops-patch.yaml
+  - dev-resource-requests-patch.yaml
+  - dev-rollout-strategy-patch.yaml
 patches:
-  - path: dev-cnpg-ops-patch.yaml
-  - path: dev-resource-requests-patch.yaml
-  - path: dev-rollout-strategy-patch.yaml
   - target:
       kind: ConfigMap
       name: observability-ui-config
