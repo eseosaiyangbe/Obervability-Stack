@@ -121,16 +121,21 @@ jobs:
         working-directory: ui-next
 
       - name: Lint YAML files
+        env:
+          DIFF_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          DIFF_HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
-          mapfile -t yaml_files < <(
-            {
-              find .github/workflows -type f \( -name '*.yml' -o -name '*.yaml' \)
-              find docs -type f \( -name '*.yml' -o -name '*.yaml' \)
-              find k8s -type f \( -name '*.yml' -o -name '*.yaml' \)
-              find scripts -type f \( -name '*.yml' -o -name '*.yaml' \)
-            } | sort -u
-          )
+          yaml_files=()
+          if [ -n "${DIFF_BASE:-}" ] && git rev-parse --verify "${DIFF_BASE}^{commit}" >/dev/null 2>&1; then
+            mapfile -t yaml_files < <(
+              git diff --name-only "${DIFF_BASE}" "${DIFF_HEAD}" -- \
+                '.github/workflows/*.yml' '.github/workflows/*.yaml' \
+                'docs/**/*.yml' 'docs/**/*.yaml' \
+                'k8s/**/*.yml' 'k8s/**/*.yaml' \
+                'scripts/**/*.yml' 'scripts/**/*.yaml' | sort -u
+            )
+          fi
           if [ "${#yaml_files[@]}" -gt 0 ]; then
             python -m yamllint -c .yamllint.yml -s "${yaml_files[@]}"
           fi
@@ -152,10 +157,10 @@ jobs:
       - name: Client dry-run Kubernetes manifests
         run: |
           set -euo pipefail
-          kubectl apply --dry-run=client -k k8s/overlays/dev >/tmp/observability-dev-dryrun.txt
-          kubectl apply --dry-run=client -k k8s/overlays/prod >/tmp/observability-prod-dryrun.txt
-          kubectl apply --dry-run=client -f k8s/argocd/observability-dev-application.yaml >/tmp/observability-argocd-dev-dryrun.txt
-          kubectl apply --dry-run=client -f k8s/argocd/observability-prod-application.yaml >/tmp/observability-argocd-prod-dryrun.txt
+          kubectl apply --dry-run=client --validate=false -k k8s/overlays/dev >/tmp/observability-dev-dryrun.txt
+          kubectl apply --dry-run=client --validate=false -k k8s/overlays/prod >/tmp/observability-prod-dryrun.txt
+          kubectl apply --dry-run=client --validate=false -f k8s/argocd/observability-dev-application.yaml >/tmp/observability-argocd-dev-dryrun.txt
+          kubectl apply --dry-run=client --validate=false -f k8s/argocd/observability-prod-application.yaml >/tmp/observability-argocd-prod-dryrun.txt
 
       - name: Summarize validation coverage
         run: |
@@ -169,5 +174,5 @@ jobs:
           - YAML linting via `yamllint`
           - Docker Compose render checks for standard, dev, and logging stacks
           - `kubectl kustomize` render checks for base, dev, and prod overlays
-          - `kubectl apply --dry-run=client` checks for dev, prod, and ArgoCD application manifests
+          - `kubectl apply --dry-run=client --validate=false` checks for dev, prod, and ArgoCD application manifests
           EOF

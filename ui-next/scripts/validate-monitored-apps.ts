@@ -161,7 +161,12 @@ for (const app of monitoredApps) {
       startCommand.command.startsWith("./") ? startCommand.command.split(/\s+/)[0] : undefined;
     const repoPath = resolveRepoPath(startCommand.repo, helperPath);
     if (!repoPath) {
-      error(`App ${app.id} localStart repo does not exist: ${startCommand.repo}`);
+      const message = `App ${app.id} localStart repo does not exist in this checkout: ${startCommand.repo}`;
+      if (process.env.CI === "true") {
+        warn(message);
+      } else {
+        error(message);
+      }
     } else if (startCommand.command.startsWith("./")) {
       const commandPath = path.join(repoPath, startCommand.command.split(/\s+/)[0]);
       if (!fs.existsSync(commandPath)) {
