@@ -10,7 +10,7 @@ This project provides the control plane for an owned application portfolio with 
 With one deployment path, it brings the platform surface and supporting telemetry together:
 
 > **Live preview**: [portfolio.eseosadevbox.com](https://portfolio.eseosadevbox.com)  
-> **Access**: `admin@example.com / admin@123`, `editor@example.com / editor123`, `viewer@example.com / viewer123`
+> **Access**: demo accounts are available on request. Credentials are not printed here.
 
 * **Prometheus** → Metrics collection
 * **Grafana** → Beautiful dashboards
