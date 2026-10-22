@@ -18,21 +18,29 @@ const workloadCards = [
     name: "SwiftPay",
     role: "Payments Platform",
     summary: "Distributed payment services with gateway, wallet, transaction, notification, and operational telemetry under one governed runtime.",
+    repo: "https://github.com/eseosaiyangbe/SwiftPay",
+    live: "https://swiftpay.eseosadevbox.com",
   },
   {
     name: "OpenSIS",
     role: "Student Information System",
     summary: "A legacy education platform brought under controlled operations with secrets management, health visibility, and repeatable recovery paths.",
+    repo: "https://github.com/eseosaiyangbe/OpenSIS",
+    live: "https://opensis.eseosadevbox.com",
   },
   {
     name: "FoodPulse",
     role: "Resilience Platform",
     summary: "A stateful application portfolio used to exercise Redis, PostgreSQL, and high-availability recovery patterns in a realistic operating model.",
+    repo: "https://github.com/eseosaiyangbe/FoodPulse",
+    live: "",
   },
   {
     name: "MemFlip",
     role: "Portfolio Workload",
     summary: "A smaller owned service that proves the repeatable integration pattern for onboarding and operating application workloads through the same platform.",
+    repo: "https://github.com/eseosaiyangbe/MemFlip",
+    live: "",
   },
 ]
 
@@ -57,6 +65,13 @@ const quickLinks = [
     icon: GitBranch,
     external: true,
   },
+  {
+    title: "AWS Security Monitoring",
+    description: "CloudTrail threat detection with Lambda, SNS alerting, and hand written IAM and KMS policies in CloudFormation.",
+    href: "https://github.com/eseosaiyangbe/aws-enterprise-alert-monitoring-system",
+    icon: ShieldCheck,
+    external: true,
+  },
 ]
 
 export function LandingPage() {
@@ -76,6 +91,12 @@ export function LandingPage() {
                   <ShieldCheck className="mr-1 h-3 w-3" />
                   Internal Developer Platform
                 </Badge>
+                <p className="mb-2 text-sm font-bold uppercase tracking-[0.24em] text-blue-200">
+                  Eseosa Iyangbe
+                </p>
+                <p className="mb-4 text-sm font-medium text-blue-100 sm:text-base">
+                  Senior DevOps and Platform Engineer, Ontario, Canada
+                </p>
                 <h1 className="text-2xl font-black tracking-tight sm:text-4xl lg:text-5xl">
                   One control plane for an owned application portfolio
                 </h1>
@@ -84,6 +105,17 @@ export function LandingPage() {
                   professional operator experience with shared observability, incident evidence, recovery
                   controls, and service-level governance.
                 </p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <a href="https://github.com/eseosaiyangbe" target="_blank" rel="noreferrer" className="rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20">
+                    GitHub
+                  </a>
+                  <a href="https://www.linkedin.com/in/eseosaiyangbe" target="_blank" rel="noreferrer" className="rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20">
+                    LinkedIn
+                  </a>
+                  <a href="mailto:e_raywhite@yahoo.com" className="rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20">
+                    Email
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -165,7 +197,7 @@ export function LandingPage() {
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-700 dark:text-blue-300">
                       Portfolio
                     </p>
-                    <p className="mt-2 text-lg font-bold text-gray-950 dark:text-white">5 owned services</p>
+                    <p className="mt-2 text-lg font-bold text-gray-950 dark:text-white">4 owned workloads</p>
                     <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                       One platform team, one operating model, one shared control surface.
                     </p>
@@ -217,6 +249,16 @@ export function LandingPage() {
                     <p className="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-400">
                       {workload.summary}
                     </p>
+                    <div className="mt-3 flex flex-wrap gap-4 text-sm font-semibold">
+                      <a href={workload.repo} target="_blank" rel="noreferrer" className="text-blue-700 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200">
+                        Repository
+                      </a>
+                      {workload.live ? (
+                        <a href={workload.live} target="_blank" rel="noreferrer" className="text-blue-700 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200">
+                          Live dev
+                        </a>
+                      ) : null}
+                    </div>
                   </div>
                 ))}
               </CardContent>
