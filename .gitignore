@@ -43,3 +43,28 @@ output/playwright/
 
 # Local scratch utilities
 ui-next/count-users.js
+
+# Repo hygiene additions
+# Environment variants (example files stay tracked)
+.env.*
+!.env.example
+!docker-compose.env.example
+
+# Local phase and planning scratch files
+phase*
+PHASE*
+
+# Backup dumps and archives
+observability-postgres-*.dump
+*.dump
+*.tgz
+*.sql.gz
+backups/
+
+# Dependencies, build output and logs (ui-next has its own .gitignore too)
+node_modules/
+.next/
+logs/
+
+# Local tooling state
+*.kubeconfig
